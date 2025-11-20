@@ -1,4 +1,5 @@
-import { Info } from 'lucide-react'
+import { useState } from 'react'
+import { Info, ChevronDown, ChevronUp } from 'lucide-react'
 import { EXCHANGES, getExchangeConfig } from '../config/exchanges'
 import type { AccountType } from '../config/exchanges'
 import './ExchangeSelector.css'
@@ -16,6 +17,7 @@ const ExchangeSelector = ({
   onExchangeChange,
   onAccountTypeChange
 }: ExchangeSelectorProps) => {
+  const [isExpanded, setIsExpanded] = useState(false)
   const currentExchange = getExchangeConfig(selectedExchange)
   const currentFees = currentExchange.fees[selectedAccountType]
   const maxLev = currentExchange.maxLeverage[selectedAccountType]
@@ -118,40 +120,50 @@ const ExchangeSelector = ({
         )}
       </div>
 
-      {/* Quick Tips */}
-      <div className="exchange-tips">
-        <h5>Platform Tips</h5>
-        <ul>
-          {selectedExchange === 'binance' && (
-            <>
-              <li>Largest exchange with highest liquidity</li>
-              <li>Lowest fees for high-volume traders</li>
-              <li>Up to 125x leverage on futures</li>
-            </>
-          )}
-          {selectedExchange === 'bybit' && (
-            <>
-              <li>Popular for derivatives trading</li>
-              <li>User-friendly interface for beginners</li>
-              <li>Up to 100x leverage on perpetuals</li>
-            </>
-          )}
-          {selectedExchange === 'kucoin' && (
-            <>
-              <li>Wide selection of altcoins</li>
-              <li>Good for margin trading</li>
-              <li>Competitive futures fees</li>
-            </>
-          )}
-          {selectedExchange === 'coinbase' && (
-            <>
-              <li>Most regulated US exchange</li>
-              <li>Best for spot trading only</li>
-              <li>No leverage trading available</li>
-            </>
-          )}
-        </ul>
-      </div>
+      {/* Quick Tips - Collapsible */}
+      <button
+        className="tips-toggle"
+        onClick={() => setIsExpanded(!isExpanded)}
+        type="button"
+      >
+        <span>Platform Tips & Details</span>
+        {isExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+      </button>
+
+      {isExpanded && (
+        <div className="exchange-tips">
+          <ul>
+            {selectedExchange === 'binance' && (
+              <>
+                <li>Largest exchange with highest liquidity</li>
+                <li>Lowest fees for high-volume traders</li>
+                <li>Up to 125x leverage on futures</li>
+              </>
+            )}
+            {selectedExchange === 'bybit' && (
+              <>
+                <li>Popular for derivatives trading</li>
+                <li>User-friendly interface for beginners</li>
+                <li>Up to 100x leverage on perpetuals</li>
+              </>
+            )}
+            {selectedExchange === 'kucoin' && (
+              <>
+                <li>Wide selection of altcoins</li>
+                <li>Good for margin trading</li>
+                <li>Competitive futures fees</li>
+              </>
+            )}
+            {selectedExchange === 'coinbase' && (
+              <>
+                <li>Most regulated US exchange</li>
+                <li>Best for spot trading only</li>
+                <li>No leverage trading available</li>
+              </>
+            )}
+          </ul>
+        </div>
+      )}
     </div>
   )
 }

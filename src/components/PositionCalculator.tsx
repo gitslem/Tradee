@@ -2,6 +2,7 @@ import { useState } from 'react'
 import './PositionCalculator.css'
 import LivePriceCard from './LivePriceCard'
 import ExchangeSelector from './ExchangeSelector'
+import CollapsibleSection from './CollapsibleSection'
 import { getExchangeFees, getMaxLeverage, getMaintenanceMargin, calculateFundingCost } from '../config/exchanges'
 import type { AccountType } from '../config/exchanges'
 
@@ -298,6 +299,7 @@ const PositionCalculator = () => {
         <div className="input-section">
           <h2>Trading Setup</h2>
 
+          {/* Basic Setup - Always Visible */}
           <div className="form-group">
             <label>Crypto Pair</label>
             <select value={cryptoPair} onChange={(e) => setCryptoPair(e.target.value)}>
@@ -338,109 +340,118 @@ const PositionCalculator = () => {
             </div>
           </div>
 
-          <div className="form-group leverage-toggle">
-            <label className="checkbox-label">
+          {/* Risk Management Section - Collapsible, Default Open */}
+          <CollapsibleSection title="Risk Management" defaultOpen={true} badge="Essential">
+            <div className="form-group">
+              <label>Account Balance (USDT)</label>
               <input
-                type="checkbox"
-                checked={useLeverage}
-                onChange={(e) => setUseLeverage(e.target.checked)}
+                type="number"
+                value={accountBalance}
+                onChange={(e) => setAccountBalance(e.target.value)}
+                placeholder="10000"
               />
-              <span>Use Leverage Trading</span>
-            </label>
-            <small>⚠️ Leverage increases both profit potential and risk of liquidation</small>
-          </div>
-
-          {useLeverage && (
-            <div className="form-group leverage-section">
-              <label>Leverage (Max: {maxLeverageAllowed}x for {selectedExchange})</label>
-              <select value={leverage} onChange={(e) => setLeverage(e.target.value)}>
-                <option value="1">1x (No Leverage)</option>
-                {[2, 3, 5, 10, 20, 25, 50, 75, 100, 125].map((lev) =>
-                  lev <= maxLeverageAllowed ? (
-                    <option key={lev} value={lev}>{lev}x</option>
-                  ) : null
-                )}
-              </select>
-              <small>Higher leverage = Higher liquidation risk | Max for this platform: {maxLeverageAllowed}x</small>
             </div>
-          )}
 
-          <div className="form-group">
-            <label>Account Balance (USDT)</label>
-            <input
-              type="number"
-              value={accountBalance}
-              onChange={(e) => setAccountBalance(e.target.value)}
-              placeholder="10000"
-            />
-          </div>
+            <div className="form-group">
+              <label>Risk Per Trade (%)</label>
+              <input
+                type="number"
+                value={riskPercentage}
+                onChange={(e) => setRiskPercentage(e.target.value)}
+                placeholder="1"
+                step="0.1"
+              />
+              <small>Recommended: 1-2% per trade</small>
+            </div>
 
-          <div className="form-group">
-            <label>Risk Per Trade (%)</label>
-            <input
-              type="number"
-              value={riskPercentage}
-              onChange={(e) => setRiskPercentage(e.target.value)}
-              placeholder="1"
-              step="0.1"
-            />
-            <small>Recommended: 1-2% per trade</small>
-          </div>
+            <div className="form-group">
+              <label>Entry Price (USDT)</label>
+              <input
+                type="number"
+                value={entryPrice}
+                onChange={(e) => setEntryPrice(e.target.value)}
+                placeholder="3500"
+                step="0.01"
+              />
+            </div>
 
-          <div className="form-group">
-            <label>Entry Price (USDT)</label>
-            <input
-              type="number"
-              value={entryPrice}
-              onChange={(e) => setEntryPrice(e.target.value)}
-              placeholder="3500"
-              step="0.01"
-            />
-          </div>
+            <div className="form-group">
+              <label>Stop Loss Price (USDT)</label>
+              <input
+                type="number"
+                value={stopPrice}
+                onChange={(e) => setStopPrice(e.target.value)}
+                placeholder="3400"
+                step="0.01"
+              />
+            </div>
 
-          <div className="form-group">
-            <label>Stop Loss Price (USDT)</label>
-            <input
-              type="number"
-              value={stopPrice}
-              onChange={(e) => setStopPrice(e.target.value)}
-              placeholder="3400"
-              step="0.01"
-            />
-          </div>
+            <div className="form-group">
+              <label>Take Profit 1 (USDT)</label>
+              <input
+                type="number"
+                value={takeProfitPrice}
+                onChange={(e) => setTakeProfitPrice(e.target.value)}
+                placeholder="3800"
+                step="0.01"
+              />
+            </div>
+          </CollapsibleSection>
 
-          <div className="form-group">
-            <label>Take Profit 1 (USDT) - Optional</label>
-            <input
-              type="number"
-              value={takeProfitPrice}
-              onChange={(e) => setTakeProfitPrice(e.target.value)}
-              placeholder="3800"
-              step="0.01"
-            />
-          </div>
+          {/* Leverage Settings - Collapsible */}
+          <CollapsibleSection title="Leverage Settings" defaultOpen={useLeverage} badge={useLeverage ? `${leverage}x` : 'Optional'}>
+            <div className="form-group leverage-toggle">
+              <label className="checkbox-label">
+                <input
+                  type="checkbox"
+                  checked={useLeverage}
+                  onChange={(e) => setUseLeverage(e.target.checked)}
+                />
+                <span>Use Leverage Trading</span>
+              </label>
+              <small>⚠️ Leverage increases both profit potential and risk of liquidation</small>
+            </div>
 
-          <div className="form-group">
-            <label>Take Profit 2 (USDT) - Optional</label>
-            <input
-              type="number"
-              value={tp2Price}
-              onChange={(e) => setTp2Price(e.target.value)}
-              placeholder="4000"
-              step="0.01"
-            />
-          </div>
+            {useLeverage && (
+              <div className="form-group leverage-section">
+                <label>Leverage (Max: {maxLeverageAllowed}x for {selectedExchange})</label>
+                <select value={leverage} onChange={(e) => setLeverage(e.target.value)}>
+                  <option value="1">1x (No Leverage)</option>
+                  {[2, 3, 5, 10, 20, 25, 50, 75, 100, 125].map((lev) =>
+                    lev <= maxLeverageAllowed ? (
+                      <option key={lev} value={lev}>{lev}x</option>
+                    ) : null
+                  )}
+                </select>
+                <small>Higher leverage = Higher liquidation risk | Max for this platform: {maxLeverageAllowed}x</small>
+              </div>
+            )}
+          </CollapsibleSection>
 
-          <div className="form-group">
-            <label>Take Profit 3 (USDT) - Optional</label>
-            <input
-              type="number"
-              value={tp3Price}
-              onChange={(e) => setTp3Price(e.target.value)}
-              placeholder="4200"
-              step="0.01"
-            />
-          </div>
+          {/* Advanced Options - Collapsible */}
+          <CollapsibleSection title="Advanced Options" defaultOpen={false} badge="Optional">
+            <div className="form-group">
+              <label>Take Profit 2 (USDT) - Optional</label>
+              <input
+                type="number"
+                value={tp2Price}
+                onChange={(e) => setTp2Price(e.target.value)}
+                placeholder="4000"
+                step="0.01"
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Take Profit 3 (USDT) - Optional</label>
+              <input
+                type="number"
+                value={tp3Price}
+                onChange={(e) => setTp3Price(e.target.value)}
+                placeholder="4200"
+                step="0.01"
+              />
+            </div>
+          </CollapsibleSection>
         </div>
 
         <div className="results-section">
