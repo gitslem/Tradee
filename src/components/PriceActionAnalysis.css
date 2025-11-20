@@ -1,6 +1,8 @@
 .price-action {
   width: 100%;
   animation: fadeIn 0.5s ease-out;
+  position: relative;
+  z-index: 1;
 }
 
 @keyframes fadeIn {

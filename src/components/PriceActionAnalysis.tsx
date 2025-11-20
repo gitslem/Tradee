@@ -2,6 +2,7 @@ import { useState } from 'react'
 import './PriceActionAnalysis.css'
 import CandleDataCard from './CandleDataCard'
 import CollapsibleSection from './CollapsibleSection'
+import TradingBackground from './TradingBackground'
 import type { OHLCVData } from '../services/ohlcvService'
 
 interface CandleData {
@@ -136,6 +137,7 @@ const PriceActionAnalysis = () => {
 
   return (
     <div className="price-action">
+      <TradingBackground variant="price-action" />
       <h1>Price Action Analysis</h1>
       <p>Identify candlestick patterns and price action signals for better entry and exit timing</p>
 
