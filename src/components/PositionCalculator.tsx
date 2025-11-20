@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import './PositionCalculator.css'
+import LivePriceCard from './LivePriceCard'
 
 interface TakeProfitResult {
   name: string
@@ -242,6 +243,10 @@ const PositionCalculator = () => {
 
   const warnings = validatePosition()
 
+  const handleUseCurrentPrice = (price: number) => {
+    setEntryPrice(price.toString())
+  }
+
   return (
     <div className="position-calculator">
       <h1>Position Calculator</h1>
@@ -265,6 +270,8 @@ const PositionCalculator = () => {
               <option>AVAX/USDT</option>
             </select>
           </div>
+
+          <LivePriceCard pair={cryptoPair} onUsePrice={handleUseCurrentPrice} />
 
           <div className="form-group">
             <label>Position Type</label>
