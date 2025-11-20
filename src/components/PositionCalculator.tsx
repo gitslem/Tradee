@@ -1,6 +1,9 @@
 import { useState } from 'react'
 import './PositionCalculator.css'
 import LivePriceCard from './LivePriceCard'
+import ExchangeSelector from './ExchangeSelector'
+import { getExchangeFees, getMaxLeverage, getMaintenanceMargin, calculateFundingCost } from '../config/exchanges'
+import type { AccountType } from '../config/exchanges'
 
 interface TakeProfitResult {
   name: string
@@ -25,6 +28,10 @@ interface CalculationResults {
   breakevenPrice: number
   winRateNeeded: number
   takeProfitResults: TakeProfitResult[]
+  maintenanceMargin: number
+  maintenanceMarginRate: number
+  totalFees: number
+  fundingCost: number
 }
 
 const PositionCalculator = () => {
@@ -39,7 +46,12 @@ const PositionCalculator = () => {
   const [positionType, setPositionType] = useState<'long' | 'short'>('long')
   const [leverage, setLeverage] = useState<string>('1')
   const [useLeverage, setUseLeverage] = useState<boolean>(false)
-  const [tradingFee, setTradingFee] = useState<string>('0.1')
+  const [selectedExchange, setSelectedExchange] = useState<string>('binance')
+  const [accountType, setAccountType] = useState<AccountType>('futures')
+
+  // Get exchange-specific fees
+  const exchangeFees = getExchangeFees(selectedExchange, accountType)
+  const maxLeverageAllowed = getMaxLeverage(selectedExchange, accountType)
 
   const calculatePosition = (): CalculationResults | null => {
     const balance = parseFloat(accountBalance)
@@ -50,7 +62,7 @@ const PositionCalculator = () => {
     const tp2 = parseFloat(tp2Price)
     const tp3 = parseFloat(tp3Price)
     const lev = useLeverage ? parseFloat(leverage) : 1
-    const feePercent = parseFloat(tradingFee) / 100
+    const feePercent = exchangeFees.taker / 100 // Use exchange-specific taker fee
 
     if (isNaN(balance) || isNaN(risk) || isNaN(entry) || isNaN(stop) || isNaN(lev)) {
       return null
@@ -153,6 +165,20 @@ const PositionCalculator = () => {
     // Win Rate Needed (to break even)
     const winRateNeeded = riskRewardRatio > 0 ? (1 / (1 + riskRewardRatio)) * 100 : 0
 
+    // Maintenance Margin Calculation
+    const maintenanceMarginRate = getMaintenanceMargin(selectedExchange, lev)
+    const maintenanceMargin = (leveragedPositionSize * maintenanceMarginRate) / 100
+
+    // Fee Calculations
+    const entryFee = positionSize * (exchangeFees.taker / 100)
+    const exitFee = positionSize * (exchangeFees.taker / 100)
+    const totalFees = entryFee + exitFee
+
+    // Funding Cost (24 hours for futures)
+    const fundingCost = accountType === 'futures'
+      ? calculateFundingCost(selectedExchange, accountType, leveragedPositionSize, 24)
+      : 0
+
     return {
       stopLossDistance: stopLossDistance * 100,
       riskAmount,
@@ -167,7 +193,11 @@ const PositionCalculator = () => {
       leveragedPositionSize,
       breakevenPrice,
       winRateNeeded,
-      takeProfitResults
+      takeProfitResults,
+      maintenanceMargin,
+      maintenanceMarginRate,
+      totalFees,
+      fundingCost
     }
   }
 
@@ -215,6 +245,11 @@ const PositionCalculator = () => {
 
     // Leverage warnings
     if (useLeverage && lev > 1) {
+      // Check exchange leverage limit
+      if (lev > maxLeverageAllowed) {
+        warnings.push(`🚨 INVALID: ${selectedExchange} ${accountType} max leverage is ${maxLeverageAllowed}x`)
+      }
+
       if (lev >= 20) {
         warnings.push('🚨 EXTREME RISK: Leverage ≥20x can lead to instant liquidation')
       } else if (lev >= 10) {
@@ -251,6 +286,14 @@ const PositionCalculator = () => {
     <div className="position-calculator">
       <h1>Position Calculator</h1>
       <p>Calculate optimal position sizes based on your risk tolerance and trading strategy</p>
+
+      <ExchangeSelector
+        selectedExchange={selectedExchange}
+        selectedAccountType={accountType}
+        onExchangeChange={setSelectedExchange}
+        onAccountTypeChange={setAccountType}
+      />
+
       <div className="calculator-grid">
         <div className="input-section">
           <h2>Trading Setup</h2>
@@ -309,21 +352,16 @@ const PositionCalculator = () => {
 
           {useLeverage && (
             <div className="form-group leverage-section">
-              <label>Leverage</label>
+              <label>Leverage (Max: {maxLeverageAllowed}x for {selectedExchange})</label>
               <select value={leverage} onChange={(e) => setLeverage(e.target.value)}>
                 <option value="1">1x (No Leverage)</option>
-                <option value="2">2x</option>
-                <option value="3">3x</option>
-                <option value="5">5x</option>
-                <option value="10">10x</option>
-                <option value="20">20x</option>
-                <option value="25">25x</option>
-                <option value="50">50x</option>
-                <option value="75">75x</option>
-                <option value="100">100x</option>
-                <option value="125">125x</option>
+                {[2, 3, 5, 10, 20, 25, 50, 75, 100, 125].map((lev) =>
+                  lev <= maxLeverageAllowed ? (
+                    <option key={lev} value={lev}>{lev}x</option>
+                  ) : null
+                )}
               </select>
-              <small>Higher leverage = Higher liquidation risk</small>
+              <small>Higher leverage = Higher liquidation risk | Max for this platform: {maxLeverageAllowed}x</small>
             </div>
           )}
 
@@ -403,18 +441,6 @@ const PositionCalculator = () => {
               step="0.01"
             />
           </div>
-
-          <div className="form-group">
-            <label>Trading Fee (%)</label>
-            <input
-              type="number"
-              value={tradingFee}
-              onChange={(e) => setTradingFee(e.target.value)}
-              placeholder="0.1"
-              step="0.01"
-            />
-            <small>Default: 0.1% (typical for spot trading)</small>
-          </div>
         </div>
 
         <div className="results-section">
@@ -460,6 +486,12 @@ const PositionCalculator = () => {
                     <div className="result-subtext">Collateral needed</div>
                   </div>
 
+                  <div className="result-card">
+                    <h3>Maintenance Margin</h3>
+                    <div className="result-value">${results.maintenanceMargin.toFixed(2)}</div>
+                    <div className="result-subtext">{results.maintenanceMarginRate.toFixed(2)}% of position</div>
+                  </div>
+
                   <div className="result-card danger">
                     <h3>Liquidation Price</h3>
                     <div className="result-value">${results.liquidationPrice.toFixed(2)}</div>
@@ -468,13 +500,27 @@ const PositionCalculator = () => {
                       {results.distanceToLiquidation < 10 ? ' ⚠️ VERY CLOSE!' : ''}
                     </div>
                   </div>
+
+                  {accountType === 'futures' && results.fundingCost > 0 && (
+                    <div className="result-card">
+                      <h3>Funding Cost (24h)</h3>
+                      <div className="result-value">${results.fundingCost.toFixed(2)}</div>
+                      <div className="result-subtext">{exchangeFees.funding}% per funding</div>
+                    </div>
+                  )}
                 </>
               )}
 
               <div className="result-card">
+                <h3>Total Trading Fees</h3>
+                <div className="result-value">${results.totalFees.toFixed(2)}</div>
+                <div className="result-subtext">Entry + Exit ({exchangeFees.taker}% each)</div>
+              </div>
+
+              <div className="result-card">
                 <h3>Breakeven Price</h3>
                 <div className="result-value">${results.breakevenPrice.toFixed(2)}</div>
-                <div className="result-subtext">With {tradingFee}% trading fees</div>
+                <div className="result-subtext">Including {exchangeFees.taker}% fees</div>
               </div>
 
               {results.takeProfitResults.length > 0 && (
