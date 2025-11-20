@@ -2,6 +2,7 @@ import { useState } from 'react'
 import './MarketStructure.css'
 import CandleDataCard from './CandleDataCard'
 import CollapsibleSection from './CollapsibleSection'
+import TradingBackground from './TradingBackground'
 import { calculateSupportResistance } from '../services/ohlcvService'
 import type { OHLCVData } from '../services/ohlcvService'
 
@@ -141,6 +142,7 @@ const MarketStructure = () => {
 
   return (
     <div className="market-structure">
+      <TradingBackground variant="market" />
       <h1>Market Structure Analysis</h1>
       <p>Identify trends, support & resistance levels, and market bias for better trading decisions</p>
 

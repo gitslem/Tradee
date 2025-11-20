@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import './PositionCalculator.css'
 import LivePriceCard from './LivePriceCard'
-import ExchangeSelector from './ExchangeSelector'
+import FloatingExchangeSelector from './FloatingExchangeSelector'
 import CollapsibleSection from './CollapsibleSection'
-import { getExchangeFees, getMaxLeverage, getMaintenanceMargin, calculateFundingCost } from '../config/exchanges'
+import TradingBackground from './TradingBackground'
+import { getExchangeFees, getMaxLeverage, getMaintenanceMargin, calculateFundingCost, EXCHANGES } from '../config/exchanges'
 import type { AccountType } from '../config/exchanges'
 
 interface TakeProfitResult {
@@ -285,19 +286,28 @@ const PositionCalculator = () => {
 
   return (
     <div className="position-calculator">
+      <TradingBackground variant="calculator" />
       <h1>Position Calculator</h1>
       <p>Calculate optimal position sizes based on your risk tolerance and trading strategy</p>
 
-      <ExchangeSelector
+      <FloatingExchangeSelector
         selectedExchange={selectedExchange}
-        selectedAccountType={accountType}
-        onExchangeChange={setSelectedExchange}
-        onAccountTypeChange={setAccountType}
+        onSelectExchange={setSelectedExchange}
       />
 
       <div className="calculator-grid">
         <div className="input-section">
           <h2>Trading Setup</h2>
+
+          {/* Account Type Selector */}
+          <div className="form-group">
+            <label>Account Type</label>
+            <select value={accountType} onChange={(e) => setAccountType(e.target.value as AccountType)}>
+              {EXCHANGES[selectedExchange].accountTypes.spot && <option value="spot">Spot Trading</option>}
+              {EXCHANGES[selectedExchange].accountTypes.futures && <option value="futures">Futures Trading</option>}
+              {EXCHANGES[selectedExchange].accountTypes.margin && <option value="margin">Margin Trading</option>}
+            </select>
+          </div>
 
           {/* Basic Setup - Always Visible */}
           <div className="form-group">

@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Calculator, TrendingUp, Target, Shield, Zap, BarChart3, AlertTriangle, DollarSign } from 'lucide-react'
+import TradingBackground from './TradingBackground'
 import './LandingPage.css'
 
 const LandingPage = () => {
@@ -55,6 +56,7 @@ const LandingPage = () => {
 
   return (
     <div className="landing-page">
+      <TradingBackground variant="home" />
       {/* Hero Section */}
       <section className="hero">
         <div className="hero-content">

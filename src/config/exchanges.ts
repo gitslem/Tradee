@@ -15,6 +15,8 @@ export interface ExchangeConfig {
   name: string
   displayName: string
   icon: string // Emoji for now
+  color: string // Brand color for UI
+  logo: string // Logo character or emoji
 
   // Account Types Available
   accountTypes: {
@@ -55,6 +57,8 @@ export const EXCHANGES: Record<string, ExchangeConfig> = {
     name: 'Binance',
     displayName: 'Binance',
     icon: '🟡',
+    color: '#F3BA2F',
+    logo: 'B',
 
     accountTypes: {
       spot: true,
@@ -103,6 +107,8 @@ export const EXCHANGES: Record<string, ExchangeConfig> = {
     name: 'Bybit',
     displayName: 'Bybit',
     icon: '🟠',
+    color: '#F7A600',
+    logo: 'BY',
 
     accountTypes: {
       spot: true,
@@ -151,6 +157,8 @@ export const EXCHANGES: Record<string, ExchangeConfig> = {
     name: 'KuCoin',
     displayName: 'KuCoin',
     icon: '🟢',
+    color: '#24AE8F',
+    logo: 'K',
 
     accountTypes: {
       spot: true,
@@ -199,6 +207,8 @@ export const EXCHANGES: Record<string, ExchangeConfig> = {
     name: 'Coinbase',
     displayName: 'Coinbase',
     icon: '🔵',
+    color: '#0052FF',
+    logo: 'C',
 
     accountTypes: {
       spot: true,
@@ -238,6 +248,306 @@ export const EXCHANGES: Record<string, ExchangeConfig> = {
     fundingInterval: 0,
     website: 'https://www.coinbase.com',
     featuresUrl: 'https://www.coinbase.com/advanced-fees'
+  },
+
+  okx: {
+    id: 'okx',
+    name: 'OKX',
+    displayName: 'OKX',
+    icon: '⚫',
+    color: '#000000',
+    logo: 'OKX',
+
+    accountTypes: {
+      spot: true,
+      futures: true,
+      margin: true
+    },
+
+    fees: {
+      spot: {
+        maker: 0.08,
+        taker: 0.1,
+        funding: 0.0
+      },
+      futures: {
+        maker: 0.02,
+        taker: 0.05,
+        funding: 0.01
+      },
+      margin: {
+        maker: 0.08,
+        taker: 0.1,
+        funding: 0.0
+      }
+    },
+
+    maxLeverage: {
+      spot: 10,
+      futures: 125,
+      margin: 10
+    },
+
+    leverageTiers: [
+      { maxLeverage: 20, maintenanceMarginRate: 0.5, description: 'Low Risk' },
+      { maxLeverage: 75, maintenanceMarginRate: 1.0, description: 'Medium Risk' },
+      { maxLeverage: 125, maintenanceMarginRate: 2.5, description: 'High Risk' }
+    ],
+
+    minTradeAmount: 10,
+    fundingInterval: 8,
+    website: 'https://www.okx.com',
+    featuresUrl: 'https://www.okx.com/fees'
+  },
+
+  kraken: {
+    id: 'kraken',
+    name: 'Kraken',
+    displayName: 'Kraken',
+    icon: '🟣',
+    color: '#5741D9',
+    logo: 'K',
+
+    accountTypes: {
+      spot: true,
+      futures: true,
+      margin: true
+    },
+
+    fees: {
+      spot: {
+        maker: 0.16,
+        taker: 0.26,
+        funding: 0.0
+      },
+      futures: {
+        maker: 0.02,
+        taker: 0.05,
+        funding: 0.01
+      },
+      margin: {
+        maker: 0.16,
+        taker: 0.26,
+        funding: 0.02
+      }
+    },
+
+    maxLeverage: {
+      spot: 5,
+      futures: 50,
+      margin: 5
+    },
+
+    leverageTiers: [
+      { maxLeverage: 10, maintenanceMarginRate: 0.5, description: 'Low Risk' },
+      { maxLeverage: 25, maintenanceMarginRate: 1.0, description: 'Medium Risk' },
+      { maxLeverage: 50, maintenanceMarginRate: 2.0, description: 'High Risk' }
+    ],
+
+    minTradeAmount: 10,
+    fundingInterval: 8,
+    website: 'https://www.kraken.com',
+    featuresUrl: 'https://www.kraken.com/features/fee-schedule'
+  },
+
+  gateio: {
+    id: 'gateio',
+    name: 'Gate.io',
+    displayName: 'Gate.io',
+    icon: '🔷',
+    color: '#17E6A1',
+    logo: 'GT',
+
+    accountTypes: {
+      spot: true,
+      futures: true,
+      margin: true
+    },
+
+    fees: {
+      spot: {
+        maker: 0.2,
+        taker: 0.2,
+        funding: 0.0
+      },
+      futures: {
+        maker: 0.015,
+        taker: 0.05,
+        funding: 0.01
+      },
+      margin: {
+        maker: 0.2,
+        taker: 0.2,
+        funding: 0.0
+      }
+    },
+
+    maxLeverage: {
+      spot: 10,
+      futures: 100,
+      margin: 10
+    },
+
+    leverageTiers: [
+      { maxLeverage: 20, maintenanceMarginRate: 0.5, description: 'Low Risk' },
+      { maxLeverage: 50, maintenanceMarginRate: 1.0, description: 'Medium Risk' },
+      { maxLeverage: 100, maintenanceMarginRate: 2.0, description: 'High Risk' }
+    ],
+
+    minTradeAmount: 10,
+    fundingInterval: 8,
+    website: 'https://www.gate.io',
+    featuresUrl: 'https://www.gate.io/fee'
+  },
+
+  htx: {
+    id: 'htx',
+    name: 'HTX',
+    displayName: 'HTX (Huobi)',
+    icon: '🔴',
+    color: '#2E3192',
+    logo: 'HTX',
+
+    accountTypes: {
+      spot: true,
+      futures: true,
+      margin: true
+    },
+
+    fees: {
+      spot: {
+        maker: 0.2,
+        taker: 0.2,
+        funding: 0.0
+      },
+      futures: {
+        maker: 0.02,
+        taker: 0.05,
+        funding: 0.01
+      },
+      margin: {
+        maker: 0.2,
+        taker: 0.2,
+        funding: 0.098
+      }
+    },
+
+    maxLeverage: {
+      spot: 10,
+      futures: 125,
+      margin: 5
+    },
+
+    leverageTiers: [
+      { maxLeverage: 20, maintenanceMarginRate: 0.5, description: 'Low Risk' },
+      { maxLeverage: 75, maintenanceMarginRate: 1.0, description: 'Medium Risk' },
+      { maxLeverage: 125, maintenanceMarginRate: 2.5, description: 'High Risk' }
+    ],
+
+    minTradeAmount: 10,
+    fundingInterval: 8,
+    website: 'https://www.htx.com',
+    featuresUrl: 'https://www.htx.com/support/fee'
+  },
+
+  bitget: {
+    id: 'bitget',
+    name: 'Bitget',
+    displayName: 'Bitget',
+    icon: '🟦',
+    color: '#00F0E1',
+    logo: 'BG',
+
+    accountTypes: {
+      spot: true,
+      futures: true,
+      margin: true
+    },
+
+    fees: {
+      spot: {
+        maker: 0.1,
+        taker: 0.1,
+        funding: 0.0
+      },
+      futures: {
+        maker: 0.02,
+        taker: 0.06,
+        funding: 0.01
+      },
+      margin: {
+        maker: 0.1,
+        taker: 0.1,
+        funding: 0.0
+      }
+    },
+
+    maxLeverage: {
+      spot: 10,
+      futures: 125,
+      margin: 10
+    },
+
+    leverageTiers: [
+      { maxLeverage: 20, maintenanceMarginRate: 0.5, description: 'Low Risk' },
+      { maxLeverage: 50, maintenanceMarginRate: 1.0, description: 'Medium Risk' },
+      { maxLeverage: 125, maintenanceMarginRate: 2.5, description: 'High Risk' }
+    ],
+
+    minTradeAmount: 10,
+    fundingInterval: 8,
+    website: 'https://www.bitget.com',
+    featuresUrl: 'https://www.bitget.com/fee'
+  },
+
+  mexc: {
+    id: 'mexc',
+    name: 'MEXC',
+    displayName: 'MEXC',
+    icon: '🟩',
+    color: '#00D092',
+    logo: 'MX',
+
+    accountTypes: {
+      spot: true,
+      futures: true,
+      margin: true
+    },
+
+    fees: {
+      spot: {
+        maker: 0.0,
+        taker: 0.0,
+        funding: 0.0
+      },
+      futures: {
+        maker: 0.0,
+        taker: 0.01,
+        funding: 0.01
+      },
+      margin: {
+        maker: 0.0,
+        taker: 0.0,
+        funding: 0.0
+      }
+    },
+
+    maxLeverage: {
+      spot: 10,
+      futures: 200,
+      margin: 10
+    },
+
+    leverageTiers: [
+      { maxLeverage: 25, maintenanceMarginRate: 0.5, description: 'Low Risk' },
+      { maxLeverage: 100, maintenanceMarginRate: 1.0, description: 'Medium Risk' },
+      { maxLeverage: 200, maintenanceMarginRate: 5.0, description: 'Very High Risk' }
+    ],
+
+    minTradeAmount: 10,
+    fundingInterval: 8,
+    website: 'https://www.mexc.com',
+    featuresUrl: 'https://www.mexc.com/fee'
   }
 }
 
