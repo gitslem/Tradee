@@ -1,5 +1,9 @@
 import { useState } from 'react'
 import './MarketStructure.css'
+import CandleDataCard from './CandleDataCard'
+import CollapsibleSection from './CollapsibleSection'
+import { calculateSupportResistance } from '../services/ohlcvService'
+import type { OHLCVData } from '../services/ohlcvService'
 
 interface SupportResistance {
   level: string
@@ -8,6 +12,7 @@ interface SupportResistance {
 }
 
 const MarketStructure = () => {
+  const [cryptoPair, setCryptoPair] = useState<string>('ETH/USDT')
   const [currentPrice, setCurrentPrice] = useState<string>('3500')
   const [recentHigh, setRecentHigh] = useState<string>('3800')
   const [recentLow, setRecentLow] = useState<string>('3200')
@@ -23,6 +28,36 @@ const MarketStructure = () => {
     { level: '3600', strength: 'moderate', touches: '3' },
     { level: '3800', strength: 'strong', touches: '4' }
   ])
+
+  const handleUsePriceData = (ohlcv: OHLCVData) => {
+    // Calculate support/resistance from real data
+    const levels = calculateSupportResistance(ohlcv)
+
+    // Set current price
+    setCurrentPrice(ohlcv.current.close.toString())
+
+    // Set recent high/low from current candle
+    setRecentHigh(ohlcv.current.high.toString())
+    setRecentLow(ohlcv.current.low.toString())
+
+    // Set previous high/low from previous candle
+    setPrevHigh(ohlcv.previous.high.toString())
+    setPrevLow(ohlcv.previous.low.toString())
+
+    // Auto-fill support/resistance levels from calculated data
+    // Assign strength based on proximity to round numbers and previous levels
+    setSupportLevels(levels.support.map((price, index) => ({
+      level: price.toFixed(2),
+      strength: index === 0 ? 'strong' : 'moderate',
+      touches: (index + 2).toString()
+    })))
+
+    setResistanceLevels(levels.resistance.map((price, index) => ({
+      level: price.toFixed(2),
+      strength: index === 0 ? 'strong' : 'moderate',
+      touches: (index + 2).toString()
+    })))
+  }
 
   const calculateFibonacciLevels = () => {
     const high = parseFloat(recentHigh)
@@ -113,6 +148,28 @@ const MarketStructure = () => {
         <div className="input-section">
           <h3>Price Levels</h3>
 
+          {/* Crypto Pair Selector */}
+          <div className="form-group">
+            <label>Crypto Pair</label>
+            <select value={cryptoPair} onChange={(e) => setCryptoPair(e.target.value)}>
+              <option>BTC/USDT</option>
+              <option>ETH/USDT</option>
+              <option>BNB/USDT</option>
+              <option>SOL/USDT</option>
+              <option>XRP/USDT</option>
+              <option>ADA/USDT</option>
+              <option>DOGE/USDT</option>
+              <option>MATIC/USDT</option>
+              <option>DOT/USDT</option>
+              <option>AVAX/USDT</option>
+            </select>
+          </div>
+
+          {/* Live Price Data */}
+          <CandleDataCard pair={cryptoPair} onUseCandleData={handleUsePriceData} />
+
+          {/* Manual Input - Collapsible */}
+          <CollapsibleSection title="Manual Input (Optional)" defaultOpen={false} badge="Advanced">
           <div className="form-group">
             <label>Current Price</label>
             <input
@@ -162,6 +219,7 @@ const MarketStructure = () => {
               step="0.01"
             />
           </div>
+          </CollapsibleSection>
 
           <div className="levels-section">
             <h3>Support Levels</h3>
