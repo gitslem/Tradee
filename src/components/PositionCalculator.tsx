@@ -286,6 +286,38 @@ const PositionCalculator = () => {
             </div>
           </div>
 
+          <div className="form-group leverage-toggle">
+            <label className="checkbox-label">
+              <input
+                type="checkbox"
+                checked={useLeverage}
+                onChange={(e) => setUseLeverage(e.target.checked)}
+              />
+              <span>Use Leverage Trading</span>
+            </label>
+            <small>⚠️ Leverage increases both profit potential and risk of liquidation</small>
+          </div>
+
+          {useLeverage && (
+            <div className="form-group leverage-section">
+              <label>Leverage</label>
+              <select value={leverage} onChange={(e) => setLeverage(e.target.value)}>
+                <option value="1">1x (No Leverage)</option>
+                <option value="2">2x</option>
+                <option value="3">3x</option>
+                <option value="5">5x</option>
+                <option value="10">10x</option>
+                <option value="20">20x</option>
+                <option value="25">25x</option>
+                <option value="50">50x</option>
+                <option value="75">75x</option>
+                <option value="100">100x</option>
+                <option value="125">125x</option>
+              </select>
+              <small>Higher leverage = Higher liquidation risk</small>
+            </div>
+          )}
+
           <div className="form-group">
             <label>Account Balance (USDT)</label>
             <input
@@ -374,38 +406,6 @@ const PositionCalculator = () => {
             />
             <small>Default: 0.1% (typical for spot trading)</small>
           </div>
-
-          <div className="form-group leverage-toggle">
-            <label className="checkbox-label">
-              <input
-                type="checkbox"
-                checked={useLeverage}
-                onChange={(e) => setUseLeverage(e.target.checked)}
-              />
-              <span>Use Leverage Trading</span>
-            </label>
-            <small>⚠️ Leverage increases both profit potential and risk of liquidation</small>
-          </div>
-
-          {useLeverage && (
-            <div className="form-group leverage-section">
-              <label>Leverage</label>
-              <select value={leverage} onChange={(e) => setLeverage(e.target.value)}>
-                <option value="1">1x (No Leverage)</option>
-                <option value="2">2x</option>
-                <option value="3">3x</option>
-                <option value="5">5x</option>
-                <option value="10">10x</option>
-                <option value="20">20x</option>
-                <option value="25">25x</option>
-                <option value="50">50x</option>
-                <option value="75">75x</option>
-                <option value="100">100x</option>
-                <option value="125">125x</option>
-              </select>
-              <small>Higher leverage = Higher liquidation risk</small>
-            </div>
-          )}
         </div>
 
         <div className="results-section">
