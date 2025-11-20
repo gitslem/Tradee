@@ -1,5 +1,8 @@
 import { useState } from 'react'
 import './PriceActionAnalysis.css'
+import CandleDataCard from './CandleDataCard'
+import CollapsibleSection from './CollapsibleSection'
+import type { OHLCVData } from '../services/ohlcvService'
 
 interface CandleData {
   open: string
@@ -9,6 +12,7 @@ interface CandleData {
 }
 
 const PriceActionAnalysis = () => {
+  const [cryptoPair, setCryptoPair] = useState<string>('ETH/USDT')
   const [candle, setCandle] = useState<CandleData>({
     open: '3500',
     high: '3550',
@@ -19,6 +23,17 @@ const PriceActionAnalysis = () => {
   const [volume, setVolume] = useState<string>('1000000')
   const [prevVolume, setPrevVolume] = useState<string>('800000')
   const [timeframe, setTimeframe] = useState<string>('1H')
+
+  const handleUseCandleData = (ohlcv: OHLCVData) => {
+    setCandle({
+      open: ohlcv.current.open.toString(),
+      high: ohlcv.current.high.toString(),
+      low: ohlcv.current.low.toString(),
+      close: ohlcv.current.close.toString()
+    })
+    setVolume(ohlcv.current.volume.toString())
+    setPrevVolume(ohlcv.previous.volume.toString())
+  }
 
   const analyzeCandlestick = () => {
     const open = parseFloat(candle.open)
@@ -128,19 +143,41 @@ const PriceActionAnalysis = () => {
         <div className="input-section">
           <h3>Candlestick Data</h3>
 
+          {/* Crypto Pair Selector */}
           <div className="form-group">
-            <label>Timeframe</label>
-            <select value={timeframe} onChange={(e) => setTimeframe(e.target.value)}>
-              <option>1M</option>
-              <option>5M</option>
-              <option>15M</option>
-              <option>30M</option>
-              <option>1H</option>
-              <option>4H</option>
-              <option>1D</option>
-              <option>1W</option>
+            <label>Crypto Pair</label>
+            <select value={cryptoPair} onChange={(e) => setCryptoPair(e.target.value)}>
+              <option>BTC/USDT</option>
+              <option>ETH/USDT</option>
+              <option>BNB/USDT</option>
+              <option>SOL/USDT</option>
+              <option>XRP/USDT</option>
+              <option>ADA/USDT</option>
+              <option>DOGE/USDT</option>
+              <option>MATIC/USDT</option>
+              <option>DOT/USDT</option>
+              <option>AVAX/USDT</option>
             </select>
           </div>
+
+          {/* Live Candle Data */}
+          <CandleDataCard pair={cryptoPair} onUseCandleData={handleUseCandleData} />
+
+          {/* Manual Input - Collapsible */}
+          <CollapsibleSection title="Manual Input (Optional)" defaultOpen={false} badge="Advanced">
+            <div className="form-group">
+              <label>Timeframe</label>
+              <select value={timeframe} onChange={(e) => setTimeframe(e.target.value)}>
+                <option>1M</option>
+                <option>5M</option>
+                <option>15M</option>
+                <option>30M</option>
+                <option>1H</option>
+                <option>4H</option>
+                <option>1D</option>
+                <option>1W</option>
+              </select>
+            </div>
 
           <div className="form-group">
             <label>Open Price</label>
@@ -224,6 +261,7 @@ const PriceActionAnalysis = () => {
               <p>Lower Wick: {candleAnalysis.lowerWickPercent.toFixed(1)}%</p>
             </div>
           </div>
+        </CollapsibleSection>
         </div>
 
         <div className="analysis-section">
