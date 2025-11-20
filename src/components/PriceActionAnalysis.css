@@ -1,18 +1,65 @@
 .price-action {
   width: 100%;
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.price-action > h1 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #333;
+  margin-bottom: 12px;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.price-action > p {
+  font-size: 1.1rem;
+  color: #666;
+  margin-bottom: 40px;
 }
 
 .price-action h2 {
-  color: #667eea;
+  color: #f093fb;
   margin-bottom: 25px;
   font-size: 1.8rem;
-  text-align: center;
 }
 
 .price-action-grid {
   display: grid;
   grid-template-columns: 1fr 1.5fr;
-  gap: 30px;
+  gap: 40px;
+}
+
+.price-action .input-section,
+.price-action .analysis-section {
+  background: white;
+  padding: 32px;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e0e0e0;
+}
+
+.price-action .input-section h3,
+.price-action .analysis-section h3 {
+  color: #f093fb;
+  margin-bottom: 24px;
+  font-size: 1.5rem;
+  font-weight: 700;
+  border-bottom: 3px solid #f093fb;
+  padding-bottom: 12px;
 }
 
 .candle-visual {

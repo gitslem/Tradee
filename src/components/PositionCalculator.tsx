@@ -244,6 +244,8 @@ const PositionCalculator = () => {
 
   return (
     <div className="position-calculator">
+      <h1>Position Calculator</h1>
+      <p>Calculate optimal position sizes based on your risk tolerance and trading strategy</p>
       <div className="calculator-grid">
         <div className="input-section">
           <h2>Trading Setup</h2>

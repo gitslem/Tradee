@@ -10,108 +10,26 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #f8f9fa;
   min-height: 100vh;
 }
 
 .app {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 20px;
-}
-
-.app-header {
-  text-align: center;
-  color: white;
-  margin-bottom: 30px;
-  padding: 30px 20px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
-  backdrop-filter: blur(10px);
-}
-
-.app-header h1 {
-  font-size: 2.5rem;
-  margin-bottom: 10px;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.subtitle {
-  font-size: 1.1rem;
-  opacity: 0.9;
-}
-
-.tab-nav {
+  min-height: 100vh;
   display: flex;
-  gap: 10px;
-  margin-bottom: 30px;
-  background: rgba(255, 255, 255, 0.1);
-  padding: 10px;
-  border-radius: 15px;
-  backdrop-filter: blur(10px);
-}
-
-.tab-nav button {
-  flex: 1;
-  padding: 15px 20px;
-  border: none;
-  background: rgba(255, 255, 255, 0.2);
-  color: white;
-  font-size: 1rem;
-  font-weight: 600;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.tab-nav button:hover {
-  background: rgba(255, 255, 255, 0.3);
-  transform: translateY(-2px);
-}
-
-.tab-nav button.active {
-  background: white;
-  color: #667eea;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  flex-direction: column;
 }
 
 .main-content {
-  background: white;
-  border-radius: 20px;
-  padding: 30px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-  min-height: 500px;
-}
-
-.app-footer {
-  text-align: center;
-  color: white;
-  margin-top: 30px;
-  padding: 20px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 15px;
-  backdrop-filter: blur(10px);
-}
-
-.app-footer p {
-  font-size: 0.9rem;
-  opacity: 0.9;
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 60px 40px;
+  flex: 1;
 }
 
 @media (max-width: 768px) {
-  .app {
-    padding: 10px;
-  }
-
-  .app-header h1 {
-    font-size: 1.8rem;
-  }
-
-  .tab-nav {
-    flex-direction: column;
-  }
-
   .main-content {
-    padding: 20px;
+    padding: 40px 20px;
   }
 }

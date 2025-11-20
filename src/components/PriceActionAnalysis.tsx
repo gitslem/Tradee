@@ -121,7 +121,8 @@ const PriceActionAnalysis = () => {
 
   return (
     <div className="price-action">
-      <h2>Price Action Analysis</h2>
+      <h1>Price Action Analysis</h1>
+      <p>Identify candlestick patterns and price action signals for better entry and exit timing</p>
 
       <div className="price-action-grid">
         <div className="input-section">
