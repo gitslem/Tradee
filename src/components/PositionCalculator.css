@@ -97,6 +97,16 @@
   color: white;
 }
 
+.result-card.danger {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+  color: white;
+}
+
+.result-card.leverage-info {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+}
+
 .result-card h3 {
   font-size: 0.9rem;
   margin-bottom: 10px;
@@ -163,10 +173,94 @@
   border-bottom: none;
 }
 
+.quick-stats .liquidation-stat {
+  background: #ffe6e6;
+  padding: 8px 10px;
+  margin: 8px -10px;
+  border-radius: 6px;
+  border-bottom: 1px solid #ffcccc;
+}
+
+.quick-stats .liquidation-stat strong {
+  color: #d32f2f;
+}
+
 .no-results {
   text-align: center;
   padding: 60px 20px;
   color: #999;
+}
+
+/* Leverage Toggle Styles */
+.leverage-toggle {
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 10px;
+  border: 2px solid #e0e0e0;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-weight: 600;
+  color: #333;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: auto;
+  margin-right: 10px;
+  cursor: pointer;
+  transform: scale(1.2);
+}
+
+.checkbox-label span {
+  font-size: 1rem;
+}
+
+.leverage-toggle small {
+  margin-left: 30px;
+  color: #d32f2f;
+  font-weight: 500;
+}
+
+/* Leverage Section Styles */
+.leverage-section {
+  background: linear-gradient(135deg, #fff5e6 0%, #ffe8cc 100%);
+  padding: 15px;
+  border-radius: 10px;
+  border: 2px solid #ff9800;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.leverage-section label {
+  color: #e65100;
+}
+
+.leverage-section select {
+  border-color: #ff9800;
+  background: white;
+}
+
+.leverage-section select:focus {
+  border-color: #f57c00;
+  box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.1);
+}
+
+.leverage-section small {
+  color: #d84315;
+  font-weight: 600;
 }
 
 @media (max-width: 968px) {
