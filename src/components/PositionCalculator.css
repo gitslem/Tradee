@@ -1,20 +1,62 @@
 .position-calculator {
   width: 100%;
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.position-calculator > h1 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #333;
+  margin-bottom: 12px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.position-calculator > p {
+  font-size: 1.1rem;
+  color: #666;
+  margin-bottom: 40px;
 }
 
 .calculator-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 30px;
+  gap: 40px;
+}
+
+.input-section,
+.results-section {
+  background: white;
+  padding: 32px;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e0e0e0;
 }
 
 .input-section h2,
 .results-section h2 {
   color: #667eea;
-  margin-bottom: 20px;
-  font-size: 1.5rem;
-  border-bottom: 2px solid #667eea;
-  padding-bottom: 10px;
+  margin-bottom: 24px;
+  font-size: 1.75rem;
+  font-weight: 700;
+  border-bottom: 3px solid #667eea;
+  padding-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .form-group {

@@ -106,7 +106,8 @@ const MarketStructure = () => {
 
   return (
     <div className="market-structure">
-      <h2>Market Structure Analysis</h2>
+      <h1>Market Structure Analysis</h1>
+      <p>Identify trends, support & resistance levels, and market bias for better trading decisions</p>
 
       <div className="structure-grid">
         <div className="input-section">

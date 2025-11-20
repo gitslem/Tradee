@@ -1,50 +1,36 @@
-import { useState } from 'react'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import './App.css'
+import Navigation from './components/Navigation'
+import LandingPage from './components/LandingPage'
 import PositionCalculator from './components/PositionCalculator'
 import MarketStructure from './components/MarketStructure'
 import PriceActionAnalysis from './components/PriceActionAnalysis'
 
 function App() {
-  const [activeTab, setActiveTab] = useState<'calculator' | 'market' | 'price'>('calculator')
-
   return (
-    <div className="app">
-      <header className="app-header">
-        <h1>🚀 Crypto Trading Position Calculator</h1>
-        <p className="subtitle">Risk Management & Market Analysis Tool</p>
-      </header>
-
-      <nav className="tab-nav">
-        <button
-          className={activeTab === 'calculator' ? 'active' : ''}
-          onClick={() => setActiveTab('calculator')}
-        >
-          📊 Position Calculator
-        </button>
-        <button
-          className={activeTab === 'market' ? 'active' : ''}
-          onClick={() => setActiveTab('market')}
-        >
-          📈 Market Structure
-        </button>
-        <button
-          className={activeTab === 'price' ? 'active' : ''}
-          onClick={() => setActiveTab('price')}
-        >
-          🎯 Price Action
-        </button>
-      </nav>
-
-      <main className="main-content">
-        {activeTab === 'calculator' && <PositionCalculator />}
-        {activeTab === 'market' && <MarketStructure />}
-        {activeTab === 'price' && <PriceActionAnalysis />}
-      </main>
-
-      <footer className="app-footer">
-        <p>⚠️ Always use proper risk management. Never risk more than you can afford to lose.</p>
-      </footer>
-    </div>
+    <Router>
+      <div className="app">
+        <Navigation />
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/calculator" element={
+            <main className="main-content">
+              <PositionCalculator />
+            </main>
+          } />
+          <Route path="/market-structure" element={
+            <main className="main-content">
+              <MarketStructure />
+            </main>
+          } />
+          <Route path="/price-action" element={
+            <main className="main-content">
+              <PriceActionAnalysis />
+            </main>
+          } />
+        </Routes>
+      </div>
+    </Router>
   )
 }
 
