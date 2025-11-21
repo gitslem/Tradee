@@ -6,6 +6,7 @@ export interface Trade {
   entryPrice: number
   exitPrice: number | null
   quantity: number
+  quantityType: 'base' | 'quote' // 'base' = ETH in ETH/USDT, 'quote' = USDT in ETH/USDT
   entryDate: string
   exitDate: string | null
   stopLoss: number | null

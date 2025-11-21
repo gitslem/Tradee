@@ -12,7 +12,7 @@ import type { Trade, TradeStats } from '../services/tradeService'
 import './TradingJournal.css'
 
 const TradingJournal = () => {
-  const { user, isAuthenticated } = useAuth()
+  const { user, isAuthenticated, loading } = useAuth()
   const navigate = useNavigate()
 
   const [trades, setTrades] = useState<Trade[]>([])
@@ -22,6 +22,9 @@ const TradingJournal = () => {
   const [filter, setFilter] = useState<'all' | 'open' | 'closed' | 'wins' | 'losses'>('all')
 
   useEffect(() => {
+    // Wait for auth to finish loading before checking authentication
+    if (loading) return
+
     if (!isAuthenticated) {
       navigate('/login')
       return
@@ -30,7 +33,7 @@ const TradingJournal = () => {
     if (user) {
       loadTrades()
     }
-  }, [user, isAuthenticated, navigate])
+  }, [user, isAuthenticated, loading, navigate])
 
   const loadTrades = () => {
     if (!user) return
@@ -52,9 +55,14 @@ const TradingJournal = () => {
 
   const handleDeleteTrade = (tradeId: string) => {
     if (!user) return
-    if (confirm('Are you sure you want to delete this trade?')) {
-      tradeService.deleteTrade(user.email, tradeId)
-      loadTrades()
+    if (confirm('Are you sure you want to delete this trade? This action cannot be undone.')) {
+      const success = tradeService.deleteTrade(user.email, tradeId)
+      if (success) {
+        loadTrades()
+        alert('Trade deleted successfully!')
+      } else {
+        alert('Failed to delete trade. Please try again.')
+      }
     }
   }
 
@@ -65,24 +73,43 @@ const TradingJournal = () => {
     if (!exitPrice) return
 
     const price = parseFloat(exitPrice)
-    if (isNaN(price)) {
-      alert('Invalid price')
+    if (isNaN(price) || price <= 0) {
+      alert('Invalid price. Please enter a valid positive number.')
       return
     }
 
-    tradeService.closeTrade(user.email, trade.id, price, new Date().toISOString())
-    loadTrades()
+    const closedTrade = tradeService.closeTrade(user.email, trade.id, price, new Date().toISOString())
+    if (closedTrade) {
+      loadTrades()
+      const isProfitable = closedTrade.profitLoss > 0
+      alert(`Trade closed successfully!\n\nP&L: ${isProfitable ? '+' : ''}$${closedTrade.profitLoss.toFixed(2)} (${isProfitable ? '+' : ''}${closedTrade.profitLossPercent.toFixed(2)}%)`)
+    } else {
+      alert('Failed to close trade. Please try again.')
+    }
   }
 
   const handleExportCSV = () => {
     if (!user) return
-    const csv = tradeService.exportToCSV(user.email)
-    const blob = new Blob([csv], { type: 'text/csv' })
-    const url = window.URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `trading-journal-${new Date().toISOString().split('T')[0]}.csv`
-    a.click()
+
+    if (trades.length === 0) {
+      alert('No trades to export. Add some trades first!')
+      return
+    }
+
+    try {
+      const csv = tradeService.exportToCSV(user.email)
+      const blob = new Blob([csv], { type: 'text/csv' })
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `trading-journal-${new Date().toISOString().split('T')[0]}.csv`
+      a.click()
+      window.URL.revokeObjectURL(url)
+      alert(`Successfully exported ${trades.length} trade${trades.length === 1 ? '' : 's'} to CSV!`)
+    } catch (error) {
+      console.error('Export error:', error)
+      alert('Failed to export trades. Please try again.')
+    }
   }
 
   const filteredTrades = trades.filter(trade => {
@@ -93,6 +120,23 @@ const TradingJournal = () => {
     if (filter === 'losses') return trade.outcome === 'loss'
     return true
   })
+
+  if (loading) {
+    return (
+      <div className="trading-journal">
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '100vh',
+          fontSize: '1.2rem',
+          color: '#6b7280'
+        }}>
+          Loading...
+        </div>
+      </div>
+    )
+  }
 
   if (!isAuthenticated || !user) {
     return null
@@ -259,14 +303,26 @@ const TradingJournal = () => {
           }}
           onSave={(tradeData) => {
             if (!user) return
-            if (editingTrade) {
-              tradeService.updateTrade(user.email, editingTrade.id, tradeData)
-            } else {
-              tradeService.addTrade(user.email, tradeData as any)
+            try {
+              if (editingTrade) {
+                const updated = tradeService.updateTrade(user.email, editingTrade.id, tradeData)
+                if (updated) {
+                  alert('Trade updated successfully!')
+                } else {
+                  alert('Failed to update trade. Please try again.')
+                  return
+                }
+              } else {
+                tradeService.addTrade(user.email, tradeData as any)
+                alert('Trade added successfully!')
+              }
+              loadTrades()
+              setShowAddModal(false)
+              setEditingTrade(null)
+            } catch (error) {
+              console.error('Save error:', error)
+              alert('Failed to save trade. Please try again.')
             }
-            loadTrades()
-            setShowAddModal(false)
-            setEditingTrade(null)
           }}
         />
       )}
@@ -285,6 +341,11 @@ interface TradeCardProps {
 const TradeCard = ({ trade, onEdit, onDelete, onClose }: TradeCardProps) => {
   const isProfitable = trade.profitLoss > 0
   const isOpen = trade.status === 'open'
+
+  // Get currency from pair (default to 'base' for backward compatibility)
+  const [baseCurrency, quoteCurrency] = trade.pair.split('/')
+  const quantityType = trade.quantityType || 'base'
+  const currency = quantityType === 'base' ? baseCurrency : quoteCurrency
 
   return (
     <div className={`trade-card ${trade.status} ${trade.outcome}`}>
@@ -323,7 +384,7 @@ const TradeCard = ({ trade, onEdit, onDelete, onClose }: TradeCardProps) => {
           </div>
           <div className="info-item">
             <span className="info-label">Quantity</span>
-            <span className="info-value">{trade.quantity}</span>
+            <span className="info-value">{trade.quantity} {currency || ''}</span>
           </div>
           <div className="info-item">
             <span className="info-label">Exchange</span>
@@ -375,6 +436,7 @@ const TradeModal = ({ trade, onClose, onSave }: TradeModalProps) => {
     entryPrice: trade?.entryPrice.toString() || '',
     exitPrice: trade?.exitPrice?.toString() || '',
     quantity: trade?.quantity.toString() || '',
+    quantityType: trade?.quantityType || 'base' as 'base' | 'quote',
     entryDate: trade?.entryDate ? trade.entryDate.split('T')[0] : new Date().toISOString().split('T')[0],
     exitDate: trade?.exitDate ? trade.exitDate.split('T')[0] : '',
     stopLoss: trade?.stopLoss?.toString() || '',
@@ -385,13 +447,69 @@ const TradeModal = ({ trade, onClose, onSave }: TradeModalProps) => {
     tags: trade?.tags?.join(', ') || ''
   })
 
+  // Handle Escape key to close modal
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose()
+      }
+    }
+    window.addEventListener('keydown', handleEscape)
+    return () => window.removeEventListener('keydown', handleEscape)
+  }, [onClose])
+
+  // Get currency names from pair
+  const getCurrencies = (pair: string) => {
+    const [base, quote] = pair.split('/')
+    return { base, quote }
+  }
+
+  const currencies = getCurrencies(formData.pair)
+
+  // Calculate actual quantity in base currency for P&L
+  const getBaseQuantity = () => {
+    const qty = parseFloat(formData.quantity)
+    const price = parseFloat(formData.entryPrice)
+    if (isNaN(qty) || isNaN(price)) return 0
+
+    if (formData.quantityType === 'base') {
+      return qty
+    } else {
+      // Convert quote to base: if 1000 USDT at $3000/ETH = 0.333 ETH
+      return qty / price
+    }
+  }
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
+    // Validate required fields
     const entryPrice = parseFloat(formData.entryPrice)
-    const exitPrice = formData.exitPrice ? parseFloat(formData.exitPrice) : null
-    const quantity = parseFloat(formData.quantity)
+    const inputQuantity = parseFloat(formData.quantity)
     const leverage = parseFloat(formData.leverage)
+
+    if (isNaN(entryPrice) || entryPrice <= 0) {
+      alert('Please enter a valid entry price')
+      return
+    }
+
+    if (isNaN(inputQuantity) || inputQuantity <= 0) {
+      alert('Please enter a valid quantity')
+      return
+    }
+
+    if (isNaN(leverage) || leverage < 1 || leverage > 125) {
+      alert('Leverage must be between 1x and 125x')
+      return
+    }
+
+    const exitPrice = formData.exitPrice ? parseFloat(formData.exitPrice) : null
+    if (exitPrice !== null && (isNaN(exitPrice) || exitPrice <= 0)) {
+      alert('Please enter a valid exit price or leave it empty')
+      return
+    }
+
+    const baseQuantity = getBaseQuantity() // Always use base quantity for calculations
 
     let profitLoss = 0
     let profitLossPercent = 0
@@ -399,9 +517,10 @@ const TradeModal = ({ trade, onClose, onSave }: TradeModalProps) => {
     let outcome: 'win' | 'loss' | 'pending' = 'pending'
 
     if (exitPrice) {
+      // P&L calculations always use base quantity
       profitLoss = formData.type === 'long'
-        ? (exitPrice - entryPrice) * quantity
-        : (entryPrice - exitPrice) * quantity
+        ? (exitPrice - entryPrice) * baseQuantity
+        : (entryPrice - exitPrice) * baseQuantity
 
       profitLossPercent = formData.type === 'long'
         ? ((exitPrice - entryPrice) / entryPrice) * 100 * leverage
@@ -416,7 +535,8 @@ const TradeModal = ({ trade, onClose, onSave }: TradeModalProps) => {
       type: formData.type,
       entryPrice,
       exitPrice,
-      quantity,
+      quantity: inputQuantity, // Store the user's input quantity
+      quantityType: formData.quantityType, // Store which type they entered
       entryDate: new Date(formData.entryDate).toISOString(),
       exitDate: formData.exitDate ? new Date(formData.exitDate).toISOString() : null,
       stopLoss: formData.stopLoss ? parseFloat(formData.stopLoss) : null,
@@ -502,22 +622,45 @@ const TradeModal = ({ trade, onClose, onSave }: TradeModalProps) => {
 
           <div className="form-row">
             <div className="form-group">
-              <label>Quantity</label>
-              <input
-                type="number"
-                step="0.01"
-                value={formData.quantity}
-                onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
-                required
-              />
+              <label>Quantity Type</label>
+              <select
+                value={formData.quantityType}
+                onChange={(e) => setFormData({ ...formData, quantityType: e.target.value as 'base' | 'quote' })}
+              >
+                <option value="base">{currencies.base} (Base Currency)</option>
+                <option value="quote">{currencies.quote} (Quote Currency)</option>
+              </select>
             </div>
 
             <div className="form-group">
-              <label>Leverage</label>
+              <label>Quantity ({formData.quantityType === 'base' ? currencies.base : currencies.quote})</label>
+              <input
+                type="number"
+                step="0.00000001"
+                value={formData.quantity}
+                onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
+                placeholder={formData.quantityType === 'base' ? `Amount in ${currencies.base}` : `Amount in ${currencies.quote}`}
+                required
+              />
+              {formData.entryPrice && formData.quantity && (
+                <small className="conversion-hint">
+                  ≈ {formData.quantityType === 'base'
+                    ? `${(parseFloat(formData.quantity) * parseFloat(formData.entryPrice)).toFixed(2)} ${currencies.quote}`
+                    : `${(parseFloat(formData.quantity) / parseFloat(formData.entryPrice)).toFixed(8)} ${currencies.base}`
+                  }
+                </small>
+              )}
+            </div>
+          </div>
+
+          <div className="form-row">
+            <div className="form-group">
+              <label>Leverage (1-125x)</label>
               <input
                 type="number"
                 step="1"
                 min="1"
+                max="125"
                 value={formData.leverage}
                 onChange={(e) => setFormData({ ...formData, leverage: e.target.value })}
                 required
