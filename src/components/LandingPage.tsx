@@ -19,7 +19,7 @@ const LandingPage = () => {
       description: 'Analyze market trends and identify key support/resistance levels to make informed trading decisions.',
       benefits: ['Trend identification', 'Support & resistance zones', 'Market bias analysis', 'Trading range detection'],
       link: '/market-structure',
-      color: '#11998e'
+      color: '#ec4899'
     },
     {
       icon: <Target size={40} />,
@@ -104,7 +104,7 @@ const LandingPage = () => {
             <div className="card-value">$2,450</div>
           </div>
           <div className="floating-card card-2">
-            <TrendingUp size={24} color="#11998e" />
+            <TrendingUp size={24} color="#ec4899" />
             <div className="card-text">Win Rate</div>
             <div className="card-value">68%</div>
           </div>
