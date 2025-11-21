@@ -2,6 +2,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { Home, Calculator, TrendingUp, Target, Menu, X, BookOpen, LogIn, LogOut, User } from 'lucide-react'
 import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
+import Logo from './Logo'
 import './Navigation.css'
 
 const Navigation = () => {
@@ -34,7 +35,7 @@ const Navigation = () => {
       <div className="nav-container">
         <Link to="/" className="nav-logo">
           <div className="logo-icon">
-            <Calculator size={24} />
+            <Logo size={24} />
           </div>
           <span className="logo-text">Tradee</span>
         </Link>
