@@ -429,25 +429,37 @@
   line-height: 1.6;
 }
 
-/* CTA Section */
+/* CTA Section with Animated Background */
 .cta-section {
   padding: 120px 60px;
-  background: linear-gradient(135deg, #667eea 0%, #ec4899 100%);
   text-align: center;
   color: white;
   position: relative;
-  z-index: 1;
   overflow: hidden;
+  min-height: 600px;
 }
 
-.cta-section::before {
+/* Gradient overlay on top of TradingBackground */
+.cta-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.92) 0%, rgba(236, 72, 153, 0.92) 100%);
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Rotating radial gradient for extra depth */
+.cta-overlay::before {
   content: '';
   position: absolute;
   top: -50%;
   left: -50%;
   width: 200%;
   height: 200%;
-  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
   animation: rotateBg 20s linear infinite;
   pointer-events: none;
 }
