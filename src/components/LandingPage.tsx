@@ -101,17 +101,17 @@ const LandingPage = () => {
             </a>
           </div>
           <div className="hero-stats">
-            <div className="stat">
-              <div className="stat-value">4</div>
-              <div className="stat-label">Professional Tools</div>
+            <div className="stat-badge">
+              <span className="stat-number">4</span>
+              <span className="stat-text">Tools</span>
             </div>
-            <div className="stat">
-              <div className="stat-value">100%</div>
-              <div className="stat-label">Free Forever</div>
+            <div className="stat-badge">
+              <span className="stat-number">∞</span>
+              <span className="stat-text">Access</span>
             </div>
-            <div className="stat">
-              <div className="stat-value">∞</div>
-              <div className="stat-label">Unlimited Access</div>
+            <div className="stat-badge">
+              <span className="stat-number">24/7</span>
+              <span className="stat-text">Available</span>
             </div>
           </div>
         </div>
@@ -231,12 +231,6 @@ const LandingPage = () => {
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                   <path d="M10 0L12.2451 7.75486L20 10L12.2451 12.2451L10 20L7.75486 12.2451L0 10L7.75486 7.75486L10 0Z" fill="white"/>
                 </svg>
-                <span>100% Free Forever</span>
-              </div>
-              <div className="cta-feature-item">
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                  <path d="M10 0L12.2451 7.75486L20 10L12.2451 12.2451L10 20L7.75486 12.2451L0 10L7.75486 7.75486L10 0Z" fill="white"/>
-                </svg>
                 <span>No Registration Required</span>
               </div>
               <div className="cta-feature-item">
@@ -244,6 +238,12 @@ const LandingPage = () => {
                   <path d="M10 0L12.2451 7.75486L20 10L12.2451 12.2451L10 20L7.75486 12.2451L0 10L7.75486 7.75486L10 0Z" fill="white"/>
                 </svg>
                 <span>Real-Time Signals</span>
+              </div>
+              <div className="cta-feature-item">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                  <path d="M10 0L12.2451 7.75486L20 10L12.2451 12.2451L10 20L7.75486 12.2451L0 10L7.75486 7.75486L10 0Z" fill="white"/>
+                </svg>
+                <span>Instant Access</span>
               </div>
             </div>
           </div>
@@ -277,15 +277,6 @@ const LandingPage = () => {
               <ul className="footer-links">
                 <li><Link to="/support">Support</Link></li>
                 <li><a href="mailto:tradee444@gmail.com">Contact Us</a></li>
-                <li>
-                  <a
-                    href="https://github.com/gitslem"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    GitHub
-                  </a>
-                </li>
               </ul>
             </div>
 
