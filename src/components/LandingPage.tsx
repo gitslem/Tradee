@@ -252,21 +252,68 @@ const LandingPage = () => {
 
       {/* Footer */}
       <footer className="landing-footer">
-        <div className="footer-content">
-          <div className="footer-main">
-            <p className="footer-tagline">Made with ❤️ for the crypto trading community</p>
-            <p className="footer-disclaimer">Not financial advice • Use at your own risk • Always DYOR</p>
+        <div className="footer-container">
+          <div className="footer-grid">
+            <div className="footer-section footer-brand">
+              <h3 className="footer-logo">Tradee</h3>
+              <p className="footer-description">
+                Professional crypto trading tools for consistent profitability.
+                Risk management, market analysis, and performance tracking - all free forever.
+              </p>
+            </div>
+
+            <div className="footer-section">
+              <h4 className="footer-heading">Tools</h4>
+              <ul className="footer-links">
+                <li><Link to="/calculator">Position Calculator</Link></li>
+                <li><Link to="/market-structure">Market Structure</Link></li>
+                <li><Link to="/price-action">Price Action</Link></li>
+                <li><Link to="/journal">Trading Journal</Link></li>
+              </ul>
+            </div>
+
+            <div className="footer-section">
+              <h4 className="footer-heading">Resources</h4>
+              <ul className="footer-links">
+                <li><Link to="/support">Support</Link></li>
+                <li><a href="mailto:tradee444@gmail.com">Contact Us</a></li>
+                <li>
+                  <a
+                    href="https://github.com/gitslem"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    GitHub
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            <div className="footer-section">
+              <h4 className="footer-heading">Legal</h4>
+              <ul className="footer-links">
+                <li><span className="footer-text">Not Financial Advice</span></li>
+                <li><span className="footer-text">Educational Purpose Only</span></li>
+                <li><span className="footer-text">Use at Your Own Risk</span></li>
+              </ul>
+            </div>
           </div>
-          <div className="footer-credits">
-            <a
-              href="https://github.com/gitslem"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="github-link"
-            >
-              <Github size={20} />
-              <span>Created by @gitslem</span>
-            </a>
+
+          <div className="footer-bottom">
+            <div className="footer-copyright">
+              <p>&copy; 2025 Tradee. All rights reserved.</p>
+            </div>
+            <div className="footer-author">
+              <a
+                href="https://github.com/gitslem"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="author-link"
+              >
+                <Github size={18} />
+                <span>Created by @gitslem</span>
+              </a>
+            </div>
           </div>
         </div>
       </footer>

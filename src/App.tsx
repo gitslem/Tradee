@@ -8,6 +8,7 @@ import TradingJournal from './components/TradingJournal'
 import PositionCalculator from './components/PositionCalculator'
 import MarketStructure from './components/MarketStructure'
 import PriceActionAnalysis from './components/PriceActionAnalysis'
+import Support from './components/Support'
 
 function App() {
   return (
@@ -34,6 +35,7 @@ function App() {
                 <PriceActionAnalysis />
               </main>
             } />
+            <Route path="/support" element={<Support />} />
           </Routes>
         </div>
       </AuthProvider>
