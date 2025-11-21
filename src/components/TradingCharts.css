@@ -218,9 +218,11 @@
   gap: 30px;
   margin-top: 30px;
   padding: 20px;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(20, 20, 40, 0.85);
+  border: 1px solid rgba(102, 126, 234, 0.3);
   border-radius: 12px;
   backdrop-filter: blur(10px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   animation: statsSlideUp 0.8s ease-out 2.6s backwards;
 }
 

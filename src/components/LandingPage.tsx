@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Calculator, TrendingUp, Target, Shield, Zap, BarChart3, AlertTriangle, DollarSign, Rocket, Github } from 'lucide-react'
+import { Calculator, TrendingUp, Target, Shield, Zap, BarChart3, AlertTriangle, DollarSign, Rocket, Github, BookOpen } from 'lucide-react'
 import TradingBackground from './TradingBackground'
 import TradingCharts from './TradingCharts'
 import './LandingPage.css'
@@ -8,27 +8,43 @@ const LandingPage = () => {
   const features = [
     {
       icon: <Calculator size={40} />,
-      title: 'Position Calculator',
-      description: 'Calculate optimal position sizes based on your risk tolerance. Never guess your trade size again.',
-      benefits: ['Risk-based position sizing', 'Leverage & liquidation calculator', 'Multiple take-profit targets', 'Breakeven price calculation'],
+      title: 'Position Size Calculator',
+      description: 'Essential for protecting your capital. Calculate exact position sizes based on your account balance, risk percentage, and stop-loss distance. Prevent overleveraging and blown accounts.',
+      benefits: ['Risk-based position sizing with leverage', 'Liquidation price calculator', 'Multiple take-profit target planning', 'Breakeven price calculation'],
+      usage: 'Use before every trade to determine how much to invest',
+      importance: 'Critical for risk management and capital preservation',
       link: '/calculator',
       color: '#667eea'
     },
     {
       icon: <TrendingUp size={40} />,
-      title: 'Market Structure',
-      description: 'Analyze market trends and identify key support/resistance levels to make informed trading decisions.',
-      benefits: ['Trend identification', 'Support & resistance zones', 'Market bias analysis', 'Trading range detection'],
+      title: 'Market Structure Analysis',
+      description: 'Identify the current market trend and key price levels. Understand whether the market is bullish, bearish, or ranging to align your strategy with market conditions.',
+      benefits: ['Higher-high and higher-low trend analysis', 'Support & resistance level identification', 'Market bias determination (bullish/bearish/neutral)', 'Break of structure detection'],
+      usage: 'Analyze before entering trades to trade with the trend',
+      importance: 'Essential for timing entries and understanding market context',
       link: '/market-structure',
       color: '#ec4899'
     },
     {
       icon: <Target size={40} />,
       title: 'Price Action Analysis',
-      description: 'Master candlestick patterns and price action signals for better entry and exit timing.',
-      benefits: ['Candlestick pattern recognition', 'Price action signals', 'Entry/exit timing', 'Pattern probability analysis'],
+      description: 'Master candlestick patterns for precise entry and exit timing. Recognize reversal and continuation patterns to predict price movements based on historical behavior.',
+      benefits: ['23+ candlestick pattern recognition', 'Real-time price action signals', 'Pattern reliability and probability data', 'Entry/exit timing optimization'],
+      usage: 'Check patterns on your timeframe to confirm trade setups',
+      importance: 'Improves entry timing and increases win rate',
       link: '/price-action',
       color: '#f093fb'
+    },
+    {
+      icon: <BookOpen size={40} />,
+      title: 'Trading Journal',
+      description: 'Track every trade with detailed metrics. Analyze your performance over time to identify what works and what doesn\'t. Data-driven improvement for consistent profitability.',
+      benefits: ['Complete trade history logging', 'Win rate and P&L tracking', 'Performance analytics dashboard', 'CSV export for advanced analysis'],
+      usage: 'Log all trades to track performance and find patterns',
+      importance: 'Crucial for continuous improvement and accountability',
+      link: '/journal',
+      color: '#10b981'
     }
   ]
 
@@ -66,11 +82,11 @@ const LandingPage = () => {
             <span>Professional Trading Tools</span>
           </div>
           <h1 className="hero-title">
-            Trade Smarter with
-            <span className="gradient-text"> Advanced Crypto Tools</span>
+            Professional Crypto Trading Tools for
+            <span className="gradient-text"> Consistent Profitability</span>
           </h1>
           <p className="hero-subtitle">
-            Master risk management, analyze market structure, and perfect your trading strategy with our comprehensive suite of tools designed for both beginners and professionals.
+            Complete toolkit for serious traders: Calculate position sizes, analyze market structure, identify price action patterns, and track your performance. Everything you need to trade with discipline and precision.
           </p>
           <div className="hero-cta">
             <Link to="/calculator" className="btn-primary">
@@ -85,8 +101,8 @@ const LandingPage = () => {
           </div>
           <div className="hero-stats">
             <div className="stat">
-              <div className="stat-value">3</div>
-              <div className="stat-label">Powerful Tools</div>
+              <div className="stat-value">4</div>
+              <div className="stat-label">Professional Tools</div>
             </div>
             <div className="stat">
               <div className="stat-value">100%</div>
@@ -94,7 +110,7 @@ const LandingPage = () => {
             </div>
             <div className="stat">
               <div className="stat-value">∞</div>
-              <div className="stat-label">Calculations</div>
+              <div className="stat-label">Unlimited Access</div>
             </div>
           </div>
         </div>
@@ -106,9 +122,9 @@ const LandingPage = () => {
       {/* Features Section */}
       <section id="features" className="features-section">
         <div className="section-header">
-          <h2 className="section-title">Powerful Features for Every Trader</h2>
+          <h2 className="section-title">Complete Trading Toolkit</h2>
           <p className="section-subtitle">
-            Everything you need to analyze, calculate, and execute trades with confidence
+            Four essential tools that professional traders use daily. Each tool serves a specific purpose in your trading workflow.
           </p>
         </div>
         <div className="features-grid">
@@ -119,6 +135,18 @@ const LandingPage = () => {
               </div>
               <h3 className="feature-title">{feature.title}</h3>
               <p className="feature-description">{feature.description}</p>
+
+              <div className="feature-meta">
+                <div className="feature-usage">
+                  <strong>When to Use:</strong> {feature.usage}
+                </div>
+                <div className="feature-importance">
+                  <strong>Why It Matters:</strong> {feature.importance}
+                </div>
+              </div>
+
+              <div className="feature-divider"></div>
+
               <ul className="feature-benefits">
                 {feature.benefits.map((benefit, i) => (
                   <li key={i}>
@@ -130,7 +158,7 @@ const LandingPage = () => {
                 ))}
               </ul>
               <Link to={feature.link} className="feature-link" style={{ color: feature.color }}>
-                Try it now
+                Open Tool
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                   <path d="M6 12L10 8L6 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
@@ -176,7 +204,7 @@ const LandingPage = () => {
 
       {/* CTA Section */}
       <section className="cta-section">
-        <TradingBackground variant="home" />
+        <TradingBackground variant="market" />
         <div className="cta-overlay"></div>
         <div className="cta-content">
           <div className="cta-icon-wrapper">

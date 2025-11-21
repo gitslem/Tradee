@@ -228,10 +228,16 @@
 
 .features-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 40px;
   max-width: 1400px;
   margin: 0 auto;
+}
+
+@media (max-width: 1024px) {
+  .features-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .feature-card {
@@ -273,6 +279,41 @@
   color: #666;
   line-height: 1.6;
   margin-bottom: 24px;
+}
+
+.feature-meta {
+  background: rgba(102, 126, 234, 0.05);
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  border-left: 3px solid var(--card-color);
+}
+
+.feature-usage,
+.feature-importance {
+  font-size: 0.9rem;
+  color: #444;
+  line-height: 1.5;
+  margin-bottom: 10px;
+}
+
+.feature-usage:last-child,
+.feature-importance:last-child {
+  margin-bottom: 0;
+}
+
+.feature-meta strong {
+  color: var(--card-color);
+  font-weight: 700;
+  display: inline-block;
+  margin-bottom: 4px;
+}
+
+.feature-divider {
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--card-color), transparent);
+  margin: 24px 0;
+  opacity: 0.3;
 }
 
 .feature-benefits {
