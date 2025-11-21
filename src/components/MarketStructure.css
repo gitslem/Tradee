@@ -316,3 +316,98 @@
     grid-template-columns: 1fr;
   }
 }
+
+@media (max-width: 768px) {
+  .market-structure {
+    padding: 30px 20px;
+  }
+
+  .market-structure > h1 {
+    font-size: 2rem;
+  }
+
+  .market-structure > p {
+    font-size: 1rem;
+  }
+
+  .market-structure h2 {
+    font-size: 1.5rem;
+  }
+
+  .market-structure .input-section,
+  .market-structure .analysis-section {
+    padding: 24px;
+  }
+
+  .input-section h3,
+  .analysis-section h3 {
+    font-size: 1.3rem;
+  }
+
+  .level-row {
+    flex-wrap: wrap;
+  }
+
+  .level-row select {
+    width: 100px;
+  }
+}
+
+@media (max-width: 480px) {
+  .market-structure {
+    padding: 20px 12px;
+  }
+
+  .market-structure > h1 {
+    font-size: 1.75rem;
+  }
+
+  .market-structure > p {
+    font-size: 0.95rem;
+  }
+
+  .market-structure h2 {
+    font-size: 1.25rem;
+  }
+
+  .market-structure .input-section,
+  .market-structure .analysis-section {
+    padding: 20px 16px;
+  }
+
+  .input-section h3,
+  .analysis-section h3 {
+    font-size: 1.15rem;
+  }
+
+  .levels-section {
+    padding: 16px;
+  }
+
+  .level-row {
+    flex-direction: column;
+  }
+
+  .level-row select {
+    width: 100%;
+  }
+
+  .add-btn,
+  .remove-btn {
+    padding: 10px;
+    font-size: 0.85rem;
+  }
+
+  .analysis-card {
+    padding: 16px;
+  }
+
+  .analysis-card h4 {
+    font-size: 1rem;
+  }
+
+  .current-price-display {
+    font-size: 1.1rem;
+    padding: 12px;
+  }
+}

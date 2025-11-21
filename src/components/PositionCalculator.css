@@ -365,3 +365,91 @@
     grid-template-columns: 1fr;
   }
 }
+
+@media (max-width: 768px) {
+  .position-calculator {
+    padding: 30px 20px;
+  }
+
+  .position-calculator > h1 {
+    font-size: 2rem;
+  }
+
+  .position-calculator > p {
+    font-size: 1rem;
+  }
+
+  .input-section,
+  .results-section {
+    padding: 24px;
+  }
+
+  .input-section h2,
+  .results-section h2 {
+    font-size: 1.5rem;
+  }
+
+  .result-value {
+    font-size: 1.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .position-calculator {
+    padding: 20px 12px;
+  }
+
+  .position-calculator > h1 {
+    font-size: 1.75rem;
+  }
+
+  .position-calculator > p {
+    font-size: 0.95rem;
+  }
+
+  .input-section,
+  .results-section {
+    padding: 20px 16px;
+  }
+
+  .input-section h2,
+  .results-section h2 {
+    font-size: 1.25rem;
+  }
+
+  .form-group input,
+  .form-group select {
+    padding: 10px;
+    font-size: 0.95rem;
+  }
+
+  .radio-group {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .result-card {
+    padding: 16px;
+  }
+
+  .result-value {
+    font-size: 1.5rem;
+  }
+
+  .result-card h3 {
+    font-size: 0.8rem;
+  }
+
+  .checkbox-label {
+    font-size: 1rem;
+  }
+
+  .checkbox-label span {
+    font-size: 1rem;
+  }
+
+  .leverage-toggle small {
+    margin-left: 20px;
+    font-size: 0.85rem;
+  }
+}

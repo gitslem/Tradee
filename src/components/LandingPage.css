@@ -1032,3 +1032,132 @@
     text-align: center;
   }
 }
+
+@media (max-width: 480px) {
+  .hero {
+    padding: 30px 16px;
+  }
+
+  .hero-title {
+    font-size: 1.75rem;
+  }
+
+  .hero-subtitle {
+    font-size: 0.95rem;
+  }
+
+  .hero-badge {
+    font-size: 0.8rem;
+    padding: 6px 12px;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    font-size: 1rem;
+    padding: 14px 24px;
+  }
+
+  .hero-stats {
+    padding: 10px 16px;
+    gap: 12px;
+  }
+
+  .stat-badge {
+    padding: 6px 12px;
+  }
+
+  .stat-number {
+    font-size: 1.25rem;
+  }
+
+  .stat-text {
+    font-size: 0.75rem;
+  }
+
+  .features-section,
+  .why-section,
+  .warning-section {
+    padding: 40px 16px;
+  }
+
+  .cta-section {
+    padding: 40px 16px;
+  }
+
+  .section-title {
+    font-size: 1.75rem;
+  }
+
+  .section-subtitle {
+    font-size: 0.95rem;
+  }
+
+  .feature-card {
+    padding: 20px;
+  }
+
+  .feature-title {
+    font-size: 1.25rem;
+  }
+
+  .feature-description {
+    font-size: 0.9rem;
+  }
+
+  .why-card {
+    padding: 24px;
+  }
+
+  .why-icon {
+    width: 70px;
+    height: 70px;
+  }
+
+  .why-title {
+    font-size: 1.1rem;
+  }
+
+  .why-description {
+    font-size: 0.9rem;
+  }
+
+  .warning-card {
+    padding: 20px;
+  }
+
+  .cta-title {
+    font-size: 1.75rem;
+  }
+
+  .cta-subtitle {
+    font-size: 0.95rem;
+  }
+
+  .cta-chart-wrapper {
+    padding: 20px;
+  }
+
+  .btn-cta-primary,
+  .btn-cta-secondary {
+    font-size: 1rem;
+    padding: 14px 28px;
+  }
+
+  .landing-footer {
+    padding: 40px 16px 24px;
+  }
+
+  .footer-logo {
+    font-size: 1.75rem;
+  }
+
+  .footer-description,
+  .footer-links li a,
+  .footer-links li span {
+    font-size: 0.9rem;
+  }
+
+  .footer-heading {
+    font-size: 1rem;
+  }
+}
