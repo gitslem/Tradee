@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom'
-import { Calculator, TrendingUp, Target, Shield, Zap, BarChart3, AlertTriangle, DollarSign, Rocket, Github, BookOpen } from 'lucide-react'
+import { Calculator, TrendingUp, Target, Shield, Zap, BarChart3, AlertTriangle, DollarSign, Github, BookOpen } from 'lucide-react'
 import TradingBackground from './TradingBackground'
 import TradingCharts from './TradingCharts'
+import LiveTradingChart from './LiveTradingChart'
 import './LandingPage.css'
 
 const LandingPage = () => {
@@ -204,42 +205,46 @@ const LandingPage = () => {
 
       {/* CTA Section */}
       <section className="cta-section">
-        <TradingBackground variant="market" />
-        <div className="cta-overlay"></div>
-        <div className="cta-content">
-          <div className="cta-icon-wrapper">
-            <Rocket size={60} className="cta-icon" />
+        <div className="cta-container">
+          <div className="cta-header">
+            <h2 className="cta-title">Ready to Level Up Your Trading?</h2>
+            <p className="cta-subtitle">Watch live market action with real-time buy and sell signals</p>
           </div>
-          <h2 className="cta-title">Ready to Level Up Your Trading?</h2>
-          <p className="cta-subtitle">Join thousands of traders using professional tools to make smarter decisions</p>
-          <div className="cta-buttons">
-            <Link to="/calculator" className="btn-cta-primary">
-              <Zap size={20} />
-              Start Trading Smarter
-            </Link>
-            <Link to="/journal" className="btn-cta-secondary">
-              <BarChart3 size={20} />
-              Track Your Trades
-            </Link>
+
+          <div className="cta-chart-wrapper">
+            <LiveTradingChart />
           </div>
-          <div className="cta-features">
-            <div className="cta-feature-item">
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path d="M10 0L12.2451 7.75486L20 10L12.2451 12.2451L10 20L7.75486 12.2451L0 10L7.75486 7.75486L10 0Z" fill="white"/>
-              </svg>
-              <span>100% Free Forever</span>
+
+          <div className="cta-actions">
+            <div className="cta-buttons">
+              <Link to="/calculator" className="btn-cta-primary">
+                <Zap size={20} />
+                Start Trading Smarter
+              </Link>
+              <Link to="/journal" className="btn-cta-secondary">
+                <BarChart3 size={20} />
+                Track Your Trades
+              </Link>
             </div>
-            <div className="cta-feature-item">
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path d="M10 0L12.2451 7.75486L20 10L12.2451 12.2451L10 20L7.75486 12.2451L0 10L7.75486 7.75486L10 0Z" fill="white"/>
-              </svg>
-              <span>No Registration Required</span>
-            </div>
-            <div className="cta-feature-item">
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path d="M10 0L12.2451 7.75486L20 10L12.2451 12.2451L10 20L7.75486 12.2451L0 10L7.75486 7.75486L10 0Z" fill="white"/>
-              </svg>
-              <span>Instant Access</span>
+            <div className="cta-features">
+              <div className="cta-feature-item">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                  <path d="M10 0L12.2451 7.75486L20 10L12.2451 12.2451L10 20L7.75486 12.2451L0 10L7.75486 7.75486L10 0Z" fill="white"/>
+                </svg>
+                <span>100% Free Forever</span>
+              </div>
+              <div className="cta-feature-item">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                  <path d="M10 0L12.2451 7.75486L20 10L12.2451 12.2451L10 20L7.75486 12.2451L0 10L7.75486 7.75486L10 0Z" fill="white"/>
+                </svg>
+                <span>No Registration Required</span>
+              </div>
+              <div className="cta-feature-item">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                  <path d="M10 0L12.2451 7.75486L20 10L12.2451 12.2451L10 20L7.75486 12.2451L0 10L7.75486 7.75486L10 0Z" fill="white"/>
+                </svg>
+                <span>Real-Time Signals</span>
+              </div>
             </div>
           </div>
         </div>
