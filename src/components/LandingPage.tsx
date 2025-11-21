@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { Calculator, TrendingUp, Target, Shield, Zap, BarChart3, AlertTriangle, DollarSign, Rocket, Github } from 'lucide-react'
 import TradingBackground from './TradingBackground'
-import BearBullBattle from './BearBullBattle'
+import TradingCharts from './TradingCharts'
 import './LandingPage.css'
 
 const LandingPage = () => {
@@ -99,7 +99,7 @@ const LandingPage = () => {
           </div>
         </div>
         <div className="hero-illustration">
-          <BearBullBattle />
+          <TradingCharts />
         </div>
       </section>
 
