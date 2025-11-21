@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
-import { Calculator, TrendingUp, Target, Shield, Zap, BarChart3, AlertTriangle, DollarSign } from 'lucide-react'
+import { Calculator, TrendingUp, Target, Shield, Zap, BarChart3, AlertTriangle, DollarSign, Rocket, Github } from 'lucide-react'
 import TradingBackground from './TradingBackground'
+import BearBullBattle from './BearBullBattle'
 import './LandingPage.css'
 
 const LandingPage = () => {
@@ -98,21 +99,7 @@ const LandingPage = () => {
           </div>
         </div>
         <div className="hero-illustration">
-          <div className="floating-card card-1">
-            <Calculator size={24} color="#667eea" />
-            <div className="card-text">Position Size</div>
-            <div className="card-value">$2,450</div>
-          </div>
-          <div className="floating-card card-2">
-            <TrendingUp size={24} color="#ec4899" />
-            <div className="card-text">Win Rate</div>
-            <div className="card-value">68%</div>
-          </div>
-          <div className="floating-card card-3">
-            <Target size={24} color="#f093fb" />
-            <div className="card-text">R:R Ratio</div>
-            <div className="card-value">1:3.5</div>
-          </div>
+          <BearBullBattle />
         </div>
       </section>
 
@@ -189,20 +176,64 @@ const LandingPage = () => {
 
       {/* CTA Section */}
       <section className="cta-section">
-        <h2 className="cta-title">Ready to Level Up Your Trading?</h2>
-        <p className="cta-subtitle">Start using professional trading tools in seconds</p>
-        <Link to="/calculator" className="btn-primary btn-large">
-          Get Started Free
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <path d="M9 18L15 12L9 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </Link>
+        <div className="cta-content">
+          <div className="cta-icon-wrapper">
+            <Rocket size={60} className="cta-icon" />
+          </div>
+          <h2 className="cta-title">Ready to Level Up Your Trading?</h2>
+          <p className="cta-subtitle">Join thousands of traders using professional tools to make smarter decisions</p>
+          <div className="cta-buttons">
+            <Link to="/calculator" className="btn-cta-primary">
+              <Zap size={20} />
+              Start Trading Smarter
+            </Link>
+            <Link to="/journal" className="btn-cta-secondary">
+              <BarChart3 size={20} />
+              Track Your Trades
+            </Link>
+          </div>
+          <div className="cta-features">
+            <div className="cta-feature-item">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M10 0L12.2451 7.75486L20 10L12.2451 12.2451L10 20L7.75486 12.2451L0 10L7.75486 7.75486L10 0Z" fill="white"/>
+              </svg>
+              <span>100% Free Forever</span>
+            </div>
+            <div className="cta-feature-item">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M10 0L12.2451 7.75486L20 10L12.2451 12.2451L10 20L7.75486 12.2451L0 10L7.75486 7.75486L10 0Z" fill="white"/>
+              </svg>
+              <span>No Registration Required</span>
+            </div>
+            <div className="cta-feature-item">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M10 0L12.2451 7.75486L20 10L12.2451 12.2451L10 20L7.75486 12.2451L0 10L7.75486 7.75486L10 0Z" fill="white"/>
+              </svg>
+              <span>Instant Access</span>
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* Footer */}
       <footer className="landing-footer">
-        <p>Made with ❤️ for the crypto trading community</p>
-        <p className="footer-disclaimer">Not financial advice • Use at your own risk • Always DYOR</p>
+        <div className="footer-content">
+          <div className="footer-main">
+            <p className="footer-tagline">Made with ❤️ for the crypto trading community</p>
+            <p className="footer-disclaimer">Not financial advice • Use at your own risk • Always DYOR</p>
+          </div>
+          <div className="footer-credits">
+            <a
+              href="https://github.com/gitslem"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="github-link"
+            >
+              <Github size={20} />
+              <span>Created by @gitslem</span>
+            </a>
+          </div>
+        </div>
       </footer>
     </div>
   )
