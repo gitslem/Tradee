@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Calculator, TrendingUp, Target, Shield, Zap, BarChart3, AlertTriangle, DollarSign, Github, BookOpen } from 'lucide-react'
+import { Calculator, TrendingUp, Target, Shield, Zap, BarChart3, AlertTriangle, DollarSign, BookOpen } from 'lucide-react'
 import TradingBackground from './TradingBackground'
 import TradingCharts from './TradingCharts'
 import LiveTradingChart from './LiveTradingChart'
@@ -294,16 +294,8 @@ const LandingPage = () => {
             <div className="footer-copyright">
               <p>&copy; 2025 Tradee. All rights reserved.</p>
             </div>
-            <div className="footer-author">
-              <a
-                href="https://github.com/gitslem"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="author-link"
-              >
-                <Github size={18} />
-                <span>Created by @gitslem</span>
-              </a>
+            <div className="footer-tagline">
+              <p>Trade Smart. Trade Safe. Trade Profitably.</p>
             </div>
           </div>
         </div>
