@@ -176,6 +176,8 @@ const LandingPage = () => {
 
       {/* CTA Section */}
       <section className="cta-section">
+        <TradingBackground variant="home" />
+        <div className="cta-overlay"></div>
         <div className="cta-content">
           <div className="cta-icon-wrapper">
             <Rocket size={60} className="cta-icon" />

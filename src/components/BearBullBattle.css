@@ -1,158 +1,287 @@
 .bear-bull-battle {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  max-width: 600px;
+  justify-content: space-around;
+  max-width: 900px;
   margin: 0 auto;
-  padding: 40px 20px;
+  padding: 60px 20px;
   position: relative;
 }
 
-/* Bull Styles */
+/* Bull Styles - Charging Animation */
 .bull-container {
   position: relative;
-  animation: bullCharge 2s ease-in-out infinite;
+  animation: bullCharge 3s ease-in-out infinite;
+  transform-origin: center;
 }
 
 .bull {
-  width: 180px;
-  height: 180px;
-  filter: drop-shadow(0 8px 16px rgba(16, 185, 129, 0.3));
+  width: 280px;
+  height: 240px;
+  filter: drop-shadow(0 10px 25px rgba(16, 185, 129, 0.4));
 }
 
-.bull-arrow {
-  position: absolute;
-  top: -50px;
-  right: 20px;
-  width: 50px;
-  height: 80px;
-  animation: bullArrowMove 1.5s ease-in-out infinite;
-}
-
+/* Bull charging forward with head down */
 @keyframes bullCharge {
   0%, 100% {
-    transform: translateX(0) rotate(0deg);
+    transform: translateX(0) translateY(0) rotate(0deg);
+  }
+  25% {
+    transform: translateX(-8px) translateY(2px) rotate(-2deg);
   }
   50% {
-    transform: translateX(10px) rotate(-3deg);
+    transform: translateX(15px) translateY(-3px) rotate(-5deg) scale(1.05);
+  }
+  75% {
+    transform: translateX(8px) translateY(1px) rotate(-3deg);
   }
 }
 
-@keyframes bullArrowMove {
+/* Bull tail swinging */
+.bull-tail {
+  animation: tailSwing 1.5s ease-in-out infinite;
+  transform-origin: 220px 135px;
+}
+
+@keyframes tailSwing {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(15deg);
+  }
+}
+
+/* Bull arrows moving up */
+.bull-arrows {
+  animation: bullArrowsUp 2s ease-in-out infinite;
+}
+
+@keyframes bullArrowsUp {
   0%, 100% {
     transform: translateY(0);
     opacity: 1;
   }
   50% {
-    transform: translateY(-15px);
-    opacity: 0.6;
+    transform: translateY(-20px);
+    opacity: 0.5;
   }
 }
 
-/* Bear Styles */
+/* Bear Styles - Swiping and Roaring */
 .bear-container {
   position: relative;
-  animation: bearSwipe 2s ease-in-out infinite;
-  animation-delay: 0.3s;
+  animation: bearSwipe 3.5s ease-in-out infinite;
+  animation-delay: 0.5s;
+  transform-origin: center;
 }
 
 .bear {
-  width: 180px;
-  height: 180px;
-  filter: drop-shadow(0 8px 16px rgba(239, 68, 68, 0.3));
+  width: 280px;
+  height: 240px;
+  filter: drop-shadow(0 10px 25px rgba(239, 68, 68, 0.4));
 }
 
-.bear-arrow {
-  position: absolute;
-  top: -50px;
-  left: 20px;
-  width: 50px;
-  height: 80px;
-  animation: bearArrowMove 1.5s ease-in-out infinite;
-  animation-delay: 0.3s;
-}
-
+/* Bear swiping with power */
 @keyframes bearSwipe {
   0%, 100% {
-    transform: translateX(0) rotate(0deg);
+    transform: translateX(0) translateY(0) rotate(0deg);
   }
-  50% {
-    transform: translateX(-10px) rotate(3deg);
+  20% {
+    transform: translateX(8px) translateY(-2px) rotate(3deg);
+  }
+  40% {
+    transform: translateX(-12px) translateY(2px) rotate(-4deg) scale(1.05);
+  }
+  60% {
+    transform: translateX(-8px) translateY(0) rotate(-2deg);
+  }
+  80% {
+    transform: translateX(4px) translateY(-1px) rotate(1deg);
   }
 }
 
-@keyframes bearArrowMove {
+/* Bear attack arm swiping */
+.bear-attack-arm {
+  animation: bearArmSwipe 2s ease-in-out infinite;
+  transform-origin: 80px 110px;
+}
+
+@keyframes bearArmSwipe {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-15deg);
+  }
+  50% {
+    transform: rotate(10deg);
+  }
+  75% {
+    transform: rotate(-5deg);
+  }
+}
+
+/* Bear claws slashing */
+.bear-claws {
+  animation: clawsSlash 1.8s ease-in-out infinite;
+}
+
+@keyframes clawsSlash {
+  0%, 100% {
+    opacity: 0.8;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-2px) scale(1.1);
+  }
+}
+
+/* Bear teeth showing aggression */
+.bear-teeth {
+  animation: teethGrowl 2.5s ease-in-out infinite;
+}
+
+@keyframes teethGrowl {
+  0%, 100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(1.2);
+  }
+}
+
+/* Bear arrows moving down */
+.bear-arrows {
+  animation: bearArrowsDown 2s ease-in-out infinite;
+  animation-delay: 0.5s;
+}
+
+@keyframes bearArrowsDown {
   0%, 100% {
     transform: translateY(0);
     opacity: 1;
   }
   50% {
-    transform: translateY(15px);
-    opacity: 0.6;
+    transform: translateY(20px);
+    opacity: 0.5;
   }
 }
 
-/* VS Text */
+/* VS Text - Battle Center */
 .vs-text {
   position: relative;
   z-index: 10;
-  margin: 0 20px;
+  margin: 0 30px;
 }
 
 .vs-circle {
-  width: 80px;
-  height: 80px;
+  width: 100px;
+  height: 100px;
   border-radius: 50%;
   background: linear-gradient(135deg, #667eea 0%, #ec4899 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2rem;
+  font-size: 2.5rem;
   font-weight: 900;
   color: white;
-  box-shadow: 0 8px 32px rgba(102, 126, 234, 0.4);
-  animation: vsRotate 3s linear infinite, vsPulse 2s ease-in-out infinite;
+  box-shadow: 0 10px 40px rgba(102, 126, 234, 0.5);
+  animation: vsRotate 4s linear infinite, vsPulse 2s ease-in-out infinite;
   position: relative;
-  z-index: 2;
+  z-index: 3;
+  border: 4px solid rgba(255, 255, 255, 0.3);
 }
 
 @keyframes vsRotate {
   0% {
-    transform: rotate(0deg);
+    transform: rotate(0deg) scale(1);
+  }
+  50% {
+    transform: rotate(180deg) scale(1.1);
   }
   100% {
-    transform: rotate(360deg);
+    transform: rotate(360deg) scale(1);
   }
 }
 
 @keyframes vsPulse {
   0%, 100% {
-    box-shadow: 0 8px 32px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 10px 40px rgba(102, 126, 234, 0.5);
   }
   50% {
-    box-shadow: 0 12px 48px rgba(236, 72, 153, 0.6);
+    box-shadow: 0 15px 60px rgba(236, 72, 153, 0.8), 0 0 80px rgba(236, 72, 153, 0.4);
   }
 }
 
-/* Battle Sparks */
+/* Battle Energy Waves */
+.battle-energy {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 150px;
+  height: 150px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.energy-wave {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 3px solid rgba(236, 72, 153, 0.6);
+  animation: energyExpand 2s ease-out infinite;
+}
+
+.energy-wave-1 {
+  animation-delay: 0s;
+}
+
+.energy-wave-2 {
+  animation-delay: 0.4s;
+}
+
+.energy-wave-3 {
+  animation-delay: 0.8s;
+}
+
+@keyframes energyExpand {
+  0% {
+    transform: translate(-50%, -50%) scale(0.5);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(2);
+    opacity: 0;
+  }
+}
+
+/* Battle Sparks - More Dynamic */
 .battle-sparks {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 100px;
-  height: 100px;
+  width: 140px;
+  height: 140px;
   pointer-events: none;
+  z-index: 2;
 }
 
 .spark {
   position: absolute;
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
-  background: #fbbf24;
-  box-shadow: 0 0 10px #fbbf24;
-  animation: sparkFly 1.5s ease-out infinite;
+  background: radial-gradient(circle, #fbbf24 0%, #f59e0b 100%);
+  box-shadow: 0 0 12px #fbbf24, 0 0 20px rgba(251, 191, 36, 0.5);
+  animation: sparkFly 1.2s ease-out infinite;
 }
 
 .spark-1 {
@@ -162,21 +291,33 @@
 }
 
 .spark-2 {
-  top: 50%;
-  left: 100%;
-  animation-delay: 0.2s;
+  top: 15%;
+  left: 85%;
+  animation-delay: 0.15s;
 }
 
 .spark-3 {
-  top: 100%;
-  left: 50%;
-  animation-delay: 0.4s;
+  top: 50%;
+  left: 100%;
+  animation-delay: 0.3s;
 }
 
 .spark-4 {
+  top: 85%;
+  left: 85%;
+  animation-delay: 0.45s;
+}
+
+.spark-5 {
+  top: 100%;
+  left: 50%;
+  animation-delay: 0.6s;
+}
+
+.spark-6 {
   top: 50%;
   left: 0;
-  animation-delay: 0.6s;
+  animation-delay: 0.75s;
 }
 
 @keyframes sparkFly {
@@ -184,53 +325,93 @@
     transform: scale(0) translate(0, 0);
     opacity: 1;
   }
-  50% {
+  30% {
     opacity: 1;
   }
   100% {
-    transform: scale(1) translate(var(--spark-x, 20px), var(--spark-y, -20px));
+    transform: scale(1.5) translate(var(--spark-x, 25px), var(--spark-y, -25px));
     opacity: 0;
   }
 }
 
 .spark-1 {
   --spark-x: 0px;
-  --spark-y: -30px;
+  --spark-y: -40px;
 }
 
 .spark-2 {
-  --spark-x: 30px;
-  --spark-y: 0px;
+  --spark-x: 35px;
+  --spark-y: -30px;
 }
 
 .spark-3 {
-  --spark-x: 0px;
-  --spark-y: 30px;
+  --spark-x: 40px;
+  --spark-y: 0px;
 }
 
 .spark-4 {
-  --spark-x: -30px;
+  --spark-x: 35px;
+  --spark-y: 30px;
+}
+
+.spark-5 {
+  --spark-x: 0px;
+  --spark-y: 40px;
+}
+
+.spark-6 {
+  --spark-x: -40px;
   --spark-y: 0px;
 }
 
 /* Responsive */
 @media (max-width: 768px) {
   .bear-bull-battle {
-    max-width: 400px;
-    padding: 20px 10px;
+    max-width: 500px;
+    padding: 30px 10px;
   }
 
   .bull,
   .bear {
+    width: 180px;
+    height: 150px;
+  }
+
+  .vs-circle {
+    width: 70px;
+    height: 70px;
+    font-size: 1.8rem;
+  }
+
+  .vs-text {
+    margin: 0 15px;
+  }
+
+  .battle-sparks {
+    width: 100px;
+    height: 100px;
+  }
+
+  .battle-energy {
     width: 120px;
     height: 120px;
   }
 
-  .bull-arrow,
-  .bear-arrow {
-    width: 35px;
-    height: 60px;
-    top: -35px;
+  .spark {
+    width: 6px;
+    height: 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .bear-bull-battle {
+    max-width: 350px;
+  }
+
+  .bull,
+  .bear {
+    width: 140px;
+    height: 120px;
   }
 
   .vs-circle {
@@ -239,8 +420,7 @@
     font-size: 1.5rem;
   }
 
-  .battle-sparks {
-    width: 80px;
-    height: 80px;
+  .vs-text {
+    margin: 0 10px;
   }
 }
