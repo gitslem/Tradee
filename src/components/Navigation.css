@@ -265,3 +265,46 @@
     display: none;
   }
 }
+
+@media (max-width: 480px) {
+  .nav-container {
+    padding: 0 12px;
+    height: 60px;
+  }
+
+  .nav-logo {
+    font-size: 1.25rem;
+  }
+
+  .logo-icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  .logo-text {
+    display: none;
+  }
+
+  .nav-links {
+    top: 60px;
+    padding: 16px;
+    gap: 8px;
+  }
+
+  .nav-link {
+    padding: 14px 16px;
+    font-size: 1rem;
+  }
+
+  .user-info {
+    padding: 4px 8px;
+  }
+
+  .auth-btn {
+    padding: 6px 10px;
+  }
+
+  .mobile-menu-btn {
+    padding: 4px;
+  }
+}

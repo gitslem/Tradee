@@ -253,3 +253,113 @@
     height: 150px;
   }
 }
+
+@media (max-width: 768px) {
+  .price-action {
+    padding: 30px 20px;
+  }
+
+  .price-action > h1 {
+    font-size: 2rem;
+  }
+
+  .price-action > p {
+    font-size: 1rem;
+  }
+
+  .price-action h2 {
+    font-size: 1.5rem;
+  }
+
+  .price-action .input-section,
+  .price-action .analysis-section {
+    padding: 24px;
+  }
+
+  .price-action .input-section h3,
+  .price-action .analysis-section h3 {
+    font-size: 1.3rem;
+  }
+
+  .candle-visual {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .price-action {
+    padding: 20px 12px;
+  }
+
+  .price-action > h1 {
+    font-size: 1.75rem;
+  }
+
+  .price-action > p {
+    font-size: 0.95rem;
+  }
+
+  .price-action h2 {
+    font-size: 1.25rem;
+  }
+
+  .price-action .input-section,
+  .price-action .analysis-section {
+    padding: 20px 16px;
+  }
+
+  .price-action .input-section h3,
+  .price-action .analysis-section h3 {
+    font-size: 1.15rem;
+  }
+
+  .candle-visual {
+    padding: 12px;
+  }
+
+  .candle-visual h4 {
+    font-size: 0.9rem;
+  }
+
+  .candle-container {
+    height: 180px;
+    padding: 12px;
+  }
+
+  .candle {
+    height: 120px;
+    width: 30px;
+  }
+
+  .pattern-item,
+  .signal-item,
+  .volume-item,
+  .entry-signal {
+    padding: 10px;
+    font-size: 0.9rem;
+  }
+
+  .volume-change {
+    padding: 12px;
+    font-size: 1rem;
+  }
+
+  .volume-change strong {
+    font-size: 1.15rem;
+  }
+
+  .trading-checklist,
+  .tips-section {
+    padding: 16px;
+  }
+
+  .trading-checklist h4,
+  .tips-section h4 {
+    font-size: 1rem;
+  }
+
+  .trading-checklist li,
+  .tips-section li {
+    font-size: 0.85rem;
+  }
+}

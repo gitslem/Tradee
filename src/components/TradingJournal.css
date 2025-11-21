@@ -701,3 +701,121 @@
     padding: 24px;
   }
 }
+
+@media (max-width: 480px) {
+  .trading-journal {
+    padding: 20px 12px;
+  }
+
+  .journal-header h1 {
+    font-size: 2rem;
+  }
+
+  .journal-header p {
+    font-size: 1rem;
+  }
+
+  .action-btn {
+    padding: 10px 20px;
+    font-size: 0.9rem;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .stat-card {
+    padding: 16px;
+  }
+
+  .stat-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .stat-value {
+    font-size: 1.4rem;
+  }
+
+  .stat-value.stat-text {
+    font-size: 1.1rem;
+  }
+
+  .journal-content {
+    padding: 20px 16px;
+  }
+
+  .trades-header h2 {
+    font-size: 1.25rem;
+  }
+
+  .filter-buttons button {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+  }
+
+  .empty-state {
+    padding: 60px 20px;
+  }
+
+  .empty-state h3 {
+    font-size: 1.25rem;
+  }
+
+  .empty-state p {
+    font-size: 0.9rem;
+  }
+
+  .trade-card {
+    padding: 16px;
+  }
+
+  .pair-name {
+    font-size: 1.1rem;
+  }
+
+  .trade-type {
+    padding: 3px 10px;
+    font-size: 0.7rem;
+  }
+
+  .action-icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .info-value {
+    font-size: 0.95rem;
+  }
+
+  .pnl-amount {
+    font-size: 1.1rem;
+  }
+
+  .pnl-percent {
+    font-size: 0.9rem;
+  }
+
+  .modal-content {
+    border-radius: 20px;
+  }
+
+  .modal-header {
+    padding: 20px 16px;
+  }
+
+  .modal-header h2 {
+    font-size: 1.5rem;
+  }
+
+  .trade-form {
+    padding: 20px 16px;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    padding: 10px 24px;
+    font-size: 0.9rem;
+  }
+}
