@@ -26,10 +26,22 @@ jobs:
       - name: Run build
         run: npm run build
 
+      - name: Verify build output
+        run: |
+          if [ ! -d "dist" ]; then
+            echo "Error: dist directory not found"
+            exit 1
+          fi
+          if [ ! -f "dist/index.html" ]; then
+            echo "Error: dist/index.html not found"
+            exit 1
+          fi
+          echo "Build verification successful"
+
       - name: Deploy to Firebase Preview Channel
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
-          projectId: '${{ secrets.FIREBASE_PROJECT_ID }}'
+          projectId: traddii
           expires: 7d
