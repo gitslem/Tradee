@@ -9,6 +9,9 @@ import PositionCalculator from './components/PositionCalculator'
 import MarketStructure from './components/MarketStructure'
 import PriceActionAnalysis from './components/PriceActionAnalysis'
 import Support from './components/Support'
+import FAQ from './components/FAQ'
+import Terms from './components/Terms'
+import Privacy from './components/Privacy'
 
 function App() {
   return (
@@ -36,6 +39,9 @@ function App() {
               </main>
             } />
             <Route path="/support" element={<Support />} />
+            <Route path="/faq" element={<FAQ />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/privacy" element={<Privacy />} />
           </Routes>
         </div>
       </AuthProvider>
