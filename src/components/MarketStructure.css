@@ -3,9 +3,9 @@
   animation: fadeIn 0.5s ease-out;
   position: relative;
   z-index: 1;
-  padding: 40px 60px;
+  padding: var(--space-10) var(--space-6);
   min-height: 100vh;
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--color-background);
 }
 
 @keyframes fadeIn {
@@ -20,80 +20,121 @@
 }
 
 .market-structure > h1 {
-  font-size: 2.5rem;
-  font-weight: 800;
-  color: #333;
-  margin-bottom: 12px;
-  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-extrabold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-3);
+  background: linear-gradient(135deg, #10b981 0%, #38ef7d 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .market-structure > p {
-  font-size: 1.1rem;
-  color: #666;
-  margin-bottom: 40px;
-}
-
-.market-structure h2 {
-  color: #11998e;
-  margin-bottom: 25px;
-  font-size: 1.8rem;
+  font-size: var(--font-size-lg);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-10);
 }
 
 .structure-grid {
   display: grid;
   grid-template-columns: 1fr 1.5fr;
-  gap: 40px;
+  gap: var(--space-8);
+  max-width: var(--container-max-width);
+  margin: 0 auto;
 }
 
 .market-structure .input-section,
 .market-structure .analysis-section {
-  background: white;
-  padding: 32px;
-  border-radius: 20px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  border: 1px solid #e0e0e0;
+  background: var(--glass-background);
+  backdrop-filter: blur(10px);
+  padding: var(--space-8);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--glass-border);
+  transition: all var(--transition-base);
+}
+
+.market-structure .input-section:hover,
+.market-structure .analysis-section:hover {
+  box-shadow: var(--shadow-2xl);
+  border-color: var(--color-border);
 }
 
 .input-section h3,
 .analysis-section h3 {
-  color: #11998e;
-  margin-bottom: 24px;
-  font-size: 1.5rem;
-  font-weight: 700;
-  border-bottom: 3px solid #11998e;
-  padding-bottom: 12px;
+  color: var(--color-success);
+  margin-bottom: var(--space-6);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  border-bottom: 3px solid var(--color-success);
+  padding-bottom: var(--space-3);
 }
 
+/* Form Groups */
+.market-structure .form-group {
+  margin-bottom: var(--space-6);
+}
+
+.market-structure .form-group label {
+  display: block;
+  margin-bottom: var(--space-2);
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-sm);
+}
+
+.market-structure .form-group input,
+.market-structure .form-group select {
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-base);
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  transition: all var(--transition-fast);
+  min-height: 44px; /* Touch-friendly */
+}
+
+.market-structure .form-group input:focus,
+.market-structure .form-group select:focus {
+  outline: none;
+  border-color: var(--color-success);
+  box-shadow: 0 0 0 3px var(--color-success-light);
+}
+
+/* Levels Section */
 .levels-section {
-  margin-top: 25px;
-  padding: 20px;
-  background: #f8f9fa;
-  border-radius: 12px;
+  margin-top: var(--space-6);
+  padding: var(--space-5);
+  background: var(--color-background-hover);
+  border-radius: var(--radius-xl);
 }
 
 .levels-section h3 {
-  font-size: 1rem;
-  margin-bottom: 15px;
-  color: #333;
+  font-size: var(--font-size-base);
+  margin-bottom: var(--space-4);
+  color: var(--color-text-primary);
   border: none;
+  font-weight: var(--font-weight-semibold);
 }
 
 .level-row {
   display: flex;
-  gap: 10px;
-  margin-bottom: 10px;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
   align-items: center;
 }
 
 .level-row input,
 .level-row select {
-  padding: 10px;
-  border: 2px solid #e0e0e0;
-  border-radius: 6px;
-  font-size: 0.9rem;
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  background: var(--color-surface);
+  transition: all var(--transition-fast);
 }
 
 .level-row input {
@@ -104,69 +145,99 @@
   width: 120px;
 }
 
+.level-row input:focus,
+.level-row select:focus {
+  outline: none;
+  border-color: var(--color-success);
+  box-shadow: 0 0 0 2px var(--color-success-light);
+}
+
 .remove-btn {
-  background: #dc3545;
+  background: var(--color-danger);
   color: white;
   border: none;
-  padding: 10px 15px;
-  border-radius: 6px;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
   cursor: pointer;
-  font-size: 1rem;
-  transition: all 0.3s ease;
+  font-size: var(--font-size-base);
+  transition: all var(--transition-fast);
+  min-height: 44px;
+  min-width: 44px; /* Touch-friendly */
 }
 
 .remove-btn:hover {
-  background: #c82333;
+  background: var(--color-danger-dark);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
 
 .add-btn {
   width: 100%;
-  background: #667eea;
+  background: var(--color-primary);
   color: white;
   border: none;
-  padding: 12px;
-  border-radius: 8px;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
   cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: 600;
-  margin-top: 10px;
-  transition: all 0.3s ease;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  margin-top: var(--space-3);
+  transition: all var(--transition-fast);
+  min-height: 44px;
 }
 
 .add-btn:hover {
-  background: #5568d3;
+  background: var(--color-primary-dark);
   transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
 
+/* Analysis Cards */
 .analysis-card {
-  background: #f8f9fa;
-  padding: 20px;
-  border-radius: 12px;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  background: var(--color-background-hover);
+  padding: var(--space-5);
+  border-radius: var(--radius-xl);
+  margin-bottom: var(--space-5);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--color-border-light);
+  transition: all var(--transition-base);
+}
+
+.analysis-card:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-border);
 }
 
 .analysis-card h4 {
-  color: #667eea;
-  margin-bottom: 15px;
-  font-size: 1.1rem;
+  color: var(--color-primary);
+  margin-bottom: var(--space-4);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
 }
 
 .analysis-item {
-  padding: 10px;
-  background: white;
-  border-radius: 8px;
-  margin-bottom: 10px;
-  border-left: 4px solid #667eea;
-  font-size: 0.95rem;
+  padding: var(--space-3);
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--space-3);
+  border-left: 4px solid var(--color-primary);
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-relaxed);
 }
 
+.analysis-item:last-child {
+  margin-bottom: 0;
+}
+
+/* Range Bar */
 .range-bar {
   position: relative;
   height: 40px;
-  background: linear-gradient(to right, #dc3545, #ffc107, #28a745);
-  border-radius: 20px;
-  margin: 20px 0;
+  background: linear-gradient(to right, var(--color-danger), var(--color-warning), var(--color-success));
+  border-radius: var(--radius-full);
+  margin: var(--space-5) 0;
+  box-shadow: var(--shadow-md);
 }
 
 .range-indicator {
@@ -175,173 +246,217 @@
   width: 4px;
   height: 50px;
   background: white;
-  border: 3px solid #333;
-  border-radius: 4px;
+  border: 3px solid var(--color-text-primary);
+  border-radius: var(--radius-md);
   transform: translateX(-50%);
+  box-shadow: var(--shadow-lg);
 }
 
 .range-text {
   text-align: center;
-  font-weight: 600;
-  color: #333;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin-top: var(--space-2);
 }
 
+/* Fibonacci Levels */
 .fib-levels {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .fib-level {
   display: flex;
   justify-content: space-between;
-  padding: 10px;
-  background: white;
-  border-radius: 6px;
-  font-size: 0.9rem;
+  align-items: center;
+  padding: var(--space-3);
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  transition: all var(--transition-fast);
+}
+
+.fib-level:hover {
+  background: var(--color-background-hover);
+  transform: translateX(4px);
 }
 
 .fib-label {
-  font-weight: 600;
-  color: #667eea;
-  min-width: 60px;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
 }
 
 .fib-price {
-  font-weight: 600;
-  color: #333;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  font-family: var(--font-mono);
 }
 
 .fib-nearby {
-  color: #28a745;
-  font-size: 0.85rem;
-  font-weight: 600;
+  color: var(--color-warning);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  margin-left: var(--space-2);
 }
 
+/* Levels Summary */
 .levels-summary {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: var(--space-4);
 }
 
 .resistance-summary,
 .support-summary {
-  background: white;
-  padding: 15px;
-  border-radius: 8px;
+  padding: var(--space-4);
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
 }
 
 .resistance-summary h5,
 .support-summary h5 {
-  color: #667eea;
-  margin-bottom: 10px;
-  font-size: 0.9rem;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
   text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: var(--space-3);
+}
+
+.resistance-summary h5 {
+  color: var(--color-danger);
+}
+
+.support-summary h5 {
+  color: var(--color-success);
 }
 
 .level-item {
   display: flex;
   justify-content: space-between;
-  padding: 8px 12px;
-  margin-bottom: 8px;
-  border-radius: 6px;
-  font-size: 0.9rem;
+  align-items: center;
+  padding: var(--space-2) var(--space-3);
+  margin-bottom: var(--space-2);
+  border-radius: var(--radius-md);
+  background: var(--color-background-hover);
+  transition: all var(--transition-fast);
+}
+
+.level-item:hover {
+  transform: translateX(4px);
+  background: var(--color-background);
 }
 
 .level-item.strong {
-  background: #d4edda;
-  border-left: 4px solid #28a745;
+  border-left: 4px solid var(--color-success);
+  font-weight: var(--font-weight-semibold);
 }
 
 .level-item.moderate {
-  background: #fff3cd;
-  border-left: 4px solid #ffc107;
+  border-left: 4px solid var(--color-warning);
 }
 
 .level-item.weak {
-  background: #f8d7da;
-  border-left: 4px solid #dc3545;
+  border-left: 4px solid var(--color-text-tertiary);
 }
 
 .strength-badge {
-  font-size: 0.75rem;
-  padding: 2px 8px;
-  border-radius: 12px;
-  background: rgba(0, 0, 0, 0.1);
+  font-size: var(--font-size-xs);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-full);
   text-transform: uppercase;
-  font-weight: 600;
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.5px;
+}
+
+.level-item.strong .strength-badge {
+  background: var(--color-success-light);
+  color: var(--color-success-dark);
+}
+
+.level-item.moderate .strength-badge {
+  background: var(--color-warning-light);
+  color: var(--color-warning-dark);
+}
+
+.level-item.weak .strength-badge {
+  background: var(--color-border);
+  color: var(--color-text-tertiary);
 }
 
 .current-price-display {
-  text-align: center;
-  padding: 15px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: var(--space-4);
+  background: var(--color-primary);
   color: white;
-  border-radius: 8px;
-  font-size: 1.2rem;
+  border-radius: var(--radius-lg);
+  text-align: center;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  margin: var(--space-4) 0;
+  box-shadow: var(--shadow-lg);
 }
 
+/* Trading Suggestions */
 .trading-suggestions {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 20px;
-  border-radius: 12px;
+  background: var(--color-info-light);
+  padding: var(--space-5);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-info);
+  margin-top: var(--space-6);
 }
 
 .trading-suggestions h4 {
-  color: white;
-  margin-bottom: 15px;
+  color: var(--color-info-dark);
+  margin-bottom: var(--space-4);
+  font-size: var(--font-size-lg);
 }
 
 .trading-suggestions ul {
   list-style: none;
+  padding: 0;
+  margin: 0;
 }
 
 .trading-suggestions li {
-  padding: 8px 0;
-  padding-left: 20px;
+  padding: var(--space-2) 0 var(--space-2) var(--space-6);
+  color: var(--color-text-secondary);
   position: relative;
-  font-size: 0.9rem;
+  line-height: var(--line-height-relaxed);
 }
 
-.trading-suggestions li:before {
-  content: "→";
+.trading-suggestions li::before {
+  content: '→';
   position: absolute;
   left: 0;
-  font-weight: bold;
+  color: var(--color-info);
+  font-weight: var(--font-weight-bold);
 }
 
-@media (max-width: 968px) {
+/* Responsive Design */
+@media (max-width: 1024px) {
   .structure-grid {
     grid-template-columns: 1fr;
+    gap: var(--space-6);
   }
 }
 
 @media (max-width: 768px) {
   .market-structure {
-    padding: 30px 20px;
+    padding: var(--space-8) var(--space-4);
   }
 
   .market-structure > h1 {
-    font-size: 2rem;
-  }
-
-  .market-structure > p {
-    font-size: 1rem;
-  }
-
-  .market-structure h2 {
-    font-size: 1.5rem;
+    font-size: var(--font-size-3xl);
   }
 
   .market-structure .input-section,
   .market-structure .analysis-section {
-    padding: 24px;
+    padding: var(--space-6);
   }
 
   .input-section h3,
   .analysis-section h3 {
-    font-size: 1.3rem;
+    font-size: var(--font-size-xl);
   }
 
   .level-row {
@@ -349,65 +464,22 @@
   }
 
   .level-row select {
-    width: 100px;
+    width: auto;
+    flex: 1;
   }
 }
 
 @media (max-width: 480px) {
   .market-structure {
-    padding: 20px 12px;
+    padding: var(--space-6) var(--space-3);
   }
 
   .market-structure > h1 {
-    font-size: 1.75rem;
-  }
-
-  .market-structure > p {
-    font-size: 0.95rem;
-  }
-
-  .market-structure h2 {
-    font-size: 1.25rem;
+    font-size: var(--font-size-2xl);
   }
 
   .market-structure .input-section,
   .market-structure .analysis-section {
-    padding: 20px 16px;
-  }
-
-  .input-section h3,
-  .analysis-section h3 {
-    font-size: 1.15rem;
-  }
-
-  .levels-section {
-    padding: 16px;
-  }
-
-  .level-row {
-    flex-direction: column;
-  }
-
-  .level-row select {
-    width: 100%;
-  }
-
-  .add-btn,
-  .remove-btn {
-    padding: 10px;
-    font-size: 0.85rem;
-  }
-
-  .analysis-card {
-    padding: 16px;
-  }
-
-  .analysis-card h4 {
-    font-size: 1rem;
-  }
-
-  .current-price-display {
-    font-size: 1.1rem;
-    padding: 12px;
+    padding: var(--space-5);
   }
 }
