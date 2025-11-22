@@ -63,7 +63,7 @@ const Login = () => {
             <div className="login-icon">
               <Shield size={48} />
             </div>
-            <h1>Welcome to Tradee</h1>
+            <h1>Welcome to Traddii</h1>
             <p>Passwordless authentication - secure and simple</p>
           </div>
 

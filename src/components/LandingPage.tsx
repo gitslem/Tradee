@@ -255,7 +255,7 @@ const LandingPage = () => {
         <div className="footer-container">
           <div className="footer-grid">
             <div className="footer-section footer-brand">
-              <h3 className="footer-logo">Tradee</h3>
+              <h3 className="footer-logo">Traddii</h3>
               <p className="footer-description">
                 Professional crypto trading tools for consistent profitability.
                 Risk management, market analysis, and performance tracking - all free forever.
@@ -292,7 +292,7 @@ const LandingPage = () => {
 
           <div className="footer-bottom">
             <div className="footer-copyright">
-              <p>&copy; 2025 Tradee. All rights reserved.</p>
+              <p>&copy; 2025 Traddii. All rights reserved.</p>
             </div>
             <div className="footer-tagline">
               <p>Trade Smart. Trade Safe. Trade Profitably.</p>
