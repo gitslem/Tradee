@@ -471,7 +471,10 @@ const PositionCalculator = () => {
                 </div>
 
                 <div className="form-group leverage-section">
-                  <label>Leverage (Max: {maxLeverageAllowed}x for {selectedExchange})</label>
+                  <label>
+                    Leverage Multiplier
+                    <span className="leverage-max-badge">{selectedExchange.charAt(0).toUpperCase() + selectedExchange.slice(1)} Max: {maxLeverageAllowed}x</span>
+                  </label>
                   <select value={leverage} onChange={(e) => setLeverage(e.target.value)}>
                     <option value="1">1x (No Leverage)</option>
                     {[2, 3, 5, 10, 20, 25, 50, 75, 100, 125].map((lev) =>
@@ -480,7 +483,10 @@ const PositionCalculator = () => {
                       ) : null
                     )}
                   </select>
-                  <small>Higher leverage = Higher liquidation risk | Max for this platform: {maxLeverageAllowed}x</small>
+                  <small className="leverage-warning">
+                    <span className="warning-icon">⚠️</span>
+                    <strong>Important:</strong> Higher leverage multiplies both potential profits and liquidation risk. Maximum allowed on {selectedExchange.charAt(0).toUpperCase() + selectedExchange.slice(1)}: <strong>{maxLeverageAllowed}x</strong>
+                  </small>
                 </div>
               </>
             )}
