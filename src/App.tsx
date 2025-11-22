@@ -3,6 +3,8 @@ import './App.css'
 import { AuthProvider } from './context/AuthContext'
 import Navigation from './components/Navigation'
 import Footer from './components/Footer'
+import ScrollToTop from './components/ScrollToTop'
+import FloatingScrollButton from './components/FloatingScrollButton'
 import LandingPage from './components/LandingPage'
 import Login from './components/Login'
 import TradingJournal from './components/TradingJournal'
@@ -18,6 +20,7 @@ function App() {
   return (
     <Router>
       <AuthProvider>
+        <ScrollToTop />
         <div className="app">
           <Navigation />
           <Routes>
@@ -45,6 +48,7 @@ function App() {
             <Route path="/privacy" element={<Privacy />} />
           </Routes>
           <Footer />
+          <FloatingScrollButton />
         </div>
       </AuthProvider>
     </Router>
