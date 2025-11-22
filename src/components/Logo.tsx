@@ -14,17 +14,35 @@ const Logo = ({ size = 24 }: { size?: number }) => {
         </linearGradient>
       </defs>
 
-      {/* Modern Bold T - Single unified shape */}
+      {/* T shape - horizontal top bar */}
       <path
-        d="M 15 10 L 85 10 L 85 30 L 60 30 L 60 90 L 40 90 L 40 30 L 15 30 Z"
+        d="M 10 10 L 90 10 L 90 28 L 58 28 L 58 32 L 42 32 L 42 28 L 10 28 Z"
         fill="url(#modernGradient)"
       />
 
-      {/* Accent detail - modern geometric cut */}
+      {/* I shape - vertical bar (shared with T stem) with distinctive top */}
       <path
-        d="M 45 35 L 55 35 L 55 45 L 45 45 Z"
+        d="M 42 28 L 58 28 L 58 90 L 42 90 Z"
+        fill="url(#modernGradient)"
+      />
+
+      {/* I dot - positioned above to create merged T+I effect */}
+      <circle
+        cx="72"
+        cy="18"
+        r="6"
+        fill="url(#modernGradient)"
+      />
+
+      {/* Accent detail - modern geometric element */}
+      <rect
+        x="45"
+        y="50"
+        width="10"
+        height="3"
         fill="white"
-        opacity="0.3"
+        opacity="0.25"
+        rx="1.5"
       />
     </svg>
   )
