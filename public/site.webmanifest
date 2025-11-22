@@ -1,0 +1,26 @@
+{
+  "name": "Traddii - Crypto Trading Position Calculator",
+  "short_name": "Traddii",
+  "description": "Professional crypto trading position calculator with risk management and market analysis tools",
+  "icons": [
+    {
+      "src": "/logo2.jpeg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo1.jpeg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#D4AF37",
+  "background_color": "#1a1a1a",
+  "orientation": "portrait-primary",
+  "categories": ["finance", "business", "utilities"],
+  "lang": "en-US"
+}
