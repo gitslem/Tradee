@@ -203,6 +203,78 @@ const LandingPage = () => {
         </div>
       </section>
 
+      {/* Testimonials Section */}
+      <section className="testimonials-section">
+        <div className="testimonials-container">
+          <div className="testimonials-header">
+            <h2>Trusted by Traders Worldwide</h2>
+            <p>See what our users say about their experience with Tradee</p>
+          </div>
+
+          <div className="testimonials-grid">
+            <div className="testimonial-card">
+              <div className="testimonial-rating">
+                {[...Array(5)].map((_, i) => (
+                  <svg key={i} width="20" height="20" viewBox="0 0 20 20" fill="#F59E0B">
+                    <path d="M10 0L12.2451 7.75486L20 10L12.2451 12.2451L10 20L7.75486 12.2451L0 10L7.75486 7.75486L10 0Z"/>
+                  </svg>
+                ))}
+              </div>
+              <p className="testimonial-text">
+                "The position calculator is a game-changer! I used to risk way too much per trade, but now I know exactly how much to invest based on my stop-loss. My account has been growing steadily since I started using it."
+              </p>
+              <div className="testimonial-author">
+                <div className="author-avatar">MK</div>
+                <div className="author-info">
+                  <strong>Marcus Kim</strong>
+                  <span>Day Trader, Singapore</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="testimonial-card">
+              <div className="testimonial-rating">
+                {[...Array(5)].map((_, i) => (
+                  <svg key={i} width="20" height="20" viewBox="0 0 20 20" fill="#F59E0B">
+                    <path d="M10 0L12.2451 7.75486L20 10L12.2451 12.2451L10 20L7.75486 12.2451L0 10L7.75486 7.75486L10 0Z"/>
+                  </svg>
+                ))}
+              </div>
+              <p className="testimonial-text">
+                "Finally, a trading journal that actually helps me improve! The analytics dashboard showed me I was trading too much during low-volatility hours. After adjusting my strategy, my win rate increased by 15%."
+              </p>
+              <div className="testimonial-author">
+                <div className="author-avatar">SJ</div>
+                <div className="author-info">
+                  <strong>Sarah Johnson</strong>
+                  <span>Swing Trader, United States</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="testimonial-card">
+              <div className="testimonial-rating">
+                {[...Array(5)].map((_, i) => (
+                  <svg key={i} width="20" height="20" viewBox="0 0 20 20" fill="#F59E0B">
+                    <path d="M10 0L12.2451 7.75486L20 10L12.2451 12.2451L10 20L7.75486 12.2451L0 10L7.75486 7.75486L10 0Z"/>
+                  </svg>
+                ))}
+              </div>
+              <p className="testimonial-text">
+                "As a beginner, I was overwhelmed by all the trading tools out there. Tradee is simple yet powerful. The market structure analysis helps me understand trends, and the price action tool improved my entry timing significantly."
+              </p>
+              <div className="testimonial-author">
+                <div className="author-avatar">RP</div>
+                <div className="author-info">
+                  <strong>Raj Patel</strong>
+                  <span>Crypto Trader, India</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="cta-section">
         <div className="cta-container">
@@ -260,10 +332,18 @@ const LandingPage = () => {
                 Professional crypto trading tools for consistent profitability.
                 Risk management, market analysis, and performance tracking - all free forever.
               </p>
+              <div className="footer-social">
+                <a href="mailto:tradee444@gmail.com" className="social-link" aria-label="Email">
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/>
+                    <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/>
+                  </svg>
+                </a>
+              </div>
             </div>
 
             <div className="footer-section">
-              <h4 className="footer-heading">Tools</h4>
+              <h4 className="footer-heading">Trading Tools</h4>
               <ul className="footer-links">
                 <li><Link to="/calculator">Position Calculator</Link></li>
                 <li><Link to="/market-structure">Market Structure</Link></li>
@@ -273,9 +353,10 @@ const LandingPage = () => {
             </div>
 
             <div className="footer-section">
-              <h4 className="footer-heading">Resources</h4>
+              <h4 className="footer-heading">Company</h4>
               <ul className="footer-links">
-                <li><Link to="/support">Support</Link></li>
+                <li><Link to="/faq">FAQ</Link></li>
+                <li><Link to="/support">Support Center</Link></li>
                 <li><a href="mailto:tradee444@gmail.com">Contact Us</a></li>
               </ul>
             </div>
@@ -283,16 +364,25 @@ const LandingPage = () => {
             <div className="footer-section">
               <h4 className="footer-heading">Legal</h4>
               <ul className="footer-links">
-                <li><span className="footer-text">Not Financial Advice</span></li>
-                <li><span className="footer-text">Educational Purpose Only</span></li>
-                <li><span className="footer-text">Use at Your Own Risk</span></li>
+                <li><Link to="/terms">Terms & Conditions</Link></li>
+                <li><Link to="/privacy">Privacy Policy</Link></li>
+                <li><span className="footer-disclaimer">Not Financial Advice</span></li>
               </ul>
             </div>
           </div>
 
+          <div className="footer-divider"></div>
+
           <div className="footer-bottom">
             <div className="footer-copyright">
               <p>&copy; 2025 Traddii. All rights reserved.</p>
+            </div>
+            <div className="footer-links-bottom">
+              <Link to="/terms">Terms</Link>
+              <span className="footer-separator">•</span>
+              <Link to="/privacy">Privacy</Link>
+              <span className="footer-separator">•</span>
+              <Link to="/faq">FAQ</Link>
             </div>
             <div className="footer-tagline">
               <p>Trade Smart. Trade Safe. Trade Profitably.</p>
