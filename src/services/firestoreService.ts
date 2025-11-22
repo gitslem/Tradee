@@ -9,39 +9,58 @@ import {
   orderBy,
   getDocs,
   onSnapshot,
-  Timestamp,
-  QuerySnapshot,
-  DocumentData
-} from 'firebase/firestore';
-import { db } from '../config/firebase';
+  type QuerySnapshot,
+  type DocumentData
+} from 'firebase/firestore'
+import { db } from '../config/firebase'
 
 export interface Trade {
-  id?: string;
-  userId: string;
-  pair: string;
-  entryPrice: number;
-  exitPrice: number;
-  positionSize: number;
-  side: 'long' | 'short';
-  entryDate: string;
-  exitDate: string;
-  pnl: number;
-  pnlPercent: number;
-  fees: number;
-  notes: string;
-  tags: string[];
-  strategy: string;
-  exchange: string;
-  timeframe: string;
-  riskRewardRatio: number;
-  stopLoss: number;
-  takeProfit: number;
-  createdAt: Date;
-  updatedAt: Date;
+  id: string
+  userId: string
+  pair: string
+  type: 'long' | 'short'
+  entryPrice: number
+  exitPrice?: number | null
+  quantity: number
+  quantityType: 'base' | 'quote' // 'base' = ETH in ETH/USDT, 'quote' = USDT in ETH/USDT
+  entryDate: string
+  exitDate?: string | null
+  stopLoss?: number | null
+  takeProfit?: number | null
+  leverage: number
+  exchange: string
+  status: 'open' | 'closed'
+  outcome: 'win' | 'loss' | 'pending'
+  profitLoss: number
+  profitLossPercent: number
+  fees: number
+  notes: string
+  tags: string[]
+  screenshots: string[]
+  createdAt: string
+  updatedAt: string
+}
+
+export interface TradeStats {
+  totalTrades: number
+  openTrades: number
+  closedTrades: number
+  wins: number
+  losses: number
+  winRate: number
+  totalProfitLoss: number
+  avgWin: number
+  avgLoss: number
+  largestWin: number
+  largestLoss: number
+  profitFactor: number
+  bestPair: string
+  worstPair: string
+  bestExchange: string
 }
 
 class FirestoreService {
-  private collectionName = 'trades';
+  private collectionName = 'trades'
 
   // Add a new trade
   async addTrade(userId: string, trade: Omit<Trade, 'id' | 'userId' | 'createdAt' | 'updatedAt'>): Promise<string> {
@@ -49,40 +68,40 @@ class FirestoreService {
       const tradeData = {
         ...trade,
         userId,
-        createdAt: Timestamp.now(),
-        updatedAt: Timestamp.now()
-      };
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      }
 
-      const docRef = await addDoc(collection(db, this.collectionName), tradeData);
-      return docRef.id;
+      const docRef = await addDoc(collection(db, this.collectionName), tradeData)
+      return docRef.id
     } catch (error) {
-      console.error('Error adding trade:', error);
-      throw error;
+      console.error('Error adding trade:', error)
+      throw error
     }
   }
 
   // Update an existing trade
   async updateTrade(tradeId: string, updates: Partial<Trade>): Promise<void> {
     try {
-      const tradeRef = doc(db, this.collectionName, tradeId);
+      const tradeRef = doc(db, this.collectionName, tradeId)
       await updateDoc(tradeRef, {
         ...updates,
-        updatedAt: Timestamp.now()
-      });
+        updatedAt: new Date().toISOString()
+      })
     } catch (error) {
-      console.error('Error updating trade:', error);
-      throw error;
+      console.error('Error updating trade:', error)
+      throw error
     }
   }
 
   // Delete a trade
   async deleteTrade(tradeId: string): Promise<void> {
     try {
-      const tradeRef = doc(db, this.collectionName, tradeId);
-      await deleteDoc(tradeRef);
+      const tradeRef = doc(db, this.collectionName, tradeId)
+      await deleteDoc(tradeRef)
     } catch (error) {
-      console.error('Error deleting trade:', error);
-      throw error;
+      console.error('Error deleting trade:', error)
+      throw error
     }
   }
 
@@ -92,14 +111,14 @@ class FirestoreService {
       const q = query(
         collection(db, this.collectionName),
         where('userId', '==', userId),
-        orderBy('entryDate', 'desc')
-      );
+        orderBy('createdAt', 'desc')
+      )
 
-      const querySnapshot = await getDocs(q);
-      return this.convertToTrades(querySnapshot);
+      const querySnapshot = await getDocs(q)
+      return this.convertToTrades(querySnapshot)
     } catch (error) {
-      console.error('Error getting user trades:', error);
-      throw error;
+      console.error('Error getting user trades:', error)
+      throw error
     }
   }
 
@@ -108,35 +127,74 @@ class FirestoreService {
     const q = query(
       collection(db, this.collectionName),
       where('userId', '==', userId),
-      orderBy('entryDate', 'desc')
-    );
+      orderBy('createdAt', 'desc')
+    )
 
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const trades = this.convertToTrades(querySnapshot);
-      callback(trades);
+      const trades = this.convertToTrades(querySnapshot)
+      callback(trades)
     }, (error) => {
-      console.error('Error listening to trades:', error);
-    });
+      console.error('Error listening to trades:', error)
+    })
 
-    return unsubscribe;
+    return unsubscribe
   }
 
-  // Get trades by date range
-  async getTradesByDateRange(userId: string, startDate: string, endDate: string): Promise<Trade[]> {
-    try {
-      const q = query(
-        collection(db, this.collectionName),
-        where('userId', '==', userId),
-        where('entryDate', '>=', startDate),
-        where('entryDate', '<=', endDate),
-        orderBy('entryDate', 'desc')
-      );
+  // Calculate statistics from trades
+  calculateStats(trades: Trade[]): TradeStats {
+    const closedTrades = trades.filter(t => t.status === 'closed')
+    const wins = closedTrades.filter(t => t.outcome === 'win')
+    const losses = closedTrades.filter(t => t.outcome === 'loss')
 
-      const querySnapshot = await getDocs(q);
-      return this.convertToTrades(querySnapshot);
-    } catch (error) {
-      console.error('Error getting trades by date range:', error);
-      throw error;
+    const totalProfitLoss = closedTrades.reduce((sum, t) => sum + t.profitLoss, 0)
+    const totalWins = wins.reduce((sum, t) => sum + t.profitLoss, 0)
+    const totalLosses = Math.abs(losses.reduce((sum, t) => sum + t.profitLoss, 0))
+
+    const winRate = closedTrades.length > 0 ? (wins.length / closedTrades.length) * 100 : 0
+    const avgWin = wins.length > 0 ? totalWins / wins.length : 0
+    const avgLoss = losses.length > 0 ? totalLosses / losses.length : 0
+    const profitFactor = totalLosses > 0 ? totalWins / totalLosses : totalWins > 0 ? Infinity : 0
+
+    const largestWin = wins.length > 0 ? Math.max(...wins.map(t => t.profitLoss)) : 0
+    const largestLoss = losses.length > 0 ? Math.min(...losses.map(t => t.profitLoss)) : 0
+
+    // Best pair by total P&L
+    const pairStats = new Map<string, number>()
+    closedTrades.forEach(t => {
+      pairStats.set(t.pair, (pairStats.get(t.pair) || 0) + t.profitLoss)
+    })
+    const bestPair = pairStats.size > 0
+      ? Array.from(pairStats.entries()).sort((a, b) => b[1] - a[1])[0][0]
+      : 'N/A'
+    const worstPair = pairStats.size > 0
+      ? Array.from(pairStats.entries()).sort((a, b) => a[1] - b[1])[0][0]
+      : 'N/A'
+
+    // Best exchange by total P&L
+    const exchangeStats = new Map<string, number>()
+    closedTrades.forEach(t => {
+      exchangeStats.set(t.exchange, (exchangeStats.get(t.exchange) || 0) + t.profitLoss)
+    })
+    const bestExchange = exchangeStats.size > 0
+      ? Array.from(exchangeStats.entries()).sort((a, b) => b[1] - a[1])[0][0]
+      : 'N/A'
+
+    return {
+      totalTrades: trades.length,
+      openTrades: trades.filter(t => t.status === 'open').length,
+      closedTrades: closedTrades.length,
+      wins: wins.length,
+      losses: losses.length,
+      winRate,
+      totalProfitLoss,
+      avgWin,
+      avgLoss,
+      largestWin,
+      largestLoss,
+      profitFactor,
+      bestPair,
+      worstPair,
+      bestExchange
     }
   }
 
@@ -145,69 +203,73 @@ class FirestoreService {
     const headers = [
       'Date',
       'Pair',
-      'Side',
+      'Type',
       'Entry Price',
       'Exit Price',
-      'Position Size',
-      'PnL',
-      'PnL %',
+      'Quantity',
+      'Quantity Type',
+      'Leverage',
+      'P&L',
+      'P&L %',
       'Fees',
-      'R:R Ratio',
-      'Strategy',
+      'Status',
+      'Outcome',
       'Exchange',
-      'Notes'
-    ].join(',');
+      'Notes',
+      'Tags'
+    ].join(',')
 
     const rows = trades.map(trade => [
       trade.entryDate,
       trade.pair,
-      trade.side,
+      trade.type,
       trade.entryPrice,
-      trade.exitPrice,
-      trade.positionSize,
-      trade.pnl,
-      trade.pnlPercent,
+      trade.exitPrice || '',
+      trade.quantity,
+      trade.quantityType,
+      trade.leverage,
+      trade.profitLoss,
+      trade.profitLossPercent,
       trade.fees,
-      trade.riskRewardRatio,
-      trade.strategy,
+      trade.status,
+      trade.outcome,
       trade.exchange,
-      `"${trade.notes.replace(/"/g, '""')}"`
-    ].join(','));
+      `"${trade.notes.replace(/"/g, '""')}"`,
+      `"${trade.tags.join(', ')}"`
+    ].join(','))
 
-    return [headers, ...rows].join('\n');
+    return [headers, ...rows].join('\n')
   }
 
   // Export trades to JSON
   exportToJSON(trades: Trade[]): string {
-    return JSON.stringify(trades, null, 2);
+    return JSON.stringify(trades, null, 2)
   }
 
   // Download export file
   downloadExport(content: string, filename: string, type: 'csv' | 'json'): void {
-    const mimeType = type === 'csv' ? 'text/csv' : 'application/json';
-    const blob = new Blob([content], { type: mimeType });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    const mimeType = type === 'csv' ? 'text/csv' : 'application/json'
+    const blob = new Blob([content], { type: mimeType })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = filename
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
   }
 
   // Helper method to convert Firestore documents to Trade objects
   private convertToTrades(querySnapshot: QuerySnapshot<DocumentData>): Trade[] {
     return querySnapshot.docs.map(doc => {
-      const data = doc.data();
+      const data = doc.data()
       return {
         id: doc.id,
-        ...data,
-        createdAt: data.createdAt?.toDate() || new Date(),
-        updatedAt: data.updatedAt?.toDate() || new Date()
-      } as Trade;
-    });
+        ...data
+      } as Trade
+    })
   }
 }
 
-export default new FirestoreService();
+export const firestoreService = new FirestoreService()
