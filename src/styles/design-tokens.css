@@ -3,12 +3,18 @@
 
 :root {
   /* === COLOR PALETTE === */
-  /* Primary - Professional Blue-Gray */
-  --color-primary: #2563eb;
-  --color-primary-light: #3b82f6;
-  --color-primary-dark: #1e40af;
-  --color-primary-alpha-10: rgba(37, 99, 235, 0.1);
-  --color-primary-alpha-20: rgba(37, 99, 235, 0.2);
+  /* Primary - Luxurious Gold */
+  --color-primary: #D4AF37;
+  --color-primary-light: #F4D03F;
+  --color-primary-dark: #B8860B;
+  --color-primary-alpha-10: rgba(212, 175, 55, 0.1);
+  --color-primary-alpha-20: rgba(212, 175, 55, 0.2);
+  --color-primary-alpha-30: rgba(212, 175, 55, 0.3);
+
+  /* Accent - Deep Purple for contrast */
+  --color-accent: #6B46C1;
+  --color-accent-light: #9F7AEA;
+  --color-accent-dark: #553C9A;
 
   /* Semantic Colors */
   --color-success: #10b981;

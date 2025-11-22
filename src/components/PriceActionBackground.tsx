@@ -71,10 +71,10 @@ const PriceActionBackground = () => {
       const candleWidth = canvas.width / numCandles * 0.7
       const x = candle.x
 
-      // Set color based on bull/bear
+      // Set color based on bull/bear - using gold/bronze theme
       const color = candle.bullish
-        ? `rgba(16, 185, 129, ${candle.opacity})`
-        : `rgba(239, 68, 68, ${candle.opacity})`
+        ? `rgba(212, 175, 55, ${candle.opacity})` // Gold for bullish
+        : `rgba(184, 134, 11, ${candle.opacity})` // Darker gold for bearish
 
       // Draw wick
       ctx.strokeStyle = color
@@ -114,11 +114,11 @@ const PriceActionBackground = () => {
         candle.opacity = 0.35 + Math.sin(time * 2 + index) * 0.2
       })
 
-      // Draw trend lines - more visible with glow effect
-      ctx.strokeStyle = 'rgba(147, 51, 234, 0.4)'
+      // Draw trend lines - more visible with gold glow effect
+      ctx.strokeStyle = 'rgba(212, 175, 55, 0.6)'
       ctx.lineWidth = 4
-      ctx.shadowColor = 'rgba(147, 51, 234, 0.6)'
-      ctx.shadowBlur = 15
+      ctx.shadowColor = 'rgba(244, 208, 63, 0.8)'
+      ctx.shadowBlur = 20
       ctx.setLineDash([10, 5])
       ctx.beginPath()
       ctx.moveTo(0, canvas.height * 0.3 + Math.sin(time) * 20)
