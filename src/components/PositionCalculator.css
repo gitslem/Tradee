@@ -85,7 +85,8 @@
   margin-bottom: var(--space-2);
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-base);
+  letter-spacing: 0.01em;
 }
 
 .form-group input,
@@ -96,7 +97,8 @@
   border-radius: var(--radius-md);
   font-size: var(--font-size-base);
   color: var(--color-text-primary);
-  background: var(--color-background);
+  background: var(--color-surface);
+  font-weight: var(--font-weight-medium);
   transition: all var(--transition-fast);
   min-height: 44px; /* Touch-friendly */
 }
@@ -113,11 +115,17 @@
   border-color: var(--color-primary-alpha-20);
 }
 
+.form-group input::placeholder {
+  color: var(--color-text-tertiary);
+  opacity: 0.8;
+}
+
 .form-group small {
   display: block;
   margin-top: var(--space-2);
   color: var(--color-text-secondary);
   font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
 }
 
 /* Radio Group */
@@ -215,10 +223,10 @@
 .result-card h3 {
   font-size: var(--font-size-sm);
   margin-bottom: var(--space-2);
-  opacity: 0.9;
+  opacity: 1;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-bold);
 }
 
 .result-value {
@@ -226,11 +234,13 @@
   font-weight: var(--font-weight-bold);
   margin-bottom: var(--space-1);
   font-family: var(--font-family-mono);
+  line-height: 1.2;
 }
 
 .result-subtext {
   font-size: var(--font-size-sm);
-  opacity: 0.8;
+  opacity: 0.9;
+  font-weight: var(--font-weight-medium);
 }
 
 /* Warnings */
@@ -254,6 +264,7 @@
   margin-bottom: var(--space-2);
   font-size: var(--font-size-sm);
   line-height: var(--line-height-relaxed);
+  font-weight: var(--font-weight-medium);
 }
 
 /* Quick Stats */
@@ -281,10 +292,12 @@
 .quick-stats li {
   padding: var(--space-3) 0;
   border-bottom: 1px solid var(--color-border-light);
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-base);
   display: flex;
   justify-content: space-between;
   align-items: center;
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-medium);
 }
 
 .quick-stats li:last-child {
@@ -293,7 +306,7 @@
 
 .quick-stats li strong {
   color: var(--color-text-primary);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-bold);
 }
 
 .quick-stats .liquidation-stat {

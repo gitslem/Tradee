@@ -38,6 +38,7 @@
 
   /* Neutral Colors - Light Mode */
   --color-background: #ffffff;
+  --color-background-hover: #f8fafc;
   --color-surface: #f8fafc;
   --color-surface-elevated: #ffffff;
   --color-border: #e2e8f0;
@@ -130,6 +131,7 @@
 @media (prefers-color-scheme: dark) {
   :root {
     --color-background: #0f172a;
+    --color-background-hover: #1e293b;
     --color-surface: #1e293b;
     --color-surface-elevated: #334155;
     --color-border: #334155;
