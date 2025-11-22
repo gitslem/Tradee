@@ -51,6 +51,7 @@ const PositionCalculator = () => {
   const [useLeverage, setUseLeverage] = useState<boolean>(false)
   const [selectedExchange, setSelectedExchange] = useState<string>('binance')
   const [accountType, setAccountType] = useState<AccountType>('futures')
+  const [positionMode, setPositionMode] = useState<'fixed-risk' | 'fixed-margin'>('fixed-risk')
 
   // Get exchange-specific fees
   const exchangeFees = getExchangeFees(selectedExchange, accountType)
@@ -77,19 +78,27 @@ const PositionCalculator = () => {
     // Risk Amount = Account Balance × Risk % per Trade
     const riskAmount = balance * (risk / 100)
 
-    // Position Size = (Account Balance × Risk % per Trade) ÷ Stop Loss % Distance
-    const positionSize = riskAmount / stopLossDistance
+    // Calculate Position Size based on mode
+    let positionSize: number
+    let marginRequired: number
+    let notionalValue: number
+
+    if (positionMode === 'fixed-margin' && useLeverage && lev > 1) {
+      // Fixed Margin Mode: Margin stays constant, position size scales with leverage
+      // This allows profits to increase with leverage
+      marginRequired = riskAmount / stopLossDistance
+      positionSize = marginRequired * lev
+      notionalValue = positionSize
+    } else {
+      // Fixed Risk Mode (default): Position size based on risk, margin decreases with leverage
+      positionSize = riskAmount / stopLossDistance
+      marginRequired = positionSize / lev
+      notionalValue = positionSize
+    }
 
     // Position Value in base currency (Quantity)
     const positionValue = positionSize / entry
     const quantity = positionValue
-
-    // Margin Required (collateral needed for leveraged position)
-    // Leverage reduces the margin required, not increases position size
-    const marginRequired = positionSize / lev
-
-    // Notional Value (total position value) remains same regardless of leverage
-    const notionalValue = positionSize
 
     // Liquidation Price Calculation (Isolated Margin - Bybit/Binance Formula)
     // This formula accounts for maintenance margin and matches real exchange calculations
@@ -447,18 +456,33 @@ const PositionCalculator = () => {
             </div>
 
             {useLeverage && (
-              <div className="form-group leverage-section">
-                <label>Leverage (Max: {maxLeverageAllowed}x for {selectedExchange})</label>
-                <select value={leverage} onChange={(e) => setLeverage(e.target.value)}>
-                  <option value="1">1x (No Leverage)</option>
-                  {[2, 3, 5, 10, 20, 25, 50, 75, 100, 125].map((lev) =>
-                    lev <= maxLeverageAllowed ? (
-                      <option key={lev} value={lev}>{lev}x</option>
-                    ) : null
-                  )}
-                </select>
-                <small>Higher leverage = Higher liquidation risk | Max for this platform: {maxLeverageAllowed}x</small>
-              </div>
+              <>
+                <div className="form-group">
+                  <label>Position Sizing Mode</label>
+                  <select value={positionMode} onChange={(e) => setPositionMode(e.target.value as 'fixed-risk' | 'fixed-margin')}>
+                    <option value="fixed-risk">Fixed Risk (Conservative)</option>
+                    <option value="fixed-margin">Fixed Margin (Scales with Leverage)</option>
+                  </select>
+                  <small>
+                    {positionMode === 'fixed-risk'
+                      ? '💡 Risk amount stays constant, margin decreases with leverage'
+                      : '⚡ Margin stays constant, position size & profit scale with leverage'}
+                  </small>
+                </div>
+
+                <div className="form-group leverage-section">
+                  <label>Leverage (Max: {maxLeverageAllowed}x for {selectedExchange})</label>
+                  <select value={leverage} onChange={(e) => setLeverage(e.target.value)}>
+                    <option value="1">1x (No Leverage)</option>
+                    {[2, 3, 5, 10, 20, 25, 50, 75, 100, 125].map((lev) =>
+                      lev <= maxLeverageAllowed ? (
+                        <option key={lev} value={lev}>{lev}x</option>
+                      ) : null
+                    )}
+                  </select>
+                  <small>Higher leverage = Higher liquidation risk | Max for this platform: {maxLeverageAllowed}x</small>
+                </div>
+              </>
             )}
           </CollapsibleSection>
 

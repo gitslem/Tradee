@@ -3,9 +3,9 @@
   animation: fadeIn 0.5s ease-out;
   position: relative;
   z-index: 1;
-  padding: 40px 60px;
+  padding: var(--space-10) var(--space-6);
   min-height: 100vh;
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--color-background);
 }
 
 @keyframes fadeIn {
@@ -20,346 +20,376 @@
 }
 
 .price-action > h1 {
-  font-size: 2.5rem;
-  font-weight: 800;
-  color: #333;
-  margin-bottom: 12px;
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-extrabold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-3);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .price-action > p {
-  font-size: 1.1rem;
-  color: #666;
-  margin-bottom: 40px;
-}
-
-.price-action h2 {
-  color: #f093fb;
-  margin-bottom: 25px;
-  font-size: 1.8rem;
+  font-size: var(--font-size-lg);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-10);
 }
 
 .price-action-grid {
   display: grid;
   grid-template-columns: 1fr 1.5fr;
-  gap: 40px;
+  gap: var(--space-8);
+  max-width: var(--container-max-width);
+  margin: 0 auto;
 }
 
 .price-action .input-section,
 .price-action .analysis-section {
-  background: white;
-  padding: 32px;
-  border-radius: 20px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  border: 1px solid #e0e0e0;
+  background: var(--glass-background);
+  backdrop-filter: blur(10px);
+  padding: var(--space-8);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--glass-border);
+  transition: all var(--transition-base);
 }
 
-.price-action .input-section h3,
-.price-action .analysis-section h3 {
-  color: #f093fb;
-  margin-bottom: 24px;
-  font-size: 1.5rem;
-  font-weight: 700;
-  border-bottom: 3px solid #f093fb;
-  padding-bottom: 12px;
+.price-action .input-section:hover,
+.price-action .analysis-section:hover {
+  box-shadow: var(--shadow-2xl);
+  border-color: var(--color-border);
 }
 
+.input-section h3,
+.analysis-section h3 {
+  color: var(--color-primary);
+  margin-bottom: var(--space-6);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  border-bottom: 3px solid var(--color-primary);
+  padding-bottom: var(--space-3);
+}
+
+/* Form Groups */
+.price-action .form-group {
+  margin-bottom: var(--space-6);
+}
+
+.price-action .form-group label {
+  display: block;
+  margin-bottom: var(--space-2);
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-sm);
+}
+
+.price-action .form-group input,
+.price-action .form-group select {
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-base);
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  transition: all var(--transition-fast);
+  min-height: 44px; /* Touch-friendly */
+}
+
+.price-action .form-group input:focus,
+.price-action .form-group select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-light);
+}
+
+/* Candle Visualization */
 .candle-visual {
-  margin-top: 25px;
-  padding: 20px;
-  background: #f8f9fa;
-  border-radius: 12px;
+  margin-top: var(--space-6);
+  padding: var(--space-6);
+  background: var(--color-background-hover);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-border-light);
 }
 
 .candle-visual h4 {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-4);
   text-align: center;
-  color: #667eea;
-  margin-bottom: 20px;
-  font-size: 1rem;
 }
 
 .candle-container {
   display: flex;
   justify-content: center;
-  align-items: center;
-  height: 300px;
-  background: white;
-  border-radius: 8px;
-  padding: 20px;
+  align-items: flex-end;
+  height: 200px;
+  padding: var(--space-4);
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--space-4);
+  position: relative;
 }
 
 .candle {
-  width: 40px;
-  height: 250px;
+  width: 80px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: flex-end;
+  height: 100%;
   position: relative;
 }
 
 .candle .wick {
   width: 2px;
-  background: #333;
+  background: var(--color-text-tertiary);
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.candle .wick.upper {
+  bottom: 100%;
+  transform-origin: bottom;
+}
+
+.candle .wick.lower {
+  top: 100%;
+  transform-origin: top;
 }
 
 .candle .body {
   width: 100%;
-  border: 2px solid #333;
-  min-height: 10px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  transition: all var(--transition-base);
 }
 
 .candle.bullish .body {
-  background: #28a745;
-  border-color: #28a745;
+  background: var(--color-success);
+  border: 2px solid var(--color-success-dark);
 }
 
 .candle.bearish .body {
-  background: #dc3545;
-  border-color: #dc3545;
+  background: var(--color-danger);
+  border: 2px solid var(--color-danger-dark);
 }
 
 .candle-stats {
-  margin-top: 15px;
-  display: flex;
-  justify-content: space-around;
-  font-size: 0.85rem;
-  color: #666;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+}
+
+.candle-stats p {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  text-align: center;
+  font-weight: var(--font-weight-medium);
+}
+
+/* Analysis Cards */
+.analysis-card {
+  background: var(--color-background-hover);
+  padding: var(--space-5);
+  border-radius: var(--radius-xl);
+  margin-bottom: var(--space-5);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--color-border-light);
+  transition: all var(--transition-base);
+}
+
+.analysis-card:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-border);
+}
+
+.analysis-card h4 {
+  color: var(--color-primary);
+  margin-bottom: var(--space-4);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+}
+
+.analysis-card.highlight {
+  background: var(--color-primary-light);
+  border-color: var(--color-primary);
+}
+
+.analysis-card.highlight h4 {
+  color: var(--color-primary-dark);
+}
+
+.pattern-item,
+.signal-item,
+.volume-item,
+.entry-signal {
+  padding: var(--space-3);
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--space-3);
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-relaxed);
+  border-left: 4px solid var(--color-primary);
 }
 
 .pattern-item {
-  padding: 12px;
-  background: white;
-  border-radius: 8px;
-  margin-bottom: 10px;
-  border-left: 4px solid #667eea;
-  font-size: 0.95rem;
-  font-weight: 500;
+  border-left-color: var(--color-info);
 }
 
 .signal-item {
-  padding: 12px;
-  background: white;
-  border-radius: 8px;
-  margin-bottom: 10px;
-  font-size: 0.95rem;
-}
-
-.volume-change {
-  padding: 15px;
-  background: white;
-  border-radius: 8px;
-  margin-bottom: 15px;
-  text-align: center;
-  font-size: 1.1rem;
-}
-
-.volume-change strong {
-  color: #667eea;
-  font-size: 1.3rem;
-}
-
-.volume-item {
-  padding: 10px;
-  background: white;
-  border-radius: 8px;
-  margin-bottom: 8px;
-  font-size: 0.9rem;
+  border-left-color: var(--color-warning);
 }
 
 .entry-signal {
-  padding: 15px;
-  background: white;
-  border-radius: 8px;
-  margin-bottom: 12px;
-  font-size: 1rem;
-  font-weight: 500;
-  line-height: 1.6;
+  border-left-color: var(--color-success);
+  font-weight: var(--font-weight-medium);
 }
 
-.trading-checklist {
-  background: #fff3cd;
-  padding: 20px;
-  border-radius: 12px;
-  margin-top: 20px;
+.pattern-item:last-child,
+.signal-item:last-child,
+.volume-item:last-child,
+.entry-signal:last-child {
+  margin-bottom: 0;
 }
 
-.trading-checklist h4 {
-  color: #856404;
-  margin-bottom: 15px;
-  font-size: 1.1rem;
+.volume-change {
+  padding: var(--space-3);
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--space-3);
+  text-align: center;
+  font-size: var(--font-size-lg);
 }
 
-.trading-checklist ul {
-  list-style: none;
+.volume-change strong {
+  color: var(--color-primary);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
 }
 
-.trading-checklist li {
-  padding: 8px 0;
-  padding-left: 25px;
-  position: relative;
-  color: #856404;
-  font-size: 0.9rem;
-}
-
-.trading-checklist li:before {
-  content: "☐";
-  position: absolute;
-  left: 0;
-  font-size: 1.2rem;
+/* Checklist & Tips */
+.trading-checklist,
+.tips-section {
+  background: var(--color-success-light);
+  padding: var(--space-5);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-success);
+  margin-bottom: var(--space-5);
 }
 
 .tips-section {
-  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-  color: white;
-  padding: 20px;
-  border-radius: 12px;
-  margin-top: 20px;
+  background: var(--color-info-light);
+  border-color: var(--color-info);
+}
+
+.trading-checklist h4,
+.tips-section h4 {
+  color: var(--color-success-dark);
+  margin-bottom: var(--space-4);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
 }
 
 .tips-section h4 {
-  color: white;
-  margin-bottom: 15px;
-  font-size: 1.1rem;
+  color: var(--color-info-dark);
 }
 
+.trading-checklist ul,
 .tips-section ul {
   list-style: none;
+  padding: 0;
+  margin: 0;
 }
 
+.trading-checklist li,
 .tips-section li {
-  padding: 8px 0;
-  font-size: 0.9rem;
-  line-height: 1.5;
+  padding: var(--space-2) 0 var(--space-2) var(--space-6);
+  color: var(--color-text-secondary);
+  position: relative;
+  line-height: var(--line-height-relaxed);
 }
 
-.tips-section strong {
-  font-weight: 700;
+.trading-checklist li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: var(--color-success);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-lg);
 }
 
-@media (max-width: 968px) {
+.tips-section li::before {
+  content: '→';
+  position: absolute;
+  left: 0;
+  color: var(--color-info);
+  font-weight: var(--font-weight-bold);
+}
+
+.tips-section li strong {
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
   .price-action-grid {
     grid-template-columns: 1fr;
-  }
-
-  .candle-container {
-    height: 200px;
-  }
-
-  .candle {
-    height: 150px;
+    gap: var(--space-6);
   }
 }
 
 @media (max-width: 768px) {
   .price-action {
-    padding: 30px 20px;
+    padding: var(--space-8) var(--space-4);
   }
 
   .price-action > h1 {
-    font-size: 2rem;
-  }
-
-  .price-action > p {
-    font-size: 1rem;
-  }
-
-  .price-action h2 {
-    font-size: 1.5rem;
+    font-size: var(--font-size-3xl);
   }
 
   .price-action .input-section,
   .price-action .analysis-section {
-    padding: 24px;
+    padding: var(--space-6);
   }
 
-  .price-action .input-section h3,
-  .price-action .analysis-section h3 {
-    font-size: 1.3rem;
+  .input-section h3,
+  .analysis-section h3 {
+    font-size: var(--font-size-xl);
   }
 
-  .candle-visual {
-    padding: 16px;
+  .candle-stats {
+    grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 480px) {
   .price-action {
-    padding: 20px 12px;
+    padding: var(--space-6) var(--space-3);
   }
 
   .price-action > h1 {
-    font-size: 1.75rem;
-  }
-
-  .price-action > p {
-    font-size: 0.95rem;
-  }
-
-  .price-action h2 {
-    font-size: 1.25rem;
+    font-size: var(--font-size-2xl);
   }
 
   .price-action .input-section,
   .price-action .analysis-section {
-    padding: 20px 16px;
-  }
-
-  .price-action .input-section h3,
-  .price-action .analysis-section h3 {
-    font-size: 1.15rem;
-  }
-
-  .candle-visual {
-    padding: 12px;
-  }
-
-  .candle-visual h4 {
-    font-size: 0.9rem;
+    padding: var(--space-5);
   }
 
   .candle-container {
-    height: 180px;
-    padding: 12px;
+    height: 150px;
   }
 
   .candle {
-    height: 120px;
-    width: 30px;
-  }
-
-  .pattern-item,
-  .signal-item,
-  .volume-item,
-  .entry-signal {
-    padding: 10px;
-    font-size: 0.9rem;
-  }
-
-  .volume-change {
-    padding: 12px;
-    font-size: 1rem;
-  }
-
-  .volume-change strong {
-    font-size: 1.15rem;
-  }
-
-  .trading-checklist,
-  .tips-section {
-    padding: 16px;
-  }
-
-  .trading-checklist h4,
-  .tips-section h4 {
-    font-size: 1rem;
-  }
-
-  .trading-checklist li,
-  .tips-section li {
-    font-size: 0.85rem;
+    width: 60px;
   }
 }
