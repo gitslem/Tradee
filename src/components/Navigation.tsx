@@ -37,7 +37,7 @@ const Navigation = () => {
           <div className="logo-icon">
             <Logo size={24} />
           </div>
-          <span className="logo-text">Tradee</span>
+          <span className="logo-text">Traddii</span>
         </Link>
 
         <div className={`nav-links ${mobileMenuOpen ? 'mobile-open' : ''}`}>

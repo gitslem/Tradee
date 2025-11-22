@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: tradee-crypto-calculator
+    name: traddii-crypto-calculator
     runtime: node
     env: node
     buildCommand: npm install && npm run build

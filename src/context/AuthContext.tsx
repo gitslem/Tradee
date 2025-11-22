@@ -36,13 +36,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   useEffect(() => {
     // Check for existing session
-    const storedUser = localStorage.getItem('tradee_user')
+    const storedUser = localStorage.getItem('traddii_user')
     if (storedUser) {
       try {
         setUser(JSON.parse(storedUser))
       } catch (error) {
         console.error('Error parsing stored user:', error)
-        localStorage.removeItem('tradee_user')
+        localStorage.removeItem('traddii_user')
       }
     }
     setLoading(false)
@@ -66,7 +66,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         expiresAt: Date.now() + 10 * 60 * 1000 // 10 minutes
       }
 
-      localStorage.setItem('tradee_verification', JSON.stringify(verificationData))
+      localStorage.setItem('traddii_verification', JSON.stringify(verificationData))
 
       // In a real app, send email here
       console.log(`Verification code for ${email}: ${code}`)
@@ -82,7 +82,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const login = async (email: string, code: string): Promise<boolean> => {
     try {
       // Retrieve stored verification data
-      const storedData = localStorage.getItem('tradee_verification')
+      const storedData = localStorage.getItem('traddii_verification')
       if (!storedData) {
         return false
       }
@@ -99,7 +99,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       }
 
       // Check if user already exists
-      const existingUsers = JSON.parse(localStorage.getItem('tradee_users') || '[]')
+      const existingUsers = JSON.parse(localStorage.getItem('traddii_users') || '[]')
       let userData = existingUsers.find((u: User) => u.email === email)
 
       if (!userData) {
@@ -110,22 +110,22 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           lastLogin: new Date().toISOString()
         }
         existingUsers.push(userData)
-        localStorage.setItem('tradee_users', JSON.stringify(existingUsers))
+        localStorage.setItem('traddii_users', JSON.stringify(existingUsers))
       } else {
         // Update last login
         userData.lastLogin = new Date().toISOString()
         const updatedUsers = existingUsers.map((u: User) =>
           u.email === email ? userData : u
         )
-        localStorage.setItem('tradee_users', JSON.stringify(updatedUsers))
+        localStorage.setItem('traddii_users', JSON.stringify(updatedUsers))
       }
 
       // Set current user
       setUser(userData)
-      localStorage.setItem('tradee_user', JSON.stringify(userData))
+      localStorage.setItem('traddii_user', JSON.stringify(userData))
 
       // Clear verification data
-      localStorage.removeItem('tradee_verification')
+      localStorage.removeItem('traddii_verification')
 
       return true
     } catch (error) {
@@ -136,7 +136,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const logout = () => {
     setUser(null)
-    localStorage.removeItem('tradee_user')
+    localStorage.removeItem('traddii_user')
   }
 
   const value: AuthContextType = {

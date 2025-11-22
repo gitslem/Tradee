@@ -44,7 +44,7 @@ export interface TradeStats {
 }
 
 class TradeService {
-  private storageKey = 'tradee_trades'
+  private storageKey = 'traddii_trades'
 
   private getTrades(userId: string): Trade[] {
     try {

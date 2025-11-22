@@ -10,7 +10,7 @@ const Support = () => {
       {/* Hero Section */}
       <section className="support-hero">
         <div className="support-hero-content">
-          <h1 className="support-title">Welcome to Tradee Support</h1>
+          <h1 className="support-title">Welcome to Traddii Support</h1>
           <p className="support-subtitle">
             We're here to help you get the most out of your trading tools. Whether you have questions,
             need assistance, or want to provide feedback, our team is ready to support you.
@@ -75,15 +75,15 @@ const Support = () => {
 
           <div className="faq-grid">
             <div className="faq-item">
-              <h3>Is Tradee really free?</h3>
+              <h3>Is Traddii really free?</h3>
               <p>
-                Yes! Tradee is 100% free to use with no hidden fees, subscriptions, or premium tiers.
+                Yes! Traddii is 100% free to use with no hidden fees, subscriptions, or premium tiers.
                 All features are available to everyone at no cost.
               </p>
             </div>
 
             <div className="faq-item">
-              <h3>Do I need to register to use Tradee?</h3>
+              <h3>Do I need to register to use Traddii?</h3>
               <p>
                 Most tools (Calculator, Market Structure, Price Action) require no registration.
                 The Trading Journal requires a simple email login to save your data securely.

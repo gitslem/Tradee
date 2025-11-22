@@ -1,4 +1,4 @@
-# Crypto Trading Position Calculator
+# Traddii - Crypto Trading Position Calculator
 
 A comprehensive web-based trading tool for cryptocurrency traders to calculate position sizes, manage risk, and analyze market structure and price action.
 
@@ -50,7 +50,7 @@ A comprehensive web-based trading tool for cryptocurrency traders to calculate p
 ```bash
 # Clone the repository
 git clone <repository-url>
-cd Tradee
+cd traddii
 
 # Install dependencies
 npm install
