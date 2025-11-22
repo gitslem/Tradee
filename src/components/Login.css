@@ -8,11 +8,8 @@
 }
 
 .login-container {
-  max-width: 900px;
+  max-width: 500px;
   width: 100%;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 40px;
   position: relative;
   z-index: 1;
 }
@@ -322,4 +319,99 @@
 
 .login-info {
   animation: fadeIn 0.5s ease-out 0.2s both;
+}
+
+/* Google Sign-In Button */
+.google-sign-in-button {
+  width: 100%;
+  padding: 16px 24px;
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.google-sign-in-button:hover:not(:disabled) {
+  background: #f9fafb;
+  border-color: #d1d5db;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.google-sign-in-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.google-sign-in-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.google-icon {
+  width: 24px;
+  height: 24px;
+}
+
+/* Benefits Section */
+.login-benefits {
+  margin: 32px 0;
+  padding: 24px;
+  background: linear-gradient(135deg, #f0f9ff 0%, #f5f3ff 100%);
+  border-radius: 12px;
+  border: 1px solid #e0e7ff;
+}
+
+.login-benefits h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 16px;
+}
+
+.login-benefits ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.login-benefits li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  color: #4b5563;
+  font-size: 0.95rem;
+}
+
+.login-benefits li svg {
+  color: #6366f1;
+  flex-shrink: 0;
+}
+
+/* Footer */
+.login-footer {
+  text-align: center;
+  margin-top: 24px;
+}
+
+.privacy-note {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.privacy-note svg {
+  color: #10b981;
 }

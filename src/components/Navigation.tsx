@@ -60,8 +60,16 @@ const Navigation = () => {
           {isAuthenticated ? (
             <>
               <div className="user-info">
-                <User size={18} />
-                <span>{user?.email}</span>
+                {user?.photoURL ? (
+                  <img
+                    src={user.photoURL}
+                    alt={user.displayName || user.email || 'User'}
+                    className="user-avatar"
+                  />
+                ) : (
+                  <User size={18} />
+                )}
+                <span>{user?.displayName || user?.email}</span>
               </div>
               <button onClick={handleLogout} className="auth-btn logout">
                 <LogOut size={18} />

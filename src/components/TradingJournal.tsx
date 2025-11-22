@@ -5,10 +5,10 @@ import {
   Download, Edit2, Trash2, CheckCircle, Clock
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
-import { tradeService } from '../services/tradeService'
+import { firestoreService } from '../services/firestoreService'
 import { EXCHANGES } from '../config/exchanges'
 import TradingBackground from './TradingBackground'
-import type { Trade, TradeStats } from '../services/tradeService'
+import type { Trade, TradeStats } from '../services/firestoreService'
 import './TradingJournal.css'
 
 const TradingJournal = () => {
@@ -30,18 +30,17 @@ const TradingJournal = () => {
       return
     }
 
-    if (user) {
-      loadTrades()
+    if (user?.uid) {
+      // Subscribe to real-time updates from Firestore
+      const unsubscribe = firestoreService.subscribeToUserTrades(user.uid, (updatedTrades) => {
+        setTrades(updatedTrades)
+        const userStats = firestoreService.calculateStats(updatedTrades)
+        setStats(userStats)
+      })
+
+      return () => unsubscribe()
     }
   }, [user, isAuthenticated, loading, navigate])
-
-  const loadTrades = () => {
-    if (!user) return
-    const userTrades = tradeService.getAllTrades(user.email)
-    setTrades(userTrades)
-    const userStats = tradeService.calculateStats(user.email)
-    setStats(userStats)
-  }
 
   const handleAddTrade = () => {
     setEditingTrade(null)
@@ -53,20 +52,20 @@ const TradingJournal = () => {
     setShowAddModal(true)
   }
 
-  const handleDeleteTrade = (tradeId: string) => {
+  const handleDeleteTrade = async (tradeId: string) => {
     if (!user) return
     if (confirm('Are you sure you want to delete this trade? This action cannot be undone.')) {
-      const success = tradeService.deleteTrade(user.email, tradeId)
-      if (success) {
-        loadTrades()
+      try {
+        await firestoreService.deleteTrade(tradeId)
         alert('Trade deleted successfully!')
-      } else {
+      } catch (error) {
+        console.error('Delete error:', error)
         alert('Failed to delete trade. Please try again.')
       }
     }
   }
 
-  const handleCloseTrade = (trade: Trade) => {
+  const handleCloseTrade = async (trade: Trade) => {
     if (!user || trade.status === 'closed') return
 
     const exitPrice = prompt(`Enter exit price for ${trade.pair}:`)
@@ -78,12 +77,36 @@ const TradingJournal = () => {
       return
     }
 
-    const closedTrade = tradeService.closeTrade(user.email, trade.id, price, new Date().toISOString())
-    if (closedTrade) {
-      loadTrades()
-      const isProfitable = closedTrade.profitLoss > 0
-      alert(`Trade closed successfully!\n\nP&L: ${isProfitable ? '+' : ''}$${closedTrade.profitLoss.toFixed(2)} (${isProfitable ? '+' : ''}${closedTrade.profitLossPercent.toFixed(2)}%)`)
-    } else {
+    try {
+      // Calculate P&L based on quantity type
+      const baseQuantity = trade.quantityType === 'base'
+        ? trade.quantity
+        : trade.quantity / trade.entryPrice
+
+      const profitLoss = trade.type === 'long'
+        ? (price - trade.entryPrice) * baseQuantity
+        : (trade.entryPrice - price) * baseQuantity
+
+      const profitLossPercent = trade.type === 'long'
+        ? ((price - trade.entryPrice) / trade.entryPrice) * 100 * trade.leverage
+        : ((trade.entryPrice - price) / trade.entryPrice) * 100 * trade.leverage
+
+      const outcome = profitLoss > 0 ? 'win' : 'loss'
+
+      await firestoreService.updateTrade(trade.id, {
+        exitPrice: price,
+        exitDate: new Date().toISOString(),
+        status: 'closed',
+        outcome,
+        profitLoss,
+        profitLossPercent,
+        updatedAt: new Date().toISOString()
+      })
+
+      const isProfitable = profitLoss > 0
+      alert(`Trade closed successfully!\n\nP&L: ${isProfitable ? '+' : ''}$${profitLoss.toFixed(2)} (${isProfitable ? '+' : ''}${profitLossPercent.toFixed(2)}%)`)
+    } catch (error) {
+      console.error('Close trade error:', error)
       alert('Failed to close trade. Please try again.')
     }
   }
@@ -97,15 +120,35 @@ const TradingJournal = () => {
     }
 
     try {
-      const csv = tradeService.exportToCSV(user.email)
-      const blob = new Blob([csv], { type: 'text/csv' })
-      const url = window.URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `trading-journal-${new Date().toISOString().split('T')[0]}.csv`
-      a.click()
-      window.URL.revokeObjectURL(url)
+      const csv = firestoreService.exportToCSV(trades)
+      firestoreService.downloadExport(
+        csv,
+        `trading-journal-${new Date().toISOString().split('T')[0]}.csv`,
+        'csv'
+      )
       alert(`Successfully exported ${trades.length} trade${trades.length === 1 ? '' : 's'} to CSV!`)
+    } catch (error) {
+      console.error('Export error:', error)
+      alert('Failed to export trades. Please try again.')
+    }
+  }
+
+  const handleExportJSON = () => {
+    if (!user) return
+
+    if (trades.length === 0) {
+      alert('No trades to export. Add some trades first!')
+      return
+    }
+
+    try {
+      const json = firestoreService.exportToJSON(trades)
+      firestoreService.downloadExport(
+        json,
+        `trading-journal-${new Date().toISOString().split('T')[0]}.json`,
+        'json'
+      )
+      alert(`Successfully exported ${trades.length} trade${trades.length === 1 ? '' : 's'} to JSON!`)
     } catch (error) {
       console.error('Export error:', error)
       alert('Failed to export trades. Please try again.')
@@ -155,6 +198,10 @@ const TradingJournal = () => {
           <button onClick={handleExportCSV} className="action-btn secondary">
             <Download size={18} />
             Export CSV
+          </button>
+          <button onClick={handleExportJSON} className="action-btn secondary">
+            <Download size={18} />
+            Export JSON
           </button>
           <button onClick={handleAddTrade} className="action-btn primary">
             <Plus size={18} />
@@ -301,22 +348,16 @@ const TradingJournal = () => {
             setShowAddModal(false)
             setEditingTrade(null)
           }}
-          onSave={(tradeData) => {
-            if (!user) return
+          onSave={async (tradeData) => {
+            if (!user?.uid) return
             try {
               if (editingTrade) {
-                const updated = tradeService.updateTrade(user.email, editingTrade.id, tradeData)
-                if (updated) {
-                  alert('Trade updated successfully!')
-                } else {
-                  alert('Failed to update trade. Please try again.')
-                  return
-                }
+                await firestoreService.updateTrade(editingTrade.id, tradeData)
+                alert('Trade updated successfully!')
               } else {
-                tradeService.addTrade(user.email, tradeData as any)
+                await firestoreService.addTrade(user.uid, tradeData as any)
                 alert('Trade added successfully!')
               }
-              loadTrades()
               setShowAddModal(false)
               setEditingTrade(null)
             } catch (error) {
