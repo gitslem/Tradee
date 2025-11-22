@@ -26,7 +26,7 @@ interface CalculationResults {
   liquidationPrice: number
   marginRequired: number
   distanceToLiquidation: number
-  leveragedPositionSize: number
+  notionalValue: number
   breakevenPrice: number
   winRateNeeded: number
   takeProfitResults: TakeProfitResult[]
@@ -34,6 +34,7 @@ interface CalculationResults {
   maintenanceMarginRate: number
   totalFees: number
   fundingCost: number
+  roiOnMargin: number
 }
 
 const PositionCalculator = () => {
@@ -83,11 +84,12 @@ const PositionCalculator = () => {
     const positionValue = positionSize / entry
     const quantity = positionValue
 
-    // Leveraged Position Size (total notional value)
-    const leveragedPositionSize = positionSize * lev
-
     // Margin Required (collateral needed for leveraged position)
-    const marginRequired = leveragedPositionSize / lev
+    // Leverage reduces the margin required, not increases position size
+    const marginRequired = positionSize / lev
+
+    // Notional Value (total position value) remains same regardless of leverage
+    const notionalValue = positionSize
 
     // Liquidation Price Calculation (Isolated Margin - Bybit/Binance Formula)
     // This formula accounts for maintenance margin and matches real exchange calculations
@@ -133,7 +135,8 @@ const PositionCalculator = () => {
     if (!isNaN(takeProfit)) {
       const tpDistance = Math.abs(takeProfit - entry)
       const tpPercentDistance = (tpDistance / entry) * 100
-      const potentialProfit = quantity * tpDistance * lev
+      // Profit is NOT multiplied by leverage - leverage only affects ROI on margin
+      const potentialProfit = quantity * tpDistance
       const rrRatio = tpDistance / Math.abs(entry - stop)
 
       takeProfitResults.push({
@@ -148,7 +151,7 @@ const PositionCalculator = () => {
     if (!isNaN(tp2)) {
       const tpDistance = Math.abs(tp2 - entry)
       const tpPercentDistance = (tpDistance / entry) * 100
-      const potentialProfit = quantity * tpDistance * lev
+      const potentialProfit = quantity * tpDistance
       const rrRatio = tpDistance / Math.abs(entry - stop)
 
       takeProfitResults.push({
@@ -163,7 +166,7 @@ const PositionCalculator = () => {
     if (!isNaN(tp3)) {
       const tpDistance = Math.abs(tp3 - entry)
       const tpPercentDistance = (tpDistance / entry) * 100
-      const potentialProfit = quantity * tpDistance * lev
+      const potentialProfit = quantity * tpDistance
       const rrRatio = tpDistance / Math.abs(entry - stop)
 
       takeProfitResults.push({
@@ -184,7 +187,7 @@ const PositionCalculator = () => {
 
     // Maintenance Margin Calculation
     const maintenanceMarginRate = getMaintenanceMargin(selectedExchange, lev)
-    const maintenanceMargin = (leveragedPositionSize * maintenanceMarginRate) / 100
+    const maintenanceMargin = (notionalValue * maintenanceMarginRate) / 100
 
     // Fee Calculations
     const entryFee = positionSize * (exchangeFees.taker / 100)
@@ -193,7 +196,12 @@ const PositionCalculator = () => {
 
     // Funding Cost (24 hours for futures)
     const fundingCost = accountType === 'futures'
-      ? calculateFundingCost(selectedExchange, accountType, leveragedPositionSize, 24)
+      ? calculateFundingCost(selectedExchange, accountType, notionalValue, 24)
+      : 0
+
+    // ROI on Margin (shows leverage benefit)
+    const roiOnMargin = marginRequired > 0 && potentialProfit > 0
+      ? (potentialProfit / marginRequired) * 100
       : 0
 
     return {
@@ -207,14 +215,15 @@ const PositionCalculator = () => {
       liquidationPrice,
       marginRequired,
       distanceToLiquidation,
-      leveragedPositionSize,
+      notionalValue,
       breakevenPrice,
       winRateNeeded,
       takeProfitResults,
       maintenanceMargin,
       maintenanceMarginRate,
       totalFees,
-      fundingCost
+      fundingCost,
+      roiOnMargin
     }
   }
 
@@ -541,8 +550,18 @@ const PositionCalculator = () => {
                   <div className="result-card leverage-info">
                     <h3>Leverage Position</h3>
                     <div className="result-value">{leverage}x</div>
-                    <div className="result-subtext">Total notional: ${results.leveragedPositionSize.toFixed(2)}</div>
+                    <div className="result-subtext">Notional value: ${results.notionalValue.toFixed(2)}</div>
                   </div>
+
+                  {results.roiOnMargin > 0 && (
+                    <div className="result-card success">
+                      <h3>ROI on Margin</h3>
+                      <div className="result-value">{results.roiOnMargin.toFixed(2)}%</div>
+                      <div className="result-subtext">
+                        ${results.potentialProfit.toFixed(2)} profit on ${results.marginRequired.toFixed(2)} margin
+                      </div>
+                    </div>
+                  )}
 
                   <div className="result-card">
                     <h3>Margin Required</h3>
