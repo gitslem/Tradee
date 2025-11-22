@@ -5,7 +5,6 @@ on:
     branches:
       - main
       - master
-      - claude/firebase-deployment-prep-01Wc9nGqqUD3uwLdtnjcTT4R
   workflow_dispatch:
 
 jobs:
@@ -28,10 +27,24 @@ jobs:
       - name: Run build
         run: npm run build
 
-      - name: Deploy to Firebase
+      - name: Verify build output
+        run: |
+          if [ ! -d "dist" ]; then
+            echo "Error: dist directory not found"
+            exit 1
+          fi
+          if [ ! -f "dist/index.html" ]; then
+            echo "Error: dist/index.html not found"
+            exit 1
+          fi
+          echo "Build verification successful"
+          ls -la dist/
+
+      - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
           channelId: live
-          projectId: '${{ secrets.FIREBASE_PROJECT_ID }}'
+          projectId: traddii
+
