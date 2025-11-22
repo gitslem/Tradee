@@ -24,19 +24,20 @@ service cloud.firestore {
     // EMAIL SUBSCRIPTIONS - PUBLIC FORM
     // ===========================================
     match /emailSubscriptions/{subscriptionId} {
-      // Public can create subscriptions
-      allow create: if request.auth == null
-                    && request.resource.data.keys().hasAll(['email', 'subscribedAt', 'status', 'source'])
+      // Anyone can create subscriptions (authenticated or not)
+      allow create: if request.resource.data.keys().hasAll(['email', 'subscribedAt', 'status', 'source'])
                     && request.resource.data.email is string
                     && request.resource.data.email.matches('^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$')
                     && request.resource.data.status == 'active'
                     && request.resource.data.subscribedAt is timestamp;
 
-      // Only admins can read/update/delete
-      // Temporarily allow authenticated users to read
-      allow read, update, delete: if request.auth != null;
+      // Anyone can read (needed for duplicate email check)
+      allow read: if true;
+
+      // Only authenticated users can update/delete
+      allow update, delete: if request.auth != null;
       // Change to this later when you set up admin claims:
-      // allow read, update, delete: if request.auth != null && request.auth.token.admin == true;
+      // allow update, delete: if request.auth != null && request.auth.token.admin == true;
     }
   }
 }
