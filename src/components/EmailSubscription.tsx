@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Mail, CheckCircle, AlertCircle } from 'lucide-react'
-import { collection, addDoc, query, where, getDocs, Timestamp } from 'firebase/firestore'
+import { collection, addDoc, query, where, getDocs, serverTimestamp } from 'firebase/firestore'
 import { db } from '../config/firebase'
 import './EmailSubscription.css'
 
@@ -47,7 +47,7 @@ const EmailSubscription = () => {
       // Add new subscription
       await addDoc(collection(db, 'emailSubscriptions'), {
         email: email.toLowerCase(),
-        subscribedAt: Timestamp.now(),
+        subscribedAt: serverTimestamp(),
         status: 'active',
         source: 'landing_page'
       })
