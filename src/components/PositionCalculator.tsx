@@ -89,15 +89,30 @@ const PositionCalculator = () => {
     // Margin Required (collateral needed for leveraged position)
     const marginRequired = leveragedPositionSize / lev
 
-    // Liquidation Price Calculation
-    // For LONG: Liquidation Price = Entry Price × (1 - 1/Leverage)
-    // For SHORT: Liquidation Price = Entry Price × (1 + 1/Leverage)
+    // Liquidation Price Calculation (Isolated Margin - Bybit/Binance Formula)
+    // This formula accounts for maintenance margin and matches real exchange calculations
+    // For LONG: Liquidation Price = Entry - [(Initial Margin - Maintenance Margin - Close Fee) / Quantity]
+    // For SHORT: Liquidation Price = Entry + [(Initial Margin - Maintenance Margin - Close Fee) / Quantity]
     let liquidationPrice = 0
     if (useLeverage && lev > 1) {
+      // Get maintenance margin rate for the current leverage level
+      const maintenanceMarginRate = getMaintenanceMargin(selectedExchange, lev)
+
+      // Calculate margins
+      const positionValueInUsdt = entry * quantity
+      const initialMargin = positionValueInUsdt / lev
+      const maintenanceMargin = (positionValueInUsdt * maintenanceMarginRate) / 100
+
+      // Calculate estimated fee to close the position
+      const closeFee = positionValueInUsdt * (exchangeFees.taker / 100)
+
+      // Available margin for price movement before liquidation
+      const availableMargin = initialMargin - maintenanceMargin - closeFee
+
       if (positionType === 'long') {
-        liquidationPrice = entry * (1 - 1 / lev)
+        liquidationPrice = entry - (availableMargin / quantity)
       } else {
-        liquidationPrice = entry * (1 + 1 / lev)
+        liquidationPrice = entry + (availableMargin / quantity)
       }
     }
 
@@ -326,7 +341,7 @@ const PositionCalculator = () => {
             </select>
           </div>
 
-          <LivePriceCard pair={cryptoPair} onUsePrice={handleUseCurrentPrice} />
+          <LivePriceCard pair={cryptoPair} exchange={selectedExchange} onUsePrice={handleUseCurrentPrice} />
 
           <div className="form-group">
             <label>Position Type</label>
@@ -495,6 +510,34 @@ const PositionCalculator = () => {
 
               {useLeverage && parseFloat(leverage) > 1 && (
                 <>
+                  <div className="liquidation-risk-overview">
+                    <h3>Liquidation Risk Overview</h3>
+                    <div className="risk-meter">
+                      <div className="risk-labels">
+                        <span>Entry: ${parseFloat(entryPrice).toFixed(2)}</span>
+                        <span className="liq-label">Liquidation: ${results.liquidationPrice.toFixed(2)}</span>
+                      </div>
+                      <div className="risk-bar-container">
+                        <div
+                          className={`risk-bar ${
+                            results.distanceToLiquidation < 5 ? 'critical' :
+                            results.distanceToLiquidation < 10 ? 'high' :
+                            results.distanceToLiquidation < 20 ? 'medium' : 'low'
+                          }`}
+                          style={{ width: `${Math.min(results.distanceToLiquidation * 5, 100)}%` }}
+                        >
+                          <span className="risk-percentage">{results.distanceToLiquidation.toFixed(1)}%</span>
+                        </div>
+                      </div>
+                      <div className="risk-status">
+                        {results.distanceToLiquidation < 5 ? '🚨 CRITICAL RISK - Position may liquidate quickly' :
+                         results.distanceToLiquidation < 10 ? '⚠️ HIGH RISK - Very close to liquidation' :
+                         results.distanceToLiquidation < 20 ? '⚠️ MEDIUM RISK - Monitor position closely' :
+                         '✓ Safer distance from liquidation'}
+                      </div>
+                    </div>
+                  </div>
+
                   <div className="result-card leverage-info">
                     <h3>Leverage Position</h3>
                     <div className="result-value">{leverage}x</div>
@@ -513,12 +556,20 @@ const PositionCalculator = () => {
                     <div className="result-subtext">{results.maintenanceMarginRate.toFixed(2)}% of position</div>
                   </div>
 
-                  <div className="result-card danger">
-                    <h3>Liquidation Price</h3>
+                  <div className={`result-card danger ${results.distanceToLiquidation < 10 ? 'critical-risk' : ''}`}>
+                    <h3>Liquidation Price ({selectedExchange.toUpperCase()})</h3>
                     <div className="result-value">${results.liquidationPrice.toFixed(2)}</div>
                     <div className="result-subtext">
                       {results.distanceToLiquidation.toFixed(2)}% from entry
-                      {results.distanceToLiquidation < 10 ? ' ⚠️ VERY CLOSE!' : ''}
+                      {results.distanceToLiquidation < 5 ? ' 🚨 CRITICAL!' : results.distanceToLiquidation < 10 ? ' ⚠️ VERY CLOSE!' : ''}
+                    </div>
+                    <div className="liquidation-details">
+                      <small>
+                        {positionType === 'long'
+                          ? `Price must stay above $${results.liquidationPrice.toFixed(2)}`
+                          : `Price must stay below $${results.liquidationPrice.toFixed(2)}`
+                        }
+                      </small>
                     </div>
                   </div>
 

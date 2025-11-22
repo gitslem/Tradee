@@ -6,10 +6,11 @@ import './LivePriceCard.css'
 
 interface LivePriceCardProps {
   pair: string
+  exchange?: string
   onUsePrice?: (price: number) => void
 }
 
-const LivePriceCard = ({ pair, onUsePrice }: LivePriceCardProps) => {
+const LivePriceCard = ({ pair, exchange = 'binance', onUsePrice }: LivePriceCardProps) => {
   const [priceData, setPriceData] = useState<CryptoPrice | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -18,7 +19,7 @@ const LivePriceCard = ({ pair, onUsePrice }: LivePriceCardProps) => {
   const fetchPrice = async () => {
     try {
       setError(null)
-      const data = await getCryptoPrice(pair)
+      const data = await getCryptoPrice(pair, exchange)
       if (data) {
         setPriceData(data)
       } else {
@@ -38,7 +39,7 @@ const LivePriceCard = ({ pair, onUsePrice }: LivePriceCardProps) => {
     // Auto-refresh every 30 seconds
     const interval = setInterval(fetchPrice, 30000)
     return () => clearInterval(interval)
-  }, [pair])
+  }, [pair, exchange])
 
   const handleRefresh = () => {
     setRefreshing(true)
@@ -89,6 +90,7 @@ const LivePriceCard = ({ pair, onUsePrice }: LivePriceCardProps) => {
       <div className="price-header">
         <div className="price-title">
           <h3>{priceData.symbol}</h3>
+          <span className="exchange-badge">{priceData.exchange.toUpperCase()}</span>
           <span className="live-indicator">
             <span className="pulse"></span>
             LIVE
