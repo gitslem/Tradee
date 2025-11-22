@@ -377,13 +377,6 @@ const LandingPage = () => {
             <div className="footer-copyright">
               <p>&copy; 2025 Traddii. All rights reserved.</p>
             </div>
-            <div className="footer-links-bottom">
-              <Link to="/terms">Terms</Link>
-              <span className="footer-separator">•</span>
-              <Link to="/privacy">Privacy</Link>
-              <span className="footer-separator">•</span>
-              <Link to="/faq">FAQ</Link>
-            </div>
             <div className="footer-tagline">
               <p>Trade Smart. Trade Safe. Trade Profitably.</p>
             </div>

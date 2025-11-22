@@ -24,7 +24,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  opacity: 0.08;
+  opacity: 0.15;
   pointer-events: none;
 }
 
@@ -85,7 +85,7 @@
 .chart-line {
   width: 200px;
   height: 100px;
-  opacity: 0.1;
+  opacity: 0.2;
   pointer-events: none;
 }
 
@@ -104,22 +104,22 @@
 @keyframes slideRightLeft {
   0%, 100% {
     transform: translateX(0);
-    opacity: 0.08;
+    opacity: 0.15;
   }
   50% {
     transform: translateX(-100px);
-    opacity: 0.12;
+    opacity: 0.25;
   }
 }
 
 @keyframes slideLeftRight {
   0%, 100% {
     transform: translateX(0);
-    opacity: 0.08;
+    opacity: 0.15;
   }
   50% {
     transform: translateX(100px);
-    opacity: 0.12;
+    opacity: 0.25;
   }
 }
 
@@ -127,7 +127,7 @@
 .trend-arrow {
   width: 60px;
   height: 60px;
-  opacity: 0.08;
+  opacity: 0.15;
   pointer-events: none;
 }
 
@@ -167,8 +167,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8px 20px rgba(245, 158, 11, 0.1);
-  opacity: 0.08;
+  box-shadow: 0 8px 20px rgba(245, 158, 11, 0.2);
+  opacity: 0.12;
   pointer-events: none;
 }
 
@@ -211,11 +211,11 @@
   padding: 0.75rem 1.25rem;
   background: white;
   border-radius: 12px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
-  opacity: 0.1;
+  opacity: 0.18;
   pointer-events: none;
 }
 
@@ -253,11 +253,11 @@
 @keyframes pulseScale {
   0%, 100% {
     transform: scale(1);
-    opacity: 0.08;
+    opacity: 0.15;
   }
   50% {
     transform: scale(1.05);
-    opacity: 0.12;
+    opacity: 0.2;
   }
 }
 
@@ -265,7 +265,7 @@
 .level-line {
   width: 250px;
   height: 40px;
-  opacity: 0.08;
+  opacity: 0.15;
   pointer-events: none;
 }
 
@@ -311,16 +311,16 @@
 
 @keyframes fadeInOut {
   0%, 100% {
-    opacity: 0.06;
+    opacity: 0.12;
   }
   50% {
-    opacity: 0.1;
+    opacity: 0.18;
   }
 }
 
 /* Geometric shapes */
 .geometric-shape {
-  opacity: 0.06;
+  opacity: 0.12;
   pointer-events: none;
 }
 
@@ -379,7 +379,7 @@
   height: 8px;
   border-radius: 50%;
   background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
-  opacity: 0.1;
+  opacity: 0.2;
   pointer-events: none;
 }
 
@@ -440,7 +440,7 @@
   height: 400px;
   border-radius: 50%;
   filter: blur(100px);
-  opacity: 0.04;
+  opacity: 0.08;
   pointer-events: none;
 }
 

@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import './App.css'
 import { AuthProvider } from './context/AuthContext'
 import Navigation from './components/Navigation'
+import Footer from './components/Footer'
 import LandingPage from './components/LandingPage'
 import Login from './components/Login'
 import TradingJournal from './components/TradingJournal'
@@ -43,6 +44,7 @@ function App() {
             <Route path="/terms" element={<Terms />} />
             <Route path="/privacy" element={<Privacy />} />
           </Routes>
+          <Footer />
         </div>
       </AuthProvider>
     </Router>
