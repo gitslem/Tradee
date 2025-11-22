@@ -35,7 +35,7 @@ const Navigation = () => {
       <div className="nav-container">
         <Link to="/" className="nav-logo">
           <div className="logo-icon">
-            <Logo size={36} />
+            <Logo size={52} />
           </div>
           <span className="logo-text">Traddii</span>
         </Link>
