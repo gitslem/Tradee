@@ -13,14 +13,14 @@ const Terms = () => {
           <section className="legal-section">
             <h2>1. Acceptance of Terms</h2>
             <p>
-              By accessing and using Tradee ("the Service," "we," "us," or "our"), you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to these Terms and Conditions, please do not use this Service.
+              By accessing and using Traddii ("the Service," "we," "us," or "our"), you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to these Terms and Conditions, please do not use this Service.
             </p>
           </section>
 
           <section className="legal-section">
             <h2>2. Description of Service</h2>
             <p>
-              Tradee provides educational trading tools including but not limited to:
+              Traddii provides educational trading tools including but not limited to:
             </p>
             <ul>
               <li>Position size calculator</li>
@@ -38,7 +38,7 @@ const Terms = () => {
             <h2>3. Not Financial Advice</h2>
             <div className="legal-warning">
               <p>
-                <strong>IMPORTANT:</strong> Tradee does not provide financial advice, investment recommendations, or trading signals. All information and tools provided are for educational purposes only. You should not construe any such information or other material as legal, tax, investment, financial, or other advice.
+                <strong>IMPORTANT:</strong> Traddii does not provide financial advice, investment recommendations, or trading signals. All information and tools provided are for educational purposes only. You should not construe any such information or other material as legal, tax, investment, financial, or other advice.
               </p>
             </div>
             <p>
@@ -64,7 +64,7 @@ const Terms = () => {
 
           <section className="legal-section">
             <h2>5. User Responsibilities</h2>
-            <p>When using Tradee, you agree to:</p>
+            <p>When using Traddii, you agree to:</p>
             <ul>
               <li>Provide accurate information when creating an account</li>
               <li>Maintain the security of your account credentials</li>
@@ -79,7 +79,7 @@ const Terms = () => {
           <section className="legal-section">
             <h2>6. Accuracy of Information</h2>
             <p>
-              While we strive to provide accurate calculations and data, Tradee makes no representations or warranties regarding the accuracy, completeness, or reliability of any information provided through the Service.
+              While we strive to provide accurate calculations and data, Traddii makes no representations or warranties regarding the accuracy, completeness, or reliability of any information provided through the Service.
             </p>
             <p>
               Exchange fees, leverage limits, and liquidation formulas may change without notice. Users are responsible for verifying current exchange parameters before trading.
@@ -89,7 +89,7 @@ const Terms = () => {
           <section className="legal-section">
             <h2>7. Third-Party Data</h2>
             <p>
-              Tradee integrates with third-party APIs (including but not limited to Binance, Bybit, and OKX) to provide real-time price data. We are not responsible for:
+              Traddii integrates with third-party APIs (including but not limited to Binance, Bybit, and OKX) to provide real-time price data. We are not responsible for:
             </p>
             <ul>
               <li>Accuracy of third-party data</li>
@@ -102,7 +102,7 @@ const Terms = () => {
           <section className="legal-section">
             <h2>8. Intellectual Property</h2>
             <p>
-              All content, features, and functionality of Tradee, including but not limited to text, graphics, logos, calculations, and software, are owned by Tradee or its licensors and are protected by international copyright, trademark, and other intellectual property laws.
+              All content, features, and functionality of Traddii, including but not limited to text, graphics, logos, calculations, and software, are owned by Traddii or its licensors and are protected by international copyright, trademark, and other intellectual property laws.
             </p>
             <p>
               You may not reproduce, distribute, modify, create derivative works of, publicly display, or exploit any of our content without our prior written permission.
@@ -112,7 +112,7 @@ const Terms = () => {
           <section className="legal-section">
             <h2>9. User Account and Data</h2>
             <p>
-              When you create an account with Tradee:
+              When you create an account with Traddii:
             </p>
             <ul>
               <li>You are responsible for maintaining the confidentiality of your account</li>
@@ -127,7 +127,7 @@ const Terms = () => {
             <h2>10. Limitation of Liability</h2>
             <div className="legal-warning">
               <p>
-                TO THE MAXIMUM EXTENT PERMITTED BY LAW, TRADEE SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, OR ANY LOSS OF PROFITS OR REVENUES, WHETHER INCURRED DIRECTLY OR INDIRECTLY, OR ANY LOSS OF DATA, USE, GOODWILL, OR OTHER INTANGIBLE LOSSES RESULTING FROM:
+                TO THE MAXIMUM EXTENT PERMITTED BY LAW, TRADDII SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, OR ANY LOSS OF PROFITS OR REVENUES, WHETHER INCURRED DIRECTLY OR INDIRECTLY, OR ANY LOSS OF DATA, USE, GOODWILL, OR OTHER INTANGIBLE LOSSES RESULTING FROM:
               </p>
             </div>
             <ul>
@@ -143,7 +143,7 @@ const Terms = () => {
           <section className="legal-section">
             <h2>11. Indemnification</h2>
             <p>
-              You agree to indemnify, defend, and hold harmless Tradee, its officers, directors, employees, and agents from and against any claims, liabilities, damages, losses, and expenses, including reasonable legal fees, arising out of or in any way connected with your access to or use of the Service, your violation of these Terms, or your violation of any rights of another party.
+              You agree to indemnify, defend, and hold harmless Traddii, its officers, directors, employees, and agents from and against any claims, liabilities, damages, losses, and expenses, including reasonable legal fees, arising out of or in any way connected with your access to or use of the Service, your violation of these Terms, or your violation of any rights of another party.
             </p>
           </section>
 
@@ -177,7 +177,7 @@ const Terms = () => {
           <section className="legal-section">
             <h2>15. Geographic Restrictions</h2>
             <p>
-              Tradee is provided for use by individuals worldwide. However, cryptocurrency trading may be illegal or restricted in certain jurisdictions. It is your responsibility to ensure compliance with local laws and regulations.
+              Traddii is provided for use by individuals worldwide. However, cryptocurrency trading may be illegal or restricted in certain jurisdictions. It is your responsibility to ensure compliance with local laws and regulations.
             </p>
           </section>
 
@@ -215,13 +215,13 @@ const Terms = () => {
               If you have any questions about these Terms and Conditions, please contact us at:
             </p>
             <div className="legal-contact">
-              <p><strong>Email:</strong> tradee444@gmail.com</p>
+              <p><strong>Email:</strong> traddii.web.app@gmail.com</p>
             </div>
           </section>
 
           <div className="legal-acknowledgment">
             <p>
-              <strong>By using Tradee, you acknowledge that you have read, understood, and agree to be bound by these Terms and Conditions.</strong>
+              <strong>By using Traddii, you acknowledge that you have read, understood, and agree to be bound by these Terms and Conditions.</strong>
             </p>
           </div>
         </div>

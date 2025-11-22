@@ -1,4 +1,4 @@
-import { Mail, MessageCircle, HelpCircle, Clock, Shield } from 'lucide-react'
+import { Mail, MessageCircle, HelpCircle, Clock, Shield, Phone } from 'lucide-react'
 import TradingBackground from './TradingBackground'
 import './Support.css'
 
@@ -27,22 +27,43 @@ const Support = () => {
             <p>Have a question or need help? We'd love to hear from you!</p>
           </div>
 
-          <div className="contact-card">
-            <div className="contact-card-icon">
-              <Mail size={40} />
-            </div>
-            <h3>Email Support</h3>
-            <p className="contact-description">
-              Send us your questions, feedback, or feature requests. We typically respond within 24-48 hours.
-            </p>
-            <a href="mailto:tradee444@gmail.com" className="email-link">
-              tradee444@gmail.com
-            </a>
-            <div className="contact-actions">
-              <a href="mailto:tradee444@gmail.com" className="btn-contact-primary">
-                <Mail size={20} />
-                Send Email
+          <div className="contact-methods-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '3rem' }}>
+            <div className="contact-card">
+              <div className="contact-card-icon">
+                <Mail size={40} />
+              </div>
+              <h3>Email Support</h3>
+              <p className="contact-description">
+                Send us your questions, feedback, or feature requests. We typically respond within 24-48 hours.
+              </p>
+              <a href="mailto:traddii.web.app@gmail.com" className="email-link">
+                traddii.web.app@gmail.com
               </a>
+              <div className="contact-actions">
+                <a href="mailto:traddii.web.app@gmail.com" className="btn-contact-primary">
+                  <Mail size={20} />
+                  Send Email
+                </a>
+              </div>
+            </div>
+
+            <div className="contact-card">
+              <div className="contact-card-icon">
+                <MessageCircle size={40} />
+              </div>
+              <h3>WhatsApp Support</h3>
+              <p className="contact-description">
+                Chat with us directly on WhatsApp for quick assistance and real-time support.
+              </p>
+              <a href="https://wa.me/" className="email-link" target="_blank" rel="noopener noreferrer">
+                
+              </a>
+              <div className="contact-actions">
+                <a href="https://wa.me/" target="_blank" rel="noopener noreferrer" className="btn-contact-primary" style={{ background: '#25D366' }}>
+                  <MessageCircle size={20} />
+                  Chat on WhatsApp
+                </a>
+              </div>
             </div>
           </div>
 
@@ -117,7 +138,7 @@ const Support = () => {
             <div className="faq-item">
               <h3>How do I report a bug or request a feature?</h3>
               <p>
-                Send us an email at tradee444@gmail.com with details about the bug or your feature request.
+                Send us an email at traddii.web.app@gmail.com or contact us on WhatsApp at  with details about the bug or your feature request.
                 We value your feedback and continuously improve based on user suggestions.
               </p>
             </div>

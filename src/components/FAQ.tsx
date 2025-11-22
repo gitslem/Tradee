@@ -12,20 +12,20 @@ const FAQ = () => {
 
   const faqData: FAQItem[] = [
     {
-      question: "What is Tradee and how can it help me?",
-      answer: "Tradee is a comprehensive suite of professional trading tools designed to help crypto traders manage risk, analyze markets, and track performance. Our Position Calculator helps you determine optimal position sizes based on your risk tolerance, the Market Structure tool identifies trends and key levels, Price Action Analysis recognizes candlestick patterns, and the Trading Journal tracks your trading history for continuous improvement."
+      question: "What is Traddii and how can it help me?",
+      answer: "Traddii is a comprehensive suite of professional trading tools designed to help crypto traders manage risk, analyze markets, and track performance. Our Position Calculator helps you determine optimal position sizes based on your risk tolerance, the Market Structure tool identifies trends and key levels, Price Action Analysis recognizes candlestick patterns, and the Trading Journal tracks your trading history for continuous improvement."
     },
     {
-      question: "Is Tradee really free to use?",
-      answer: "Yes! Tradee is completely free to use. All our core features including the Position Calculator, Market Structure Analysis, Price Action Analysis, and Trading Journal are available at no cost. We believe professional trading tools should be accessible to everyone, regardless of account size."
+      question: "Is Traddii really free to use?",
+      answer: "Yes! Traddii is completely free to use. All our core features including the Position Calculator, Market Structure Analysis, Price Action Analysis, and Trading Journal are available at no cost. We believe professional trading tools should be accessible to everyone, regardless of account size."
     },
     {
       question: "Do I need to create an account?",
       answer: "Most tools (Position Calculator, Market Structure, Price Action) can be used without an account. However, to use the Trading Journal and save your trade history, you'll need to sign in with Google. This ensures your data is securely stored and accessible from any device."
     },
     {
-      question: "Which exchanges does Tradee support?",
-      answer: "Tradee supports all major cryptocurrency exchanges including Binance, Bybit, OKX, KuCoin, Coinbase, Kraken, Gate.io, HTX (Huobi), Bitget, and MEXC. The Position Calculator automatically adjusts fees, leverage limits, and maintenance margin rates based on your selected exchange for accurate calculations."
+      question: "Which exchanges does Traddii support?",
+      answer: "Traddii supports all major cryptocurrency exchanges including Binance, Bybit, OKX, KuCoin, Coinbase, Kraken, Gate.io, HTX (Huobi), Bitget, and MEXC. The Position Calculator automatically adjusts fees, leverage limits, and maintenance margin rates based on your selected exchange for accurate calculations."
     },
     {
       question: "How accurate are the liquidation price calculations?",
@@ -52,16 +52,16 @@ const FAQ = () => {
       answer: "The Price Action Analysis tool recognizes over 20 candlestick patterns including Doji, Hammer, Engulfing, Shooting Star, and more. It analyzes the relationship between open, high, low, and close prices to identify potential reversal or continuation signals. Combined with volume analysis, it helps you time entries and exits more precisely."
     },
     {
-      question: "Can I use Tradee on mobile devices?",
-      answer: "Yes! Tradee is fully responsive and works seamlessly on smartphones, tablets, and desktop computers. The interface adapts to your screen size, ensuring all tools are accessible and easy to use on any device. You can analyze markets and calculate positions on the go."
+      question: "Can I use Traddii on mobile devices?",
+      answer: "Yes! Traddii is fully responsive and works seamlessly on smartphones, tablets, and desktop computers. The interface adapts to your screen size, ensuring all tools are accessible and easy to use on any device. You can analyze markets and calculate positions on the go."
     },
     {
       question: "Is my trading data secure?",
       answer: "Yes. We use Firebase Authentication and Firestore for secure data storage. Your trading journal data is encrypted and only accessible to you. We never share, sell, or access your personal trading information. For users who don't create accounts, no data is stored on our servers at all."
     },
     {
-      question: "Does Tradee provide financial advice?",
-      answer: "No. Tradee is an educational tool that provides calculators and analysis features. We do not provide financial advice, trading signals, or recommendations. All trading decisions are your own, and you should trade at your own risk. Consider consulting with a licensed financial advisor before making investment decisions."
+      question: "Does Traddii provide financial advice?",
+      answer: "No. Traddii is an educational tool that provides calculators and analysis features. We do not provide financial advice, trading signals, or recommendations. All trading decisions are your own, and you should trade at your own risk. Consider consulting with a licensed financial advisor before making investment decisions."
     },
     {
       question: "What's the difference between isolated and cross margin?",
@@ -93,15 +93,15 @@ const FAQ = () => {
     },
     {
       question: "What should I do if I encounter a bug?",
-      answer: "Please report bugs or issues through our Support page or email us at tradee444@gmail.com. Include a description of the issue, the tool you were using, your browser/device information, and steps to reproduce the problem. We actively monitor feedback and release updates regularly."
+      answer: "Please report bugs or issues through our Support page or email us at traddii.web.app@gmail.com. Include a description of the issue, the tool you were using, your browser/device information, and steps to reproduce the problem. We actively monitor feedback and release updates regularly."
     },
     {
       question: "Will you add more features in the future?",
-      answer: "Yes! We're continuously improving Tradee based on user feedback. Planned features include DCA (Dollar Cost Averaging) calculator, grid trading calculator, pivot points analysis, advanced chart patterns, economic calendar, and price alerts. Follow our updates for new feature announcements."
+      answer: "Yes! We're continuously improving Traddii based on user feedback. Planned features include DCA (Dollar Cost Averaging) calculator, grid trading calculator, pivot points analysis, advanced chart patterns, economic calendar, and price alerts. Follow our updates for new feature announcements."
     },
     {
-      question: "Can I use Tradee for stocks or forex trading?",
-      answer: "Currently, Tradee is optimized for cryptocurrency trading with exchange-specific configurations for major crypto platforms. While the core position sizing principles apply to all markets, exchange fees, leverage limits, and liquidation formulas are specific to crypto exchanges."
+      question: "Can I use Traddii for stocks or forex trading?",
+      answer: "Currently, Traddii is optimized for cryptocurrency trading with exchange-specific configurations for major crypto platforms. While the core position sizing principles apply to all markets, exchange fees, leverage limits, and liquidation formulas are specific to crypto exchanges."
     },
     {
       question: "What's the recommended risk percentage per trade?",
@@ -118,7 +118,7 @@ const FAQ = () => {
       <div className="faq-container">
         <div className="faq-header">
           <h1>Frequently Asked Questions</h1>
-          <p>Everything you need to know about Tradee trading tools</p>
+          <p>Everything you need to know about Traddii trading tools</p>
         </div>
 
         <div className="faq-list">
@@ -148,7 +148,7 @@ const FAQ = () => {
         <div className="faq-footer">
           <h3>Still have questions?</h3>
           <p>Can't find the answer you're looking for? Feel free to reach out to us.</p>
-          <a href="mailto:tradee444@gmail.com" className="btn-contact">
+          <a href="mailto:traddii.web.app@gmail.com" className="btn-contact">
             Contact Support
           </a>
         </div>
