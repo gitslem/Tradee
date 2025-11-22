@@ -28,12 +28,43 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  text-align: center;
+  animation: slideInFromTop 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .price-action > p {
-  font-size: var(--font-size-lg);
-  color: var(--color-text-secondary);
+  font-size: var(--font-size-xl);
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-medium);
   margin-bottom: var(--space-10);
+  text-align: center;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: var(--line-height-relaxed);
+  animation: slideInFromBottom 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.1s backwards;
+}
+
+@keyframes slideInFromTop {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInFromBottom {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .price-action-grid {
@@ -81,7 +112,8 @@
   margin-bottom: var(--space-2);
   color: var(--color-text-primary);
   font-weight: var(--font-weight-semibold);
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-base);
+  letter-spacing: 0.01em;
 }
 
 .price-action .form-group input,
@@ -93,15 +125,27 @@
   font-size: var(--font-size-base);
   background: var(--color-surface);
   color: var(--color-text-primary);
+  font-weight: var(--font-weight-medium);
   transition: all var(--transition-fast);
   min-height: 44px; /* Touch-friendly */
+}
+
+.price-action .form-group input:hover,
+.price-action .form-group select:hover {
+  border-color: var(--color-primary);
+  background: var(--color-background);
 }
 
 .price-action .form-group input:focus,
 .price-action .form-group select:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px var(--color-primary-light);
+  box-shadow: 0 0 0 3px var(--color-primary-alpha-10);
+}
+
+.price-action .form-group input::placeholder {
+  color: var(--color-text-tertiary);
+  opacity: 0.8;
 }
 
 /* Candle Visualization */
@@ -235,7 +279,8 @@
   border-radius: var(--radius-lg);
   margin-bottom: var(--space-3);
   font-size: var(--font-size-base);
-  color: var(--color-text-secondary);
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-medium);
   line-height: var(--line-height-relaxed);
   border-left: 4px solid var(--color-primary);
 }
@@ -312,7 +357,8 @@
 .trading-checklist li,
 .tips-section li {
   padding: var(--space-2) 0 var(--space-2) var(--space-6);
-  color: var(--color-text-secondary);
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-medium);
   position: relative;
   line-height: var(--line-height-relaxed);
 }
