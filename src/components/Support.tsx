@@ -1,4 +1,4 @@
-import { Mail, MessageCircle, HelpCircle, Clock, Shield, Phone } from 'lucide-react'
+import { Mail, MessageCircle, HelpCircle, Clock, Shield } from 'lucide-react'
 import TradingBackground from './TradingBackground'
 import './Support.css'
 

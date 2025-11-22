@@ -57,7 +57,7 @@ const PriceActionBackground = () => {
           high,
           low,
           bullish: isBullish,
-          opacity: 0.15 + Math.random() * 0.2
+          opacity: 0.3 + Math.random() * 0.3
         })
 
         prevClose = close
@@ -110,18 +110,21 @@ const PriceActionBackground = () => {
         }
         drawCandle(tempCandle)
 
-        // Pulse opacity
-        candle.opacity = 0.15 + Math.sin(time * 2 + index) * 0.1
+        // Pulse opacity - more visible and dynamic
+        candle.opacity = 0.35 + Math.sin(time * 2 + index) * 0.2
       })
 
-      // Draw trend lines
-      ctx.strokeStyle = 'rgba(147, 51, 234, 0.2)'
-      ctx.lineWidth = 3
+      // Draw trend lines - more visible with glow effect
+      ctx.strokeStyle = 'rgba(147, 51, 234, 0.4)'
+      ctx.lineWidth = 4
+      ctx.shadowColor = 'rgba(147, 51, 234, 0.6)'
+      ctx.shadowBlur = 15
       ctx.setLineDash([10, 5])
       ctx.beginPath()
       ctx.moveTo(0, canvas.height * 0.3 + Math.sin(time) * 20)
       ctx.lineTo(canvas.width, canvas.height * 0.7 + Math.cos(time) * 20)
       ctx.stroke()
+      ctx.shadowBlur = 0
       ctx.setLineDash([])
 
       animationId = requestAnimationFrame(animate)
