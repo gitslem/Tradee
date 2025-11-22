@@ -13,10 +13,10 @@ const Privacy = () => {
           <section className="legal-section">
             <h2>1. Introduction</h2>
             <p>
-              Tradee ("we," "us," or "our") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our trading tools and services.
+              Traddii ("we," "us," or "our") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our trading tools and services.
             </p>
             <p>
-              Please read this Privacy Policy carefully. By using Tradee, you agree to the collection and use of information in accordance with this policy.
+              Please read this Privacy Policy carefully. By using Traddii, you agree to the collection and use of information in accordance with this policy.
             </p>
           </section>
 
@@ -32,7 +32,7 @@ const Privacy = () => {
             </ul>
 
             <h3>2.2 Information Automatically Collected</h3>
-            <p>When you access Tradee, we automatically collect:</p>
+            <p>When you access Traddii, we automatically collect:</p>
             <ul>
               <li><strong>Usage Data:</strong> Pages visited, features used, time spent, and interaction patterns</li>
               <li><strong>Device Information:</strong> Browser type, operating system, device type, and screen resolution</li>
@@ -148,7 +148,7 @@ const Privacy = () => {
               <li>Analyze usage patterns and improve our services</li>
             </ul>
             <p>
-              You can control cookies through your browser settings. Note that disabling cookies may affect certain features of Tradee.
+              You can control cookies through your browser settings. Note that disabling cookies may affect certain features of Traddii.
             </p>
           </section>
 
@@ -184,20 +184,20 @@ const Privacy = () => {
               <li>Request restrictions on data processing</li>
             </ul>
 
-            <p>To exercise any of these rights, contact us at tradee444@gmail.com</p>
+            <p>To exercise any of these rights, contact us at traddii.web.app@gmail.com</p>
           </section>
 
           <section className="legal-section">
             <h2>9. Children's Privacy</h2>
             <p>
-              Tradee is not intended for individuals under the age of 18. We do not knowingly collect personal information from children under 18. If you are a parent or guardian and believe your child has provided us with personal information, please contact us immediately.
+              Traddii is not intended for individuals under the age of 18. We do not knowingly collect personal information from children under 18. If you are a parent or guardian and believe your child has provided us with personal information, please contact us immediately.
             </p>
           </section>
 
           <section className="legal-section">
             <h2>10. International Data Transfers</h2>
             <p>
-              Your information may be transferred to and maintained on servers located outside your country of residence. By using Tradee, you consent to the transfer of information to countries outside your home country, which may have different data protection rules.
+              Your information may be transferred to and maintained on servers located outside your country of residence. By using Traddii, you consent to the transfer of information to countries outside your home country, which may have different data protection rules.
             </p>
             <p>
               We ensure appropriate safeguards are in place to protect your information in accordance with this Privacy Policy.
@@ -247,7 +247,7 @@ const Privacy = () => {
               <li>Sending an email notification (for significant changes)</li>
             </ul>
             <p>
-              Continued use of Tradee after changes constitutes acceptance of the updated Privacy Policy.
+              Continued use of Traddii after changes constitutes acceptance of the updated Privacy Policy.
             </p>
           </section>
 
@@ -271,8 +271,8 @@ const Privacy = () => {
               If you have questions, concerns, or requests regarding this Privacy Policy or your personal information, please contact us:
             </p>
             <div className="legal-contact">
-              <p><strong>Email:</strong> tradee444@gmail.com</p>
-              <p><strong>Subject:</strong> Privacy Inquiry - Tradee</p>
+              <p><strong>Email:</strong> traddii.web.app@gmail.com</p>
+              <p><strong>Subject:</strong> Privacy Inquiry - Traddii</p>
             </div>
             <p>
               We will respond to your inquiry within 30 days.
@@ -281,7 +281,7 @@ const Privacy = () => {
 
           <div className="legal-acknowledgment">
             <p>
-              <strong>By using Tradee, you acknowledge that you have read and understood this Privacy Policy and agree to its terms.</strong>
+              <strong>By using Traddii, you acknowledge that you have read and understood this Privacy Policy and agree to its terms.</strong>
             </p>
           </div>
         </div>
