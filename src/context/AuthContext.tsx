@@ -4,7 +4,7 @@ import {
   signInWithPopup,
   signOut as firebaseSignOut,
   onAuthStateChanged,
-  User as FirebaseUser
+  type User as FirebaseUser
 } from 'firebase/auth'
 import { auth, googleProvider } from '../config/firebase'
 
