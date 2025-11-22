@@ -1,32 +1,26 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <!-- Light background for visibility in browser tabs -->
-  <rect width="100" height="100" fill="#f8f8f8" rx="12"/>
+  <!-- Simple, clean crown/chart icon - no background, just the icon -->
 
-  <!-- Bold crown with upward trend chart in gold - optimized for small sizes -->
-  <g transform="translate(12, 20)">
-    <!-- Crown shape with chart pattern - using filled paths for better visibility -->
+  <!-- Crown with upward trend chart in gold -->
+  <g transform="translate(8, 15)">
+    <!-- Crown base -->
+    <rect x="5" y="70" width="75" height="8" fill="#D4AF37" rx="2"/>
 
-    <!-- Left side of crown -->
-    <path d="M 10 60 L 10 45 L 18 50 L 18 60 Z"
-          fill="#D4AF37"/>
+    <!-- Left wall -->
+    <rect x="5" y="45" width="8" height="25" fill="#D4AF37"/>
 
-    <!-- Second peak (rising) -->
-    <path d="M 18 50 L 18 35 L 26 40 L 26 60 L 18 60 Z"
-          fill="#D4AF37"/>
+    <!-- Rising bars creating crown peaks -->
+    <rect x="18" y="38" width="10" height="32" fill="#D4AF37"/>
+    <rect x="33" y="28" width="10" height="42" fill="#D4AF37"/>
+    <rect x="48" y="18" width="10" height="52" fill="#D4AF37"/>
 
-    <!-- Middle high peak -->
-    <path d="M 26 40 L 26 22 L 34 28 L 42 34 L 42 60 L 26 60 Z"
-          fill="#D4AF37"/>
+    <!-- Upward arrow trend -->
+    <rect x="63" y="12" width="10" height="58" fill="#D4AF37"/>
 
-    <!-- Right side - upward arrow trend -->
-    <path d="M 42 34 L 50 26 L 58 18 L 58 60 L 42 60 Z"
-          fill="#D4AF37"/>
+    <!-- Arrow point -->
+    <polygon points="68,5 63,15 73,15" fill="#D4AF37"/>
 
-    <!-- Arrow head pointing up-right -->
-    <path d="M 54 18 L 54 26 L 58 18 L 66 22 L 58 18 Z"
-          fill="#D4AF37"/>
-
-    <!-- Base of crown (thicker) -->
-    <rect x="10" y="62" width="56" height="6" fill="#D4AF37" rx="2"/>
+    <!-- Right wall -->
+    <rect x="77" y="45" width="8" height="25" fill="#D4AF37"/>
   </g>
 </svg>
