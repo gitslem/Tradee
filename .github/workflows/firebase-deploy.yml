@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - master
+      - claude/firebase-deployment-prep-01Wc9nGqqUD3uwLdtnjcTT4R
   workflow_dispatch:
 
 jobs:
