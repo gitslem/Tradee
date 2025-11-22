@@ -3,6 +3,7 @@ import { Calculator, TrendingUp, Target, Shield, Zap, BarChart3, AlertTriangle, 
 import TradingBackground from './TradingBackground'
 import TradingCharts from './TradingCharts'
 import LiveTradingChart from './LiveTradingChart'
+import EmailSubscription from './EmailSubscription'
 import './LandingPage.css'
 
 const LandingPage = () => {
@@ -274,6 +275,9 @@ const LandingPage = () => {
           </div>
         </div>
       </section>
+
+      {/* Email Subscription Section */}
+      <EmailSubscription />
 
       {/* CTA Section */}
       <section className="cta-section">
