@@ -12,10 +12,24 @@
   gap: 60px;
   align-items: center;
   padding: 80px 60px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%);
   position: relative;
   overflow: hidden;
   z-index: 1;
+}
+
+.hero::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background:
+    radial-gradient(circle at 20% 50%, rgba(212, 175, 55, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 80% 50%, rgba(244, 208, 63, 0.1) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
 }
 
 .hero::before {
@@ -57,10 +71,11 @@
 }
 
 .gradient-text {
-  background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
+  background: linear-gradient(135deg, #D4AF37 0%, #F4D03F 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  filter: drop-shadow(0 2px 8px rgba(212, 175, 55, 0.4));
 }
 
 .hero-subtitle {
@@ -82,20 +97,21 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: white;
-  color: #667eea;
+  background: linear-gradient(135deg, #D4AF37 0%, #F4D03F 100%);
+  color: #1a1a1a;
   padding: 16px 32px;
   border-radius: 12px;
   font-weight: 700;
   font-size: 1.1rem;
   text-decoration: none;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 20px rgba(212, 175, 55, 0.3);
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 30px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 30px rgba(212, 175, 55, 0.5);
+  filter: brightness(1.1);
 }
 
 .btn-secondary {
@@ -484,14 +500,14 @@
   width: 90px;
   height: 90px;
   margin: 0 auto 24px;
-  background: linear-gradient(135deg, #667eea 0%, #ec4899 100%);
+  background: linear-gradient(135deg, #D4AF37 0%, #F4D03F 100%);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: #1a1a1a;
   transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.25);
+  box-shadow: 0 8px 24px rgba(212, 175, 55, 0.4);
   position: relative;
   z-index: 1;
   animation: iconRotate 8s linear infinite, iconPulse 3s ease-in-out infinite;
@@ -501,7 +517,7 @@
   content: '';
   position: absolute;
   inset: -3px;
-  background: linear-gradient(135deg, #667eea, #ec4899, #f093fb, #667eea);
+  background: linear-gradient(135deg, #D4AF37, #F4D03F, #FFD700, #D4AF37);
   border-radius: 50%;
   z-index: -1;
   opacity: 0;
@@ -561,7 +577,7 @@
 }
 
 .why-card:hover .why-title {
-  background: linear-gradient(135deg, #667eea 0%, #ec4899 100%);
+  background: linear-gradient(135deg, #D4AF37 0%, #F4D03F 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -613,10 +629,24 @@
 .cta-section {
   padding: 100px 60px;
   text-align: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%);
   position: relative;
   overflow: hidden;
   min-height: 800px;
+}
+
+.cta-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background:
+    radial-gradient(circle at 30% 40%, rgba(212, 175, 55, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 70% 60%, rgba(244, 208, 63, 0.1) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 1;
 }
 
 .cta-container {
@@ -698,13 +728,14 @@
 }
 
 .btn-cta-primary {
-  background: white;
-  color: #667eea;
+  background: linear-gradient(135deg, #D4AF37 0%, #F4D03F 100%);
+  color: #1a1a1a;
 }
 
 .btn-cta-primary:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 32px rgba(255, 255, 255, 0.3);
+  box-shadow: 0 12px 32px rgba(212, 175, 55, 0.6);
+  filter: brightness(1.1);
 }
 
 .btn-cta-secondary {
@@ -904,11 +935,12 @@
 .footer-logo {
   font-size: 2rem;
   font-weight: 900;
-  background: linear-gradient(135deg, #667eea 0%, #ec4899 100%);
+  background: linear-gradient(135deg, #D4AF37 0%, #F4D03F 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   margin-bottom: 16px;
+  filter: drop-shadow(0 2px 4px rgba(212, 175, 55, 0.3));
 }
 
 .footer-description {
@@ -943,7 +975,7 @@
 }
 
 .footer-links li a:hover {
-  color: #667eea;
+  color: var(--color-primary-light);
 }
 
 .footer-links li span.footer-disclaimer {
