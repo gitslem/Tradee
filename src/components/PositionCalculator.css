@@ -360,6 +360,135 @@
   margin-bottom: 8px;
 }
 
+/* Liquidation Risk Overview */
+.liquidation-risk-overview {
+  background: linear-gradient(135deg, #fff9f9 0%, #ffe6e6 100%);
+  border: 3px solid #ff6b6b;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 20px;
+  box-shadow: 0 6px 20px rgba(255, 107, 107, 0.25);
+  grid-column: 1 / -1;
+  animation: slideIn 0.5s ease-out;
+}
+
+.liquidation-risk-overview h3 {
+  color: #d32f2f;
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.risk-meter {
+  background: white;
+  padding: 16px;
+  border-radius: 12px;
+}
+
+.risk-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.risk-labels .liq-label {
+  color: #d32f2f;
+}
+
+.risk-bar-container {
+  background: #f0f0f0;
+  height: 40px;
+  border-radius: 20px;
+  overflow: hidden;
+  position: relative;
+  margin-bottom: 12px;
+}
+
+.risk-bar {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 12px;
+  border-radius: 20px;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.risk-bar.critical {
+  background: linear-gradient(90deg, #ff1744 0%, #f50057 100%);
+  animation: pulse-critical 2s infinite;
+}
+
+.risk-bar.high {
+  background: linear-gradient(90deg, #ff6b6b 0%, #ee5a6f 100%);
+}
+
+.risk-bar.medium {
+  background: linear-gradient(90deg, #ffa726 0%, #fb8c00 100%);
+}
+
+.risk-bar.low {
+  background: linear-gradient(90deg, #66bb6a 0%, #43a047 100%);
+}
+
+@keyframes pulse-critical {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.risk-percentage {
+  color: white;
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.risk-status {
+  text-align: center;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.7);
+  color: #d32f2f;
+}
+
+.result-card.critical-risk {
+  border: 3px solid #d32f2f;
+  box-shadow: 0 0 20px rgba(211, 47, 47, 0.4);
+  animation: pulse-border 2s infinite;
+}
+
+@keyframes pulse-border {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(211, 47, 47, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(211, 47, 47, 0.6);
+  }
+}
+
+.liquidation-details {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.liquidation-details small {
+  opacity: 0.9;
+  font-size: 0.85rem;
+}
+
 @media (max-width: 968px) {
   .calculator-grid {
     grid-template-columns: 1fr;
@@ -451,5 +580,21 @@
   .leverage-toggle small {
     margin-left: 20px;
     font-size: 0.85rem;
+  }
+
+  .liquidation-risk-overview {
+    padding: 16px;
+  }
+
+  .risk-meter {
+    padding: 12px 0;
+  }
+
+  .risk-bar-container {
+    height: 30px;
+  }
+
+  .risk-percentage {
+    font-size: 0.75rem;
   }
 }
