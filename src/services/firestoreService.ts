@@ -108,14 +108,22 @@ class FirestoreService {
   // Get all trades for a user
   async getUserTrades(userId: string): Promise<Trade[]> {
     try {
+      // Note: Removed orderBy to avoid needing a composite index
+      // We'll sort client-side instead
       const q = query(
         collection(db, this.collectionName),
-        where('userId', '==', userId),
-        orderBy('createdAt', 'desc')
+        where('userId', '==', userId)
       )
 
       const querySnapshot = await getDocs(q)
-      return this.convertToTrades(querySnapshot)
+      const trades = this.convertToTrades(querySnapshot)
+
+      // Sort by createdAt descending (newest first) on the client side
+      return trades.sort((a, b) => {
+        const dateA = new Date(a.createdAt).getTime()
+        const dateB = new Date(b.createdAt).getTime()
+        return dateB - dateA // Descending order
+      })
     } catch (error) {
       console.error('Error getting user trades:', error)
       throw error
@@ -124,15 +132,22 @@ class FirestoreService {
 
   // Listen to real-time updates for user trades
   subscribeToUserTrades(userId: string, callback: (trades: Trade[]) => void): () => void {
+    // Note: Removed orderBy to avoid needing a composite index
+    // We'll sort client-side instead
     const q = query(
       collection(db, this.collectionName),
-      where('userId', '==', userId),
-      orderBy('createdAt', 'desc')
+      where('userId', '==', userId)
     )
 
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const trades = this.convertToTrades(querySnapshot)
-      callback(trades)
+      // Sort by createdAt descending (newest first) on the client side
+      const sortedTrades = trades.sort((a, b) => {
+        const dateA = new Date(a.createdAt).getTime()
+        const dateB = new Date(b.createdAt).getTime()
+        return dateB - dateA // Descending order
+      })
+      callback(sortedTrades)
     }, (error) => {
       console.error('Error listening to trades:', error)
     })
