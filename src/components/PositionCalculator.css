@@ -455,6 +455,98 @@
   animation: slideUp var(--transition-slow);
 }
 
+.leverage-section label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-warning-dark);
+}
+
+.leverage-max-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-1) var(--space-3);
+  background: var(--color-warning);
+  color: white;
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+  }
+  50% {
+    box-shadow: 0 2px 12px rgba(245, 158, 11, 0.5);
+  }
+}
+
+.leverage-section select {
+  background: white;
+  border: 2px solid var(--color-warning);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-warning-dark);
+  font-size: var(--font-size-lg);
+}
+
+.leverage-section select:hover {
+  border-color: var(--color-warning-dark);
+  background: var(--color-warning-alpha-10);
+}
+
+.leverage-section select:focus {
+  border-color: var(--color-warning-dark);
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+}
+
+.leverage-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  background: rgba(239, 68, 68, 0.1);
+  border: 2px solid var(--color-danger);
+  border-radius: var(--radius-lg);
+  margin-top: var(--space-4);
+  line-height: var(--line-height-relaxed);
+  color: var(--color-danger-dark);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+}
+
+.warning-icon {
+  font-size: var(--font-size-xl);
+  flex-shrink: 0;
+  animation: shake 3s ease-in-out infinite;
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: translateX(-2px);
+  }
+  20%, 40%, 60%, 80% {
+    transform: translateX(2px);
+  }
+}
+
+.leverage-warning strong {
+  color: var(--color-danger);
+  font-weight: var(--font-weight-bold);
+}
+
 /* Take Profit Section */
 .tp-targets-section {
   margin-top: var(--space-6);
@@ -705,6 +797,29 @@
   .leverage-toggle small {
     margin-left: 0;
     margin-top: var(--space-3);
+  }
+
+  .leverage-section label {
+    font-size: var(--font-size-base);
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .leverage-max-badge {
+    font-size: var(--font-size-xs);
+  }
+
+  .leverage-section select {
+    font-size: var(--font-size-base);
+  }
+
+  .leverage-warning {
+    font-size: var(--font-size-sm);
+    padding: var(--space-3);
+  }
+
+  .warning-icon {
+    font-size: var(--font-size-lg);
   }
 
   .quick-stats li {
