@@ -1,19 +1,26 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import type { ReactNode } from 'react'
+import {
+  signInWithPopup,
+  signOut as firebaseSignOut,
+  onAuthStateChanged,
+  User as FirebaseUser
+} from 'firebase/auth'
+import { auth, googleProvider } from '../config/firebase'
 
 interface User {
+  uid: string
   email: string
-  createdAt: string
-  lastLogin: string
+  displayName: string | null
+  photoURL: string | null
 }
 
 interface AuthContextType {
   user: User | null
   isAuthenticated: boolean
-  login: (email: string, code: string) => Promise<boolean>
-  sendVerificationCode: (email: string) => Promise<boolean>
-  logout: () => void
   loading: boolean
+  signInWithGoogle: () => Promise<void>
+  logout: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -35,117 +42,51 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Check for existing session
-    const storedUser = localStorage.getItem('traddii_user')
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser))
-      } catch (error) {
-        console.error('Error parsing stored user:', error)
-        localStorage.removeItem('traddii_user')
+    // Listen for auth state changes
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser: FirebaseUser | null) => {
+      if (firebaseUser) {
+        setUser({
+          uid: firebaseUser.uid,
+          email: firebaseUser.email || '',
+          displayName: firebaseUser.displayName,
+          photoURL: firebaseUser.photoURL
+        })
+      } else {
+        setUser(null)
       }
-    }
-    setLoading(false)
+      setLoading(false)
+    })
+
+    return () => unsubscribe()
   }, [])
 
-  const sendVerificationCode = async (email: string): Promise<boolean> => {
+  const signInWithGoogle = async () => {
     try {
-      // Validate email format
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-      if (!emailRegex.test(email)) {
-        return false
-      }
-
-      // Generate a 6-digit verification code
-      const code = Math.floor(100000 + Math.random() * 900000).toString()
-
-      // Store the code temporarily (in real app, this would be sent via email and stored server-side)
-      const verificationData = {
-        email,
-        code,
-        expiresAt: Date.now() + 10 * 60 * 1000 // 10 minutes
-      }
-
-      localStorage.setItem('traddii_verification', JSON.stringify(verificationData))
-
-      // In a real app, send email here
-      console.log(`Verification code for ${email}: ${code}`)
-      alert(`Demo Mode: Your verification code is ${code}\n\nIn production, this would be sent to your email.`)
-
-      return true
+      const result = await signInWithPopup(auth, googleProvider)
+      // User is automatically set by onAuthStateChanged listener
+      console.log('Successfully signed in:', result.user.email)
     } catch (error) {
-      console.error('Error sending verification code:', error)
-      return false
+      console.error('Error signing in with Google:', error)
+      throw error
     }
   }
 
-  const login = async (email: string, code: string): Promise<boolean> => {
+  const logout = async () => {
     try {
-      // Retrieve stored verification data
-      const storedData = localStorage.getItem('traddii_verification')
-      if (!storedData) {
-        return false
-      }
-
-      const verificationData = JSON.parse(storedData)
-
-      // Check if code matches and hasn't expired
-      if (
-        verificationData.email !== email ||
-        verificationData.code !== code ||
-        Date.now() > verificationData.expiresAt
-      ) {
-        return false
-      }
-
-      // Check if user already exists
-      const existingUsers = JSON.parse(localStorage.getItem('traddii_users') || '[]')
-      let userData = existingUsers.find((u: User) => u.email === email)
-
-      if (!userData) {
-        // Create new user
-        userData = {
-          email,
-          createdAt: new Date().toISOString(),
-          lastLogin: new Date().toISOString()
-        }
-        existingUsers.push(userData)
-        localStorage.setItem('traddii_users', JSON.stringify(existingUsers))
-      } else {
-        // Update last login
-        userData.lastLogin = new Date().toISOString()
-        const updatedUsers = existingUsers.map((u: User) =>
-          u.email === email ? userData : u
-        )
-        localStorage.setItem('traddii_users', JSON.stringify(updatedUsers))
-      }
-
-      // Set current user
-      setUser(userData)
-      localStorage.setItem('traddii_user', JSON.stringify(userData))
-
-      // Clear verification data
-      localStorage.removeItem('traddii_verification')
-
-      return true
+      await firebaseSignOut(auth)
+      setUser(null)
     } catch (error) {
-      console.error('Error during login:', error)
-      return false
+      console.error('Error signing out:', error)
+      throw error
     }
-  }
-
-  const logout = () => {
-    setUser(null)
-    localStorage.removeItem('traddii_user')
   }
 
   const value: AuthContextType = {
     user,
     isAuthenticated: !!user,
-    login,
-    sendVerificationCode,
-    logout,
-    loading
+    loading,
+    signInWithGoogle,
+    logout
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
