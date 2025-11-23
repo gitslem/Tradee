@@ -390,9 +390,6 @@ const TradingJournal = ({ onTradesUpdate, compact = false }: TradingJournalProps
           }}
         />
       )}
-
-      {/* Personal Notes Section */}
-      <PersonalNotes trades={trades} />
     </div>
   )
 }
