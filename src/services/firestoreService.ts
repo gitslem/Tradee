@@ -58,8 +58,22 @@ export interface TradeStats {
   bestExchange: string
 }
 
+export interface JournalNote {
+  id: string
+  userId: string
+  title: string
+  content: string
+  category: 'strategy' | 'plan' | 'idea' | 'reflection' | 'concept' | 'general'
+  tags: string[]
+  relatedTrades: string[] // Array of trade IDs
+  isPinned: boolean
+  createdAt: string
+  updatedAt: string
+}
+
 class FirestoreService {
   private collectionName = 'trades'
+  private notesCollectionName = 'journal_notes'
 
   // Add a new trade
   async addTrade(userId: string, trade: Omit<Trade, 'id' | 'userId' | 'createdAt' | 'updatedAt'>): Promise<string> {
@@ -282,6 +296,157 @@ class FirestoreService {
         id: doc.id,
         ...data
       } as Trade
+    })
+  }
+
+  // ============= JOURNAL NOTES METHODS =============
+
+  // Add a new journal note
+  async addNote(userId: string, note: Omit<JournalNote, 'id' | 'userId' | 'createdAt' | 'updatedAt'>): Promise<string> {
+    try {
+      const noteData = {
+        ...note,
+        userId,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      }
+
+      const docRef = await addDoc(collection(db, this.notesCollectionName), noteData)
+      return docRef.id
+    } catch (error) {
+      console.error('Error adding note:', error)
+      throw error
+    }
+  }
+
+  // Update an existing note
+  async updateNote(noteId: string, updates: Partial<JournalNote>): Promise<void> {
+    try {
+      const noteRef = doc(db, this.notesCollectionName, noteId)
+      await updateDoc(noteRef, {
+        ...updates,
+        updatedAt: new Date().toISOString()
+      })
+    } catch (error) {
+      console.error('Error updating note:', error)
+      throw error
+    }
+  }
+
+  // Delete a note
+  async deleteNote(noteId: string): Promise<void> {
+    try {
+      const noteRef = doc(db, this.notesCollectionName, noteId)
+      await deleteDoc(noteRef)
+    } catch (error) {
+      console.error('Error deleting note:', error)
+      throw error
+    }
+  }
+
+  // Get all notes for a user
+  async getUserNotes(userId: string): Promise<JournalNote[]> {
+    try {
+      const q = query(
+        collection(db, this.notesCollectionName),
+        where('userId', '==', userId)
+      )
+
+      const querySnapshot = await getDocs(q)
+      const notes = this.convertToNotes(querySnapshot)
+
+      // Sort by pinned first, then by updated date (newest first)
+      return notes.sort((a, b) => {
+        if (a.isPinned && !b.isPinned) return -1
+        if (!a.isPinned && b.isPinned) return 1
+        const dateA = new Date(a.updatedAt).getTime()
+        const dateB = new Date(b.updatedAt).getTime()
+        return dateB - dateA
+      })
+    } catch (error) {
+      console.error('Error getting user notes:', error)
+      throw error
+    }
+  }
+
+  // Listen to real-time updates for user notes
+  subscribeToUserNotes(userId: string, callback: (notes: JournalNote[]) => void): () => void {
+    const q = query(
+      collection(db, this.notesCollectionName),
+      where('userId', '==', userId)
+    )
+
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const notes = this.convertToNotes(querySnapshot)
+      // Sort by pinned first, then by updated date (newest first)
+      const sortedNotes = notes.sort((a, b) => {
+        if (a.isPinned && !b.isPinned) return -1
+        if (!a.isPinned && b.isPinned) return 1
+        const dateA = new Date(a.updatedAt).getTime()
+        const dateB = new Date(b.updatedAt).getTime()
+        return dateB - dateA
+      })
+      callback(sortedNotes)
+    }, (error) => {
+      console.error('Error listening to notes:', error)
+    })
+
+    return unsubscribe
+  }
+
+  // Export notes to CSV
+  exportNotesToCSV(notes: JournalNote[]): string {
+    const headers = [
+      'Date Created',
+      'Last Updated',
+      'Title',
+      'Category',
+      'Content',
+      'Tags',
+      'Pinned'
+    ].join(',')
+
+    const rows = notes.map(note => [
+      note.createdAt,
+      note.updatedAt,
+      `"${note.title.replace(/"/g, '""')}"`,
+      note.category,
+      `"${note.content.replace(/"/g, '""')}"`,
+      `"${note.tags.join(', ')}"`,
+      note.isPinned
+    ].join(','))
+
+    return [headers, ...rows].join('\n')
+  }
+
+  // Export notes to JSON
+  exportNotesToJSON(notes: JournalNote[]): string {
+    return JSON.stringify(notes, null, 2)
+  }
+
+  // Export combined data (trades + notes)
+  exportCombinedToJSON(trades: Trade[], notes: JournalNote[]): string {
+    const combined = {
+      exportDate: new Date().toISOString(),
+      trades,
+      notes,
+      summary: {
+        totalTrades: trades.length,
+        totalNotes: notes.length,
+        stats: this.calculateStats(trades)
+      }
+    }
+    return JSON.stringify(combined, null, 2)
+  }
+
+  // Helper method to convert Firestore documents to Note objects
+  private convertToNotes(querySnapshot: QuerySnapshot<DocumentData>): JournalNote[] {
+    return querySnapshot.docs.map(doc => {
+      const data = doc.data()
+      return {
+        id: doc.id,
+        ...data
+      } as JournalNote
     })
   }
 }
