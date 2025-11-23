@@ -7,7 +7,6 @@ import ScrollToTop from './components/ScrollToTop'
 import FloatingScrollButton from './components/FloatingScrollButton'
 import LandingPage from './components/LandingPage'
 import Login from './components/Login'
-import Dashboard from './components/Dashboard'
 import JournalHome from './components/JournalHome'
 import PositionCalculator from './components/PositionCalculator'
 import MarketStructure from './components/MarketStructure'
@@ -27,7 +26,6 @@ function App() {
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/journal" element={<JournalHome />} />
             <Route path="/calculator" element={
               <main className="main-content">
