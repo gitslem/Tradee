@@ -8,6 +8,7 @@ import { useAuth } from '../context/AuthContext'
 import { firestoreService } from '../services/firestoreService'
 import { EXCHANGES } from '../config/exchanges'
 import TradingBackground from './TradingBackground'
+import PersonalNotes from './PersonalNotes'
 import type { Trade, TradeStats } from '../services/firestoreService'
 import './TradingJournal.css'
 
@@ -367,6 +368,9 @@ const TradingJournal = () => {
           }}
         />
       )}
+
+      {/* Personal Notes Section */}
+      <PersonalNotes trades={trades} />
     </div>
   )
 }

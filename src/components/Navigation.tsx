@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { Home, Calculator, TrendingUp, Target, Menu, X, BookOpen, LogIn, LogOut, User } from 'lucide-react'
+import { Home, Calculator, TrendingUp, Target, Menu, X, BookOpen, LogIn, LogOut, User, LayoutDashboard } from 'lucide-react'
 import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import Logo from './Logo'
@@ -13,10 +13,11 @@ const Navigation = () => {
 
   const navItems = [
     { path: '/', label: 'Home', icon: <Home size={20} /> },
+    { path: '/dashboard', label: 'Dashboard', icon: <LayoutDashboard size={20} />, authRequired: true },
+    { path: '/journal', label: 'Trading Journal', icon: <BookOpen size={20} />, authRequired: true },
     { path: '/calculator', label: 'Calculator', icon: <Calculator size={20} /> },
     { path: '/market-structure', label: 'Market Structure', icon: <TrendingUp size={20} /> },
-    { path: '/price-action', label: 'Price Action', icon: <Target size={20} /> },
-    { path: '/journal', label: 'Trading Journal', icon: <BookOpen size={20} />, authRequired: true }
+    { path: '/price-action', label: 'Price Action', icon: <Target size={20} /> }
   ]
 
   const isActive = (path: string) => {
