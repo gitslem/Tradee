@@ -887,3 +887,67 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Compact Mode Styles */
+.personal-notes.compact {
+  padding: 0;
+  background: transparent;
+  min-height: auto;
+}
+
+.personal-notes.compact .notes-stats-bar {
+  display: none;
+}
+
+.personal-notes.compact .notes-controls {
+  display: none;
+}
+
+.personal-notes.compact .notes-content {
+  background: white;
+  border-radius: var(--radius-xl);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  padding: var(--space-6);
+}
+
+.personal-notes.compact .notes-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
+}
+
+.personal-notes.compact .note-card {
+  padding: var(--space-4);
+}
+
+.personal-notes.compact .note-category {
+  font-size: var(--font-size-xs);
+  padding: var(--space-1) var(--space-2);
+}
+
+.personal-notes.compact .note-title {
+  font-size: var(--font-size-base);
+}
+
+.personal-notes.compact .note-preview {
+  font-size: var(--font-size-sm);
+}
+
+.personal-notes.compact .note-actions {
+  opacity: 1;
+}
+
+.personal-notes.compact .action-icon {
+  width: 28px;
+  height: 28px;
+}
+
+@media (max-width: 768px) {
+  .personal-notes.compact .notes-content {
+    padding: var(--space-4);
+  }
+
+  .personal-notes.compact .notes-list {
+    gap: var(--space-3);
+  }
+}

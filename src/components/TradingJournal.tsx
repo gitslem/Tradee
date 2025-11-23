@@ -2,17 +2,20 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Plus, TrendingUp, TrendingDown, Calendar, DollarSign, Target,
-  Download, Edit2, Trash2, CheckCircle, Clock
+  Download, Edit2, Trash2, CheckCircle, Clock, FileText
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { firestoreService } from '../services/firestoreService'
 import { EXCHANGES } from '../config/exchanges'
-import TradingBackground from './TradingBackground'
-import PersonalNotes from './PersonalNotes'
 import type { Trade, TradeStats } from '../services/firestoreService'
 import './TradingJournal.css'
 
-const TradingJournal = () => {
+interface TradingJournalProps {
+  onTradesUpdate?: (trades: Trade[]) => void
+  compact?: boolean
+}
+
+const TradingJournal = ({ onTradesUpdate, compact = false }: TradingJournalProps = {}) => {
   const { user, isAuthenticated, loading } = useAuth()
   const navigate = useNavigate()
 
@@ -37,11 +40,12 @@ const TradingJournal = () => {
         setTrades(updatedTrades)
         const userStats = firestoreService.calculateStats(updatedTrades)
         setStats(userStats)
+        onTradesUpdate?.(updatedTrades)
       })
 
       return () => unsubscribe()
     }
-  }, [user, isAuthenticated, loading, navigate])
+  }, [user, isAuthenticated, loading, navigate, onTradesUpdate])
 
   const handleAddTrade = () => {
     setEditingTrade(null)
@@ -187,29 +191,47 @@ const TradingJournal = () => {
   }
 
   return (
-    <div className="trading-journal">
-      <TradingBackground variant="home" />
+    <div className={`trading-journal ${compact ? 'compact' : ''}`}>
+      {!compact && (
+        <div className="journal-header-section">
+          <div className="journal-title-group">
+            <div className="journal-icon-wrapper">
+              <TrendingUp size={32} />
+            </div>
+            <div className="journal-title-content">
+              <h2>Trading Journal</h2>
+              <p>Track, analyze, and improve your trading performance</p>
+            </div>
+          </div>
 
-      <div className="journal-header">
-        <div>
-          <h1>Trading Journal</h1>
-          <p>Track, analyze, and improve your trading performance</p>
+          <div className="journal-header-actions">
+            <div className="export-button-group">
+              <button onClick={handleExportCSV} className="export-btn csv-btn" disabled={trades.length === 0}>
+                <Download size={18} />
+                <span>CSV</span>
+              </button>
+              <button onClick={handleExportJSON} className="export-btn json-btn" disabled={trades.length === 0}>
+                <FileText size={18} />
+                <span>JSON</span>
+              </button>
+            </div>
+            <button onClick={handleAddTrade} className="add-trade-btn-primary">
+              <Plus size={20} />
+              <span>New Trade</span>
+            </button>
+          </div>
         </div>
-        <div className="journal-actions">
-          <button onClick={handleExportCSV} className="action-btn secondary">
-            <Download size={18} />
-            Export CSV
-          </button>
-          <button onClick={handleExportJSON} className="action-btn secondary">
-            <Download size={18} />
-            Export JSON
-          </button>
-          <button onClick={handleAddTrade} className="action-btn primary">
+      )}
+
+      {compact && (
+        <div className="compact-header">
+          <h3>Recent Trades</h3>
+          <button onClick={handleAddTrade} className="add-trade-btn-compact">
             <Plus size={18} />
-            Add Trade
+            <span>Add Trade</span>
           </button>
         </div>
-      </div>
+      )}
 
       {stats && (
         <div className="stats-grid">

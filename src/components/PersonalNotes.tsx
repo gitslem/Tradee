@@ -10,9 +10,10 @@ import './PersonalNotes.css'
 
 interface PersonalNotesProps {
   trades?: Trade[]
+  compact?: boolean
 }
 
-const PersonalNotes = ({ trades = [] }: PersonalNotesProps) => {
+const PersonalNotes = ({ trades = [], compact = false }: PersonalNotesProps) => {
   const { user } = useAuth()
   const [notes, setNotes] = useState<JournalNote[]>([])
   const [showNoteModal, setShowNoteModal] = useState(false)
@@ -128,8 +129,9 @@ const PersonalNotes = ({ trades = [] }: PersonalNotesProps) => {
   }
 
   return (
-    <div className="personal-notes">
-      <div className="notes-header-section">
+    <div className={`personal-notes ${compact ? 'compact' : ''}`}>
+      {!compact && (
+        <div className="notes-header-section">
         <div className="notes-title-group">
           <div className="notes-icon-wrapper">
             <BookOpen size={32} />
@@ -156,8 +158,20 @@ const PersonalNotes = ({ trades = [] }: PersonalNotesProps) => {
             <span>New Note</span>
           </button>
         </div>
-      </div>
+        </div>
+      )}
 
+      {compact && (
+        <div className="compact-header">
+          <h3>Recent Notes</h3>
+          <button onClick={handleAddNote} className="add-note-btn-compact">
+            <Plus size={18} />
+            <span>Add Note</span>
+          </button>
+        </div>
+      )}
+
+      {!compact && (
       <div className="notes-stats-bar">
         <div className="stats-item">
           <span className="stats-label">Total Notes</span>
@@ -178,7 +192,9 @@ const PersonalNotes = ({ trades = [] }: PersonalNotesProps) => {
           </span>
         </div>
       </div>
+      )}
 
+      {!compact && (
       <div className="notes-controls">
         <div className="search-box">
           <Search size={20} />
@@ -208,6 +224,7 @@ const PersonalNotes = ({ trades = [] }: PersonalNotesProps) => {
           ))}
         </div>
       </div>
+      )}
 
       {filteredNotes.length === 0 ? (
         <div className="notes-empty-state">
