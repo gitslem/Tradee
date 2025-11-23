@@ -15,6 +15,19 @@ service cloud.firestore {
                                    && resource.data.userId == request.auth.uid;
     }
 
+    // ===========================================
+    // JOURNAL NOTES RULES
+    // ===========================================
+    match /journal_notes/{noteId} {
+      // Allow create if authenticated and userId in the data matches auth uid
+      allow create: if request.auth != null
+                    && request.resource.data.userId == request.auth.uid;
+
+      // Allow read, update, delete if authenticated and userId matches
+      allow read, update, delete: if request.auth != null
+                                   && resource.data.userId == request.auth.uid;
+    }
+
     match /users/{userId} {
       allow read, write: if request.auth != null
                          && request.auth.uid == userId;

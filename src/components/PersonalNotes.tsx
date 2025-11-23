@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import {
   Plus, Edit2, Trash2, Pin, Search, Tag, BookOpen,
-  Calendar, X, Save
+  Calendar, X, Save, Download, FileText
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { firestoreService } from '../services/firestoreService'
@@ -65,6 +65,46 @@ const PersonalNotes = ({ trades = [] }: PersonalNotesProps) => {
     }
   }
 
+  const handleExportNotesCSV = () => {
+    if (!user || notes.length === 0) {
+      alert('No notes to export!')
+      return
+    }
+
+    try {
+      const csv = firestoreService.exportNotesToCSV(notes)
+      firestoreService.downloadExport(
+        csv,
+        `journal-notes-${new Date().toISOString().split('T')[0]}.csv`,
+        'csv'
+      )
+      alert(`Successfully exported ${notes.length} note(s) to CSV!`)
+    } catch (error) {
+      console.error('Export error:', error)
+      alert('Failed to export notes. Please try again.')
+    }
+  }
+
+  const handleExportNotesJSON = () => {
+    if (!user || notes.length === 0) {
+      alert('No notes to export!')
+      return
+    }
+
+    try {
+      const json = firestoreService.exportNotesToJSON(notes)
+      firestoreService.downloadExport(
+        json,
+        `journal-notes-${new Date().toISOString().split('T')[0]}.json`,
+        'json'
+      )
+      alert(`Successfully exported ${notes.length} note(s) to JSON!`)
+    } catch (error) {
+      console.error('Export error:', error)
+      alert('Failed to export notes. Please try again.')
+    }
+  }
+
   const filteredNotes = notes.filter(note => {
     const matchesSearch = note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          note.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -77,25 +117,71 @@ const PersonalNotes = ({ trades = [] }: PersonalNotesProps) => {
 
   const categories = ['all', 'strategy', 'plan', 'idea', 'reflection', 'concept', 'general']
 
+  const categoryStats = {
+    all: notes.length,
+    strategy: notes.filter(n => n.category === 'strategy').length,
+    plan: notes.filter(n => n.category === 'plan').length,
+    idea: notes.filter(n => n.category === 'idea').length,
+    reflection: notes.filter(n => n.category === 'reflection').length,
+    concept: notes.filter(n => n.category === 'concept').length,
+    general: notes.filter(n => n.category === 'general').length
+  }
+
   return (
     <div className="personal-notes">
-      <div className="notes-header">
-        <div className="notes-title">
-          <BookOpen size={28} />
-          <div>
+      <div className="notes-header-section">
+        <div className="notes-title-group">
+          <div className="notes-icon-wrapper">
+            <BookOpen size={32} />
+          </div>
+          <div className="notes-title-content">
             <h2>Personal Trading Journal</h2>
-            <p>Document strategies, plans, ideas, and reflections</p>
+            <p>Document your strategies, plans, ideas, and trading insights</p>
           </div>
         </div>
-        <button onClick={handleAddNote} className="add-note-btn">
-          <Plus size={18} />
-          New Note
-        </button>
+
+        <div className="notes-header-actions">
+          <div className="export-button-group">
+            <button onClick={handleExportNotesCSV} className="export-btn csv-btn" disabled={notes.length === 0}>
+              <Download size={18} />
+              <span>CSV</span>
+            </button>
+            <button onClick={handleExportNotesJSON} className="export-btn json-btn" disabled={notes.length === 0}>
+              <FileText size={18} />
+              <span>JSON</span>
+            </button>
+          </div>
+          <button onClick={handleAddNote} className="add-note-btn-primary">
+            <Plus size={20} />
+            <span>New Note</span>
+          </button>
+        </div>
+      </div>
+
+      <div className="notes-stats-bar">
+        <div className="stats-item">
+          <span className="stats-label">Total Notes</span>
+          <span className="stats-value">{notes.length}</span>
+        </div>
+        <div className="stats-item">
+          <span className="stats-label">Pinned</span>
+          <span className="stats-value pinned">{notes.filter(n => n.isPinned).length}</span>
+        </div>
+        <div className="stats-item">
+          <span className="stats-label">This Month</span>
+          <span className="stats-value">
+            {notes.filter(n => {
+              const noteDate = new Date(n.createdAt)
+              const now = new Date()
+              return noteDate.getMonth() === now.getMonth() && noteDate.getFullYear() === now.getFullYear()
+            }).length}
+          </span>
+        </div>
       </div>
 
       <div className="notes-controls">
         <div className="search-box">
-          <Search size={18} />
+          <Search size={20} />
           <input
             type="text"
             placeholder="Search notes by title, content, or tags..."
@@ -104,7 +190,7 @@ const PersonalNotes = ({ trades = [] }: PersonalNotesProps) => {
           />
           {searchTerm && (
             <button onClick={() => setSearchTerm('')} className="clear-search">
-              <X size={16} />
+              <X size={18} />
             </button>
           )}
         </div>
@@ -113,11 +199,11 @@ const PersonalNotes = ({ trades = [] }: PersonalNotesProps) => {
           {categories.map(cat => (
             <button
               key={cat}
-              className={`category-filter ${categoryFilter === cat ? 'active' : ''}`}
+              className={`category-filter ${categoryFilter === cat ? 'active' : ''} ${cat}`}
               onClick={() => setCategoryFilter(cat)}
             >
-              {cat.charAt(0).toUpperCase() + cat.slice(1)}
-              {cat !== 'all' && ` (${notes.filter(n => n.category === cat).length})`}
+              <span className="category-name">{cat.charAt(0).toUpperCase() + cat.slice(1)}</span>
+              <span className="category-count">{categoryStats[cat as keyof typeof categoryStats]}</span>
             </button>
           ))}
         </div>
@@ -125,13 +211,21 @@ const PersonalNotes = ({ trades = [] }: PersonalNotesProps) => {
 
       {filteredNotes.length === 0 ? (
         <div className="notes-empty-state">
-          <BookOpen size={64} />
-          <h3>No notes yet</h3>
-          <p>Start documenting your trading journey with notes, strategies, and insights</p>
-          <button onClick={handleAddNote} className="add-note-btn primary">
-            <Plus size={18} />
-            Create Your First Note
-          </button>
+          <div className="empty-state-icon">
+            <BookOpen size={80} />
+          </div>
+          <h3>No notes {searchTerm || categoryFilter !== 'all' ? 'found' : 'yet'}</h3>
+          {searchTerm || categoryFilter !== 'all' ? (
+            <p>Try adjusting your search or filter criteria</p>
+          ) : (
+            <>
+              <p>Start documenting your trading journey with notes, strategies, and insights</p>
+              <button onClick={handleAddNote} className="add-note-btn-primary large">
+                <Plus size={20} />
+                <span>Create Your First Note</span>
+              </button>
+            </>
+          )}
         </div>
       ) : (
         <div className="notes-grid">
@@ -189,6 +283,8 @@ interface NoteCardProps {
 const NoteCard = ({ note, onEdit, onDelete, onTogglePin }: NoteCardProps) => {
   return (
     <div className={`note-card ${note.category} ${note.isPinned ? 'pinned' : ''}`}>
+      {note.isPinned && <div className="pinned-indicator"></div>}
+
       <div className="note-card-header">
         <div className="note-card-title-row">
           <h3>{note.title}</h3>
@@ -222,10 +318,14 @@ const NoteCard = ({ note, onEdit, onDelete, onTogglePin }: NoteCardProps) => {
       <div className="note-card-footer">
         <div className="note-card-date">
           <Calendar size={14} />
-          {new Date(note.updatedAt).toLocaleDateString()}
+          <span>{new Date(note.updatedAt).toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric'
+          })}</span>
         </div>
         <div className="note-card-actions">
-          <button onClick={() => onEdit(note)} className="note-action-btn" title="Edit">
+          <button onClick={() => onEdit(note)} className="note-action-btn edit" title="Edit">
             <Edit2 size={16} />
           </button>
           <button onClick={() => onDelete(note.id)} className="note-action-btn delete" title="Delete">
@@ -294,7 +394,10 @@ const NoteModal = ({ note, trades, onClose, onSave }: NoteModalProps) => {
     <div className="note-modal-overlay" onClick={onClose}>
       <div className="note-modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="note-modal-header">
-          <h2>{note ? 'Edit Note' : 'Create New Note'}</h2>
+          <div className="modal-title-group">
+            <BookOpen size={28} />
+            <h2>{note ? 'Edit Note' : 'Create New Note'}</h2>
+          </div>
           <button onClick={onClose} className="close-note-modal">×</button>
         </div>
 
@@ -335,7 +438,7 @@ const NoteModal = ({ note, trades, onClose, onSave }: NoteModalProps) => {
               placeholder="Write your note here...&#10;&#10;You can document:&#10;• Trading strategies and setups&#10;• Market observations and analysis&#10;• Trade ideas and opportunities&#10;• Lessons learned and reflections&#10;• Concepts and educational notes&#10;• Plans and goals"
               required
             />
-            <small>{formData.content.length} characters</small>
+            <small className="char-count">{formData.content.length} characters</small>
           </div>
 
           <div className="note-form-group">
@@ -377,6 +480,7 @@ const NoteModal = ({ note, trades, onClose, onSave }: NoteModalProps) => {
                 checked={formData.isPinned}
                 onChange={(e) => setFormData({ ...formData, isPinned: e.target.checked })}
               />
+              <Pin size={16} />
               <span>Pin this note to the top</span>
             </label>
           </div>
