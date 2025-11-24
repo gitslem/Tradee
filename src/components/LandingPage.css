@@ -705,11 +705,16 @@
   margin-right: auto;
 }
 
-/* Darker subtitle for better readability */
+/* Darker subtitle for better readability with glow */
 .cta-subtitle-dark {
-  color: #e0e0e0;
-  font-weight: 600;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  color: #ffffff;
+  font-weight: 700;
+  text-shadow:
+    0 0 10px rgba(255, 255, 255, 0.8),
+    0 0 20px rgba(212, 175, 55, 0.6),
+    0 0 30px rgba(212, 175, 55, 0.4),
+    0 2px 4px rgba(0, 0, 0, 0.3);
+  filter: brightness(1.1);
 }
 
 .cta-buttons {
@@ -778,16 +783,24 @@
   opacity: 0.95;
 }
 
-/* Darker text for CTA features for better readability */
+/* Darker text for CTA features for better readability with glow */
 .cta-feature-dark {
-  color: #e0e0e0;
-  font-weight: 700;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  color: #ffffff;
+  font-weight: 800;
+  text-shadow:
+    0 0 8px rgba(255, 255, 255, 0.9),
+    0 0 15px rgba(212, 175, 55, 0.7),
+    0 0 25px rgba(212, 175, 55, 0.5),
+    0 2px 4px rgba(0, 0, 0, 0.3);
+  filter: brightness(1.15);
 }
 
 .cta-feature-dark svg {
-  color: #F4D03F;
-  filter: drop-shadow(0 2px 4px rgba(212, 175, 55, 0.5));
+  color: #FFD700;
+  filter:
+    drop-shadow(0 0 6px rgba(255, 215, 0, 0.8))
+    drop-shadow(0 0 12px rgba(212, 175, 55, 0.6))
+    drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
 }
 
 .cta-feature-item svg {

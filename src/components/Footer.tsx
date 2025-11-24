@@ -63,9 +63,6 @@ const Footer = () => {
         </div>
 
         <div className="footer-bottom">
-          <div className="footer-address">
-            <p>(address removed)</p>
-          </div>
           <p className="footer-copyright">&copy; 2025 Traddii. All rights reserved.</p>
           <p className="footer-tagline">Trade Smart. Trade Safe. Trade Profitably.</p>
         </div>
