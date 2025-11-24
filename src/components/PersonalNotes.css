@@ -66,9 +66,10 @@
 }
 
 .notes-title-content p {
-  font-size: var(--font-size-base);
-  color: var(--color-text-secondary);
-  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-lg);
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-bold);
+  opacity: 0.9;
 }
 
 .notes-header-actions {

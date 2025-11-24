@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Plus, TrendingUp, TrendingDown, Calendar, DollarSign, Target,
-  Download, Edit2, Trash2, CheckCircle, Clock, FileText
+  Edit2, Trash2, CheckCircle, Clock
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { firestoreService } from '../services/firestoreService'
@@ -116,50 +116,6 @@ const TradingJournal = ({ onTradesUpdate, compact = false }: TradingJournalProps
     }
   }
 
-  const handleExportCSV = () => {
-    if (!user) return
-
-    if (trades.length === 0) {
-      alert('No trades to export. Add some trades first!')
-      return
-    }
-
-    try {
-      const csv = firestoreService.exportToCSV(trades)
-      firestoreService.downloadExport(
-        csv,
-        `trading-journal-${new Date().toISOString().split('T')[0]}.csv`,
-        'csv'
-      )
-      alert(`Successfully exported ${trades.length} trade${trades.length === 1 ? '' : 's'} to CSV!`)
-    } catch (error) {
-      console.error('Export error:', error)
-      alert('Failed to export trades. Please try again.')
-    }
-  }
-
-  const handleExportJSON = () => {
-    if (!user) return
-
-    if (trades.length === 0) {
-      alert('No trades to export. Add some trades first!')
-      return
-    }
-
-    try {
-      const json = firestoreService.exportToJSON(trades)
-      firestoreService.downloadExport(
-        json,
-        `trading-journal-${new Date().toISOString().split('T')[0]}.json`,
-        'json'
-      )
-      alert(`Successfully exported ${trades.length} trade${trades.length === 1 ? '' : 's'} to JSON!`)
-    } catch (error) {
-      console.error('Export error:', error)
-      alert('Failed to export trades. Please try again.')
-    }
-  }
-
   const filteredTrades = trades.filter(trade => {
     if (filter === 'all') return true
     if (filter === 'open') return trade.status === 'open'
@@ -205,16 +161,6 @@ const TradingJournal = ({ onTradesUpdate, compact = false }: TradingJournalProps
           </div>
 
           <div className="journal-header-actions">
-            <div className="export-button-group">
-              <button onClick={handleExportCSV} className="export-btn csv-btn" disabled={trades.length === 0}>
-                <Download size={18} />
-                <span>CSV</span>
-              </button>
-              <button onClick={handleExportJSON} className="export-btn json-btn" disabled={trades.length === 0}>
-                <FileText size={18} />
-                <span>JSON</span>
-              </button>
-            </div>
             <button onClick={handleAddTrade} className="add-trade-btn-primary">
               <Plus size={20} />
               <span>New Trade</span>
