@@ -68,7 +68,7 @@
 .notes-title-content p {
   font-size: var(--font-size-lg);
   color: var(--color-text-primary);
-  font-weight: var(--font-weight-bold);
+  font-weight: var(--font-weight-medium);
   opacity: 1;
 }
 
