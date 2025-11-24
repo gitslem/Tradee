@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import {
   Plus, Edit2, Trash2, Pin, Search, Tag, BookOpen,
-  Calendar, X, Save, Download, FileText
+  Calendar, X, Save
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { firestoreService } from '../services/firestoreService'
@@ -66,46 +66,6 @@ const PersonalNotes = ({ trades = [], compact = false }: PersonalNotesProps) => 
     }
   }
 
-  const handleExportNotesCSV = () => {
-    if (!user || notes.length === 0) {
-      alert('No notes to export!')
-      return
-    }
-
-    try {
-      const csv = firestoreService.exportNotesToCSV(notes)
-      firestoreService.downloadExport(
-        csv,
-        `journal-notes-${new Date().toISOString().split('T')[0]}.csv`,
-        'csv'
-      )
-      alert(`Successfully exported ${notes.length} note(s) to CSV!`)
-    } catch (error) {
-      console.error('Export error:', error)
-      alert('Failed to export notes. Please try again.')
-    }
-  }
-
-  const handleExportNotesJSON = () => {
-    if (!user || notes.length === 0) {
-      alert('No notes to export!')
-      return
-    }
-
-    try {
-      const json = firestoreService.exportNotesToJSON(notes)
-      firestoreService.downloadExport(
-        json,
-        `journal-notes-${new Date().toISOString().split('T')[0]}.json`,
-        'json'
-      )
-      alert(`Successfully exported ${notes.length} note(s) to JSON!`)
-    } catch (error) {
-      console.error('Export error:', error)
-      alert('Failed to export notes. Please try again.')
-    }
-  }
-
   const filteredNotes = notes.filter(note => {
     const matchesSearch = note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          note.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -137,22 +97,12 @@ const PersonalNotes = ({ trades = [], compact = false }: PersonalNotesProps) => 
             <BookOpen size={32} />
           </div>
           <div className="notes-title-content">
-            <h2>Personal Trading Journal</h2>
+            <h2>Personal Journal</h2>
             <p>Document your strategies, plans, ideas, and trading insights</p>
           </div>
         </div>
 
         <div className="notes-header-actions">
-          <div className="export-button-group">
-            <button onClick={handleExportNotesCSV} className="export-btn csv-btn" disabled={notes.length === 0}>
-              <Download size={18} />
-              <span>CSV</span>
-            </button>
-            <button onClick={handleExportNotesJSON} className="export-btn json-btn" disabled={notes.length === 0}>
-              <FileText size={18} />
-              <span>JSON</span>
-            </button>
-          </div>
           <button onClick={handleAddNote} className="add-note-btn-primary">
             <Plus size={20} />
             <span>New Note</span>
