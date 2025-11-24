@@ -27,7 +27,7 @@ const Support = () => {
             <p>Have a question or need help? We'd love to hear from you!</p>
           </div>
 
-          <div className="contact-methods-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '3rem' }}>
+          <div className="contact-methods-grid">
             <div className="contact-card">
               <div className="contact-card-icon">
                 <Mail size={40} />
