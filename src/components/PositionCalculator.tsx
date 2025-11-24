@@ -89,7 +89,7 @@ const PositionCalculator = () => {
     const quantity = positionValue
 
     // Liquidation Price Calculation (Isolated Margin - Bybit/Binance Formula)
-    // This formula accounts for maintenance margin, fees, and available buffer margin
+    // Accounts for margin buffer based on available account balance
     // For LONG: Liquidation Price = Entry - [(Total Margin - Maintenance Margin - Close Fee) / Quantity]
     // For SHORT: Liquidation Price = Entry + [(Total Margin - Maintenance Margin - Close Fee) / Quantity]
     let liquidationPrice = 0
@@ -102,12 +102,15 @@ const PositionCalculator = () => {
       const minimumMargin = positionValueInUsdt / lev
       const maintenanceMargin = (positionValueInUsdt * maintenanceMarginRate) / 100
 
-      // Calculate available buffer from account (up to 2x the risk amount or 10% of balance, whichever is smaller)
-      // This represents additional margin that could be allocated to prevent liquidation
-      const maxBuffer = Math.min(riskAmount * 2, balance * 0.1)
-      const marginBuffer = Math.max(0, maxBuffer - minimumMargin)
+      // Calculate available balance remaining after opening position
+      // This balance can be used as additional margin buffer
+      const remainingBalance = balance - marginRequired
 
-      // Total margin allocated = minimum required + buffer available
+      // Allocate 30% of remaining balance as safety buffer for liquidation
+      // This means larger accounts have more buffer and safer liquidation prices
+      const marginBuffer = Math.max(0, remainingBalance * 0.3)
+
+      // Total margin allocated = minimum required + buffer from available balance
       const totalMargin = minimumMargin + marginBuffer
 
       // Calculate estimated fee to close the position
