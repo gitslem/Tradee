@@ -111,7 +111,7 @@ const PersonalNotes = ({ trades = [], compact = false }: PersonalNotesProps) => 
           </div>
           <div className="notes-title-content">
             <h2>Personal Journal</h2>
-            <p>Track, analyze, and improve your trading performance</p>
+            <p>Capture your trading insights, strategies, and reflections</p>
           </div>
         </div>
 

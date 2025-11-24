@@ -45,6 +45,7 @@ const Footer = () => {
           <div className="footer-section">
             <h4 className="footer-heading">Company</h4>
             <ul className="footer-links">
+              <li><Link to="/about">About</Link></li>
               <li><Link to="/faq">FAQ</Link></li>
               <li><Link to="/support">Support</Link></li>
               <li><a href="mailto:traddii.web.app@gmail.com">Contact</a></li>
@@ -62,6 +63,9 @@ const Footer = () => {
         </div>
 
         <div className="footer-bottom">
+          <div className="footer-address">
+            <p>(address removed)</p>
+          </div>
           <p className="footer-copyright">&copy; 2025 Traddii. All rights reserved.</p>
           <p className="footer-tagline">Trade Smart. Trade Safe. Trade Profitably.</p>
         </div>
