@@ -98,7 +98,7 @@ const PersonalNotes = ({ trades = [], compact = false }: PersonalNotesProps) => 
           </div>
           <div className="notes-title-content">
             <h2>Personal Journal</h2>
-            <p>Document your strategies, plans, ideas, and trading insights</p>
+            <p>Capture your trading insights, strategies, and reflections</p>
           </div>
         </div>
 
@@ -223,7 +223,7 @@ const PersonalNotes = ({ trades = [], compact = false }: PersonalNotesProps) => 
                 await firestoreService.updateNote(editingNote.id, noteData)
                 alert('Note updated successfully!')
               } else {
-                await firestoreService.addNote(user.uid, noteData as any)
+                await firestoreService.addNote(user.uid, noteData as Omit<JournalNote, 'id' | 'userId' | 'createdAt' | 'updatedAt'>)
                 alert('Note created successfully!')
               }
               setShowNoteModal(false)
@@ -385,7 +385,7 @@ const NoteModal = ({ note, trades, onClose, onSave }: NoteModalProps) => {
             <label>Category *</label>
             <select
               value={formData.category}
-              onChange={(e) => setFormData({ ...formData, category: e.target.value as any })}
+              onChange={(e) => setFormData({ ...formData, category: e.target.value as 'strategy' | 'plan' | 'idea' | 'reflection' | 'concept' | 'general' })}
             >
               <option value="strategy">Strategy - Trading approaches and methodologies</option>
               <option value="plan">Plan - Trade planning and preparation</option>

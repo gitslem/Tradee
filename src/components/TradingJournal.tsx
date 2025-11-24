@@ -324,7 +324,7 @@ const TradingJournal = ({ onTradesUpdate, compact = false }: TradingJournalProps
                 await firestoreService.updateTrade(editingTrade.id, tradeData)
                 alert('Trade updated successfully!')
               } else {
-                await firestoreService.addTrade(user.uid, tradeData as any)
+                await firestoreService.addTrade(user.uid, tradeData as Omit<Trade, 'id' | 'userId' | 'createdAt' | 'updatedAt'>)
                 alert('Trade added successfully!')
               }
               setShowAddModal(false)
