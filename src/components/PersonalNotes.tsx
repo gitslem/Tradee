@@ -20,6 +20,8 @@ const PersonalNotes = ({ trades = [], compact = false }: PersonalNotesProps) => 
   const [editingNote, setEditingNote] = useState<JournalNote | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [categoryFilter, setCategoryFilter] = useState<string>('all')
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage] = useState(5)
 
   useEffect(() => {
     if (!user?.uid) return
@@ -76,6 +78,17 @@ const PersonalNotes = ({ trades = [], compact = false }: PersonalNotesProps) => 
     return matchesSearch && matchesCategory
   })
 
+  // Pagination logic
+  const totalPages = Math.ceil(filteredNotes.length / itemsPerPage)
+  const indexOfLastNote = currentPage * itemsPerPage
+  const indexOfFirstNote = indexOfLastNote - itemsPerPage
+  const currentNotes = filteredNotes.slice(indexOfFirstNote, indexOfLastNote)
+
+  // Reset to page 1 when filter or search changes
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [categoryFilter, searchTerm])
+
   const categories = ['all', 'strategy', 'plan', 'idea', 'reflection', 'concept', 'general']
 
   const categoryStats = {
@@ -98,7 +111,7 @@ const PersonalNotes = ({ trades = [], compact = false }: PersonalNotesProps) => 
           </div>
           <div className="notes-title-content">
             <h2>Personal Journal</h2>
-            <p>Capture your trading insights, strategies, and reflections</p>
+            <p>Track, analyze, and improve your trading performance</p>
           </div>
         </div>
 
@@ -195,17 +208,41 @@ const PersonalNotes = ({ trades = [], compact = false }: PersonalNotesProps) => 
           )}
         </div>
       ) : (
-        <div className="notes-grid">
-          {filteredNotes.map(note => (
-            <NoteCard
-              key={note.id}
-              note={note}
-              onEdit={handleEditNote}
-              onDelete={handleDeleteNote}
-              onTogglePin={handleTogglePin}
-            />
-          ))}
-        </div>
+        <>
+          <div className="notes-grid">
+            {currentNotes.map(note => (
+              <NoteCard
+                key={note.id}
+                note={note}
+                onEdit={handleEditNote}
+                onDelete={handleDeleteNote}
+                onTogglePin={handleTogglePin}
+              />
+            ))}
+          </div>
+
+          {totalPages > 1 && (
+            <div className="pagination">
+              <button
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                className="pagination-btn"
+              >
+                ← Previous
+              </button>
+              <span className="pagination-info">
+                Page {currentPage} of {totalPages} ({filteredNotes.length} notes)
+              </span>
+              <button
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages}
+                className="pagination-btn"
+              >
+                Next →
+              </button>
+            </div>
+          )}
+        </>
       )}
 
       {showNoteModal && (

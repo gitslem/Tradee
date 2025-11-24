@@ -24,6 +24,8 @@ const TradingJournal = ({ onTradesUpdate, compact = false }: TradingJournalProps
   const [showAddModal, setShowAddModal] = useState(false)
   const [editingTrade, setEditingTrade] = useState<Trade | null>(null)
   const [filter, setFilter] = useState<'all' | 'open' | 'closed' | 'wins' | 'losses'>('all')
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage] = useState(5)
 
   useEffect(() => {
     // Wait for auth to finish loading before checking authentication
@@ -124,6 +126,17 @@ const TradingJournal = ({ onTradesUpdate, compact = false }: TradingJournalProps
     if (filter === 'losses') return trade.outcome === 'loss'
     return true
   })
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredTrades.length / itemsPerPage)
+  const indexOfLastTrade = currentPage * itemsPerPage
+  const indexOfFirstTrade = indexOfLastTrade - itemsPerPage
+  const currentTrades = filteredTrades.slice(indexOfFirstTrade, indexOfLastTrade)
+
+  // Reset to page 1 when filter changes
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [filter])
 
   if (loading) {
     return (
@@ -296,17 +309,41 @@ const TradingJournal = ({ onTradesUpdate, compact = false }: TradingJournalProps
             </button>
           </div>
         ) : (
-          <div className="trades-list">
-            {filteredTrades.map(trade => (
-              <TradeCard
-                key={trade.id}
-                trade={trade}
-                onEdit={handleEditTrade}
-                onDelete={handleDeleteTrade}
-                onClose={handleCloseTrade}
-              />
-            ))}
-          </div>
+          <>
+            <div className="trades-list">
+              {currentTrades.map(trade => (
+                <TradeCard
+                  key={trade.id}
+                  trade={trade}
+                  onEdit={handleEditTrade}
+                  onDelete={handleDeleteTrade}
+                  onClose={handleCloseTrade}
+                />
+              ))}
+            </div>
+
+            {totalPages > 1 && (
+              <div className="pagination">
+                <button
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                  className="pagination-btn"
+                >
+                  ← Previous
+                </button>
+                <span className="pagination-info">
+                  Page {currentPage} of {totalPages} ({filteredTrades.length} trades)
+                </span>
+                <button
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                  className="pagination-btn"
+                >
+                  Next →
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
 

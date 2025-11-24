@@ -91,9 +91,11 @@ export const EXCHANGES: Record<string, ExchangeConfig> = {
     },
 
     leverageTiers: [
-      { maxLeverage: 20, maintenanceMarginRate: 0.5, description: 'Low Risk' },
+      { maxLeverage: 10, maintenanceMarginRate: 0.4, description: 'Low Risk' },
+      { maxLeverage: 20, maintenanceMarginRate: 0.5, description: 'Conservative' },
       { maxLeverage: 50, maintenanceMarginRate: 1.0, description: 'Medium Risk' },
-      { maxLeverage: 125, maintenanceMarginRate: 2.5, description: 'High Risk' }
+      { maxLeverage: 75, maintenanceMarginRate: 2.0, description: 'High Risk' },
+      { maxLeverage: 125, maintenanceMarginRate: 5.0, description: 'Extreme Risk' }
     ],
 
     minTradeAmount: 10,
@@ -141,9 +143,11 @@ export const EXCHANGES: Record<string, ExchangeConfig> = {
     },
 
     leverageTiers: [
-      { maxLeverage: 25, maintenanceMarginRate: 0.5, description: 'Low Risk' },
-      { maxLeverage: 50, maintenanceMarginRate: 1.0, description: 'Medium Risk' },
-      { maxLeverage: 100, maintenanceMarginRate: 2.5, description: 'High Risk' }
+      { maxLeverage: 10, maintenanceMarginRate: 0.5, description: 'Low Risk' },
+      { maxLeverage: 25, maintenanceMarginRate: 1.0, description: 'Conservative' },
+      { maxLeverage: 50, maintenanceMarginRate: 2.0, description: 'Medium Risk' },
+      { maxLeverage: 75, maintenanceMarginRate: 4.0, description: 'High Risk' },
+      { maxLeverage: 100, maintenanceMarginRate: 5.0, description: 'Extreme Risk' }
     ],
 
     minTradeAmount: 10,
