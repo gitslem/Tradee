@@ -434,6 +434,9 @@ const JournalHome = () => {
   const [selectedNote, setSelectedNote] = useState<JournalNote | null>(null)
   const [tradesView, setTradesView] = useState<'recent' | 'all'>('recent')
   const [notesView, setNotesView] = useState<'recent' | 'all'>('recent')
+  const [tradesPage, setTradesPage] = useState(1)
+  const [notesPage, setNotesPage] = useState(1)
+  const itemsPerPage = 5
 
   useEffect(() => {
     if (loading) return
@@ -466,8 +469,17 @@ const JournalHome = () => {
     return null
   }
 
-  const recentTrades = trades.slice(0, 10)
-  const recentNotes = notes.slice(0, 10)
+  // Pagination for trades
+  const totalTradesPages = Math.ceil(trades.length / itemsPerPage)
+  const indexOfLastTrade = tradesPage * itemsPerPage
+  const indexOfFirstTrade = indexOfLastTrade - itemsPerPage
+  const currentTrades = trades.slice(indexOfFirstTrade, indexOfLastTrade)
+
+  // Pagination for notes
+  const totalNotesPages = Math.ceil(notes.length / itemsPerPage)
+  const indexOfLastNote = notesPage * itemsPerPage
+  const indexOfFirstNote = indexOfLastNote - itemsPerPage
+  const currentNotes = notes.slice(indexOfFirstNote, indexOfLastNote)
 
   return (
     <div className="journal-home">
@@ -535,14 +547,15 @@ const JournalHome = () => {
 
           {tradesView === 'recent' ? (
             <>
-              {recentTrades.length === 0 ? (
+              {currentTrades.length === 0 ? (
                 <div className="empty-state">
                   <TrendingUp size={48} />
                   <p>No trades yet. Start tracking your performance!</p>
                 </div>
               ) : (
-                <div className="cards-grid">
-                  {recentTrades.map(trade => (
+                <>
+                  <div className="cards-grid">
+                    {currentTrades.map(trade => (
                     <div
                       key={trade.id}
                       className={`journal-card trade-card ${trade.status}`}
@@ -568,7 +581,30 @@ const JournalHome = () => {
                       </div>
                     </div>
                   ))}
-                </div>
+                  </div>
+
+                  {totalTradesPages > 1 && (
+                    <div className="pagination">
+                      <button
+                        onClick={() => setTradesPage(prev => Math.max(prev - 1, 1))}
+                        disabled={tradesPage === 1}
+                        className="pagination-btn"
+                      >
+                        ← Previous
+                      </button>
+                      <span className="pagination-info">
+                        Page {tradesPage} of {totalTradesPages}
+                      </span>
+                      <button
+                        onClick={() => setTradesPage(prev => Math.min(prev + 1, totalTradesPages))}
+                        disabled={tradesPage === totalTradesPages}
+                        className="pagination-btn"
+                      >
+                        Next →
+                      </button>
+                    </div>
+                  )}
+                </>
               )}
             </>
           ) : (
@@ -616,14 +652,15 @@ const JournalHome = () => {
 
           {notesView === 'recent' ? (
             <>
-              {recentNotes.length === 0 ? (
+              {currentNotes.length === 0 ? (
                 <div className="empty-state">
                   <BookOpen size={48} />
                   <p>No notes yet. Document your strategies and insights!</p>
                 </div>
               ) : (
-                <div className="cards-grid">
-                  {recentNotes.map(note => (
+                <>
+                  <div className="cards-grid">
+                    {currentNotes.map(note => (
                     <div
                       key={note.id}
                       className="journal-card note-card"
@@ -645,7 +682,30 @@ const JournalHome = () => {
                       </div>
                     </div>
                   ))}
-                </div>
+                  </div>
+
+                  {totalNotesPages > 1 && (
+                    <div className="pagination">
+                      <button
+                        onClick={() => setNotesPage(prev => Math.max(prev - 1, 1))}
+                        disabled={notesPage === 1}
+                        className="pagination-btn"
+                      >
+                        ← Previous
+                      </button>
+                      <span className="pagination-info">
+                        Page {notesPage} of {totalNotesPages}
+                      </span>
+                      <button
+                        onClick={() => setNotesPage(prev => Math.min(prev + 1, totalNotesPages))}
+                        disabled={notesPage === totalNotesPages}
+                        className="pagination-btn"
+                      >
+                        Next →
+                      </button>
+                    </div>
+                  )}
+                </>
               )}
             </>
           ) : (

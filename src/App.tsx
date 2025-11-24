@@ -15,6 +15,7 @@ import Support from './components/Support'
 import FAQ from './components/FAQ'
 import Terms from './components/Terms'
 import Privacy from './components/Privacy'
+import About from './components/About'
 
 function App() {
   return (
@@ -42,6 +43,7 @@ function App() {
                 <PriceActionAnalysis />
               </main>
             } />
+            <Route path="/about" element={<About />} />
             <Route path="/support" element={<Support />} />
             <Route path="/faq" element={<FAQ />} />
             <Route path="/terms" element={<Terms />} />
