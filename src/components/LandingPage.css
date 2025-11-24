@@ -705,6 +705,13 @@
   margin-right: auto;
 }
 
+/* Darker subtitle for better readability */
+.cta-subtitle-dark {
+  color: #e0e0e0;
+  font-weight: 600;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
 .cta-buttons {
   display: flex;
   gap: 20px;
@@ -745,10 +752,13 @@
   backdrop-filter: blur(10px);
 }
 
-.btn-cta-secondary:hover {
-  background: rgba(255, 255, 255, 0.25);
-  border-color: white;
+.btn-cta-secondary:hover,
+.btn-cta-secondary:active {
+  background: linear-gradient(135deg, #E8C76F 0%, #F5DC7D 100%);
+  border-color: #D4AF37;
+  color: #1a1a1a;
   transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(212, 175, 55, 0.5);
 }
 
 .cta-features {
@@ -766,6 +776,18 @@
   font-size: 1rem;
   font-weight: 600;
   opacity: 0.95;
+}
+
+/* Darker text for CTA features for better readability */
+.cta-feature-dark {
+  color: #e0e0e0;
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.cta-feature-dark svg {
+  color: #F4D03F;
+  filter: drop-shadow(0 2px 4px rgba(212, 175, 55, 0.5));
 }
 
 .cta-feature-item svg {
@@ -1360,5 +1382,183 @@
 
   .footer-heading {
     font-size: 1rem;
+  }
+}
+
+/* Modern Slider Styles */
+.features-slider-container {
+  position: relative;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 80px;
+}
+
+.features-slider {
+  overflow: hidden;
+  border-radius: 24px;
+}
+
+.features-slider-track {
+  display: flex;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.feature-slide {
+  min-width: 100%;
+  padding: 0 20px;
+}
+
+.feature-slide .feature-card {
+  height: 100%;
+  min-height: 600px;
+}
+
+/* Slider Navigation Buttons */
+.slider-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #D4AF37 0%, #F4D03F 100%);
+  border: none;
+  color: #1a1a1a;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 20px rgba(212, 175, 55, 0.4);
+  z-index: 10;
+}
+
+.slider-btn:hover {
+  transform: translateY(-50%) scale(1.1);
+  box-shadow: 0 8px 32px rgba(212, 175, 55, 0.6);
+}
+
+.slider-btn:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+.slider-btn-prev {
+  left: 10px;
+}
+
+.slider-btn-next {
+  right: 10px;
+}
+
+/* Slider Indicators */
+.slider-indicators {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 40px;
+}
+
+.slider-indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid #D4AF37;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 0;
+}
+
+.slider-indicator:hover {
+  background: rgba(212, 175, 55, 0.3);
+  transform: scale(1.2);
+}
+
+.slider-indicator.active {
+  background: linear-gradient(135deg, #D4AF37 0%, #F4D03F 100%);
+  width: 32px;
+  border-radius: 6px;
+  box-shadow: 0 2px 12px rgba(212, 175, 55, 0.5);
+}
+
+/* Mobile Responsiveness for Slider */
+@media (max-width: 1024px) {
+  .features-slider-container {
+    padding: 0 60px;
+  }
+
+  .slider-btn {
+    width: 48px;
+    height: 48px;
+  }
+
+  .slider-btn-prev {
+    left: 5px;
+  }
+
+  .slider-btn-next {
+    right: 5px;
+  }
+
+  .feature-slide .feature-card {
+    min-height: 550px;
+  }
+}
+
+@media (max-width: 768px) {
+  .features-slider-container {
+    padding: 0 50px;
+  }
+
+  .slider-btn {
+    width: 42px;
+    height: 42px;
+  }
+
+  .slider-btn svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .feature-slide .feature-card {
+    min-height: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .features-slider-container {
+    padding: 0 40px;
+  }
+
+  .slider-btn {
+    width: 36px;
+    height: 36px;
+  }
+
+  .slider-btn svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .slider-btn-prev {
+    left: 0;
+  }
+
+  .slider-btn-next {
+    right: 0;
+  }
+
+  .slider-indicators {
+    gap: 8px;
+    margin-top: 32px;
+  }
+
+  .slider-indicator {
+    width: 10px;
+    height: 10px;
+  }
+
+  .slider-indicator.active {
+    width: 24px;
   }
 }

@@ -1,5 +1,6 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Calculator, TrendingUp, Target, Shield, Zap, BarChart3, AlertTriangle, DollarSign, BookOpen } from 'lucide-react'
+import { Calculator, TrendingUp, Target, Shield, Zap, BarChart3, AlertTriangle, DollarSign, BookOpen, ChevronLeft, ChevronRight } from 'lucide-react'
 import TradingBackground from './TradingBackground'
 import TradingCharts from './TradingCharts'
 import LiveTradingChart from './LiveTradingChart'
@@ -7,6 +8,8 @@ import EmailSubscription from './EmailSubscription'
 import './LandingPage.css'
 
 const LandingPage = () => {
+  const [currentSlide, setCurrentSlide] = useState(0)
+
   const features = [
     {
       icon: <Calculator size={40} />,
@@ -49,6 +52,18 @@ const LandingPage = () => {
       color: '#10b981'
     }
   ]
+
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % features.length)
+  }
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + features.length) % features.length)
+  }
+
+  const goToSlide = (index: number) => {
+    setCurrentSlide(index)
+  }
 
   const whyUseIt = [
     {
@@ -121,7 +136,7 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Features Section */}
+      {/* Features Section - Modern Slider */}
       <section id="features" className="features-section">
         <div className="section-header">
           <h2 className="section-title">Complete Trading Toolkit</h2>
@@ -129,44 +144,74 @@ const LandingPage = () => {
             Four essential tools that professional traders use daily. Each tool serves a specific purpose in your trading workflow.
           </p>
         </div>
-        <div className="features-grid">
-          {features.map((feature, index) => (
-            <div key={index} className="feature-card" style={{ '--card-color': feature.color } as React.CSSProperties}>
-              <div className="feature-icon" style={{ backgroundColor: `${feature.color}15` }}>
-                <div style={{ color: feature.color }}>{feature.icon}</div>
-              </div>
-              <h3 className="feature-title">{feature.title}</h3>
-              <p className="feature-description">{feature.description}</p>
 
-              <div className="feature-meta">
-                <div className="feature-usage">
-                  <strong>When to Use:</strong> {feature.usage}
+        <div className="features-slider-container">
+          <div className="features-slider">
+            <div
+              className="features-slider-track"
+              style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+            >
+              {features.map((feature, index) => (
+                <div key={index} className="feature-slide">
+                  <div className="feature-card" style={{ '--card-color': feature.color } as React.CSSProperties}>
+                    <div className="feature-icon" style={{ backgroundColor: `${feature.color}15` }}>
+                      <div style={{ color: feature.color }}>{feature.icon}</div>
+                    </div>
+                    <h3 className="feature-title">{feature.title}</h3>
+                    <p className="feature-description">{feature.description}</p>
+
+                    <div className="feature-meta">
+                      <div className="feature-usage">
+                        <strong>When to Use:</strong> {feature.usage}
+                      </div>
+                      <div className="feature-importance">
+                        <strong>Why It Matters:</strong> {feature.importance}
+                      </div>
+                    </div>
+
+                    <div className="feature-divider"></div>
+
+                    <ul className="feature-benefits">
+                      {feature.benefits.map((benefit, i) => (
+                        <li key={i}>
+                          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                            <path d="M13.5 4L6 11.5L2.5 8" stroke={feature.color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                          {benefit}
+                        </li>
+                      ))}
+                    </ul>
+                    <Link to={feature.link} className="feature-link" style={{ color: feature.color }}>
+                      Open Tool
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <path d="M6 12L10 8L6 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </Link>
+                  </div>
                 </div>
-                <div className="feature-importance">
-                  <strong>Why It Matters:</strong> {feature.importance}
-                </div>
-              </div>
-
-              <div className="feature-divider"></div>
-
-              <ul className="feature-benefits">
-                {feature.benefits.map((benefit, i) => (
-                  <li key={i}>
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                      <path d="M13.5 4L6 11.5L2.5 8" stroke={feature.color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                    {benefit}
-                  </li>
-                ))}
-              </ul>
-              <Link to={feature.link} className="feature-link" style={{ color: feature.color }}>
-                Open Tool
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <path d="M6 12L10 8L6 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </Link>
+              ))}
             </div>
-          ))}
+          </div>
+
+          {/* Slider Controls */}
+          <button className="slider-btn slider-btn-prev" onClick={prevSlide} aria-label="Previous slide">
+            <ChevronLeft size={32} />
+          </button>
+          <button className="slider-btn slider-btn-next" onClick={nextSlide} aria-label="Next slide">
+            <ChevronRight size={32} />
+          </button>
+
+          {/* Slider Indicators */}
+          <div className="slider-indicators">
+            {features.map((_, index) => (
+              <button
+                key={index}
+                className={`slider-indicator ${index === currentSlide ? 'active' : ''}`}
+                onClick={() => goToSlide(index)}
+                aria-label={`Go to slide ${index + 1}`}
+              />
+            ))}
+          </div>
         </div>
       </section>
 
@@ -284,7 +329,7 @@ const LandingPage = () => {
         <div className="cta-container">
           <div className="cta-header">
             <h2 className="cta-title">Ready to Level Up Your Trading?</h2>
-            <p className="cta-subtitle">Watch live market action with real-time buy and sell signals</p>
+            <p className="cta-subtitle cta-subtitle-dark">Watch live market action with real-time buy and sell signals</p>
           </div>
 
           <div className="cta-chart-wrapper">
@@ -303,21 +348,21 @@ const LandingPage = () => {
               </Link>
             </div>
             <div className="cta-features">
-              <div className="cta-feature-item">
+              <div className="cta-feature-item cta-feature-dark">
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                  <path d="M10 0L12.2451 7.75486L20 10L12.2451 12.2451L10 20L7.75486 12.2451L0 10L7.75486 7.75486L10 0Z" fill="white"/>
+                  <path d="M10 0L12.2451 7.75486L20 10L12.2451 12.2451L10 20L7.75486 12.2451L0 10L7.75486 7.75486L10 0Z" fill="currentColor"/>
                 </svg>
                 <span>No Registration Required</span>
               </div>
-              <div className="cta-feature-item">
+              <div className="cta-feature-item cta-feature-dark">
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                  <path d="M10 0L12.2451 7.75486L20 10L12.2451 12.2451L10 20L7.75486 12.2451L0 10L7.75486 7.75486L10 0Z" fill="white"/>
+                  <path d="M10 0L12.2451 7.75486L20 10L12.2451 12.2451L10 20L7.75486 12.2451L0 10L7.75486 7.75486L10 0Z" fill="currentColor"/>
                 </svg>
                 <span>Real-Time Signals</span>
               </div>
-              <div className="cta-feature-item">
+              <div className="cta-feature-item cta-feature-dark">
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                  <path d="M10 0L12.2451 7.75486L20 10L12.2451 12.2451L10 20L7.75486 12.2451L0 10L7.75486 7.75486L10 0Z" fill="white"/>
+                  <path d="M10 0L12.2451 7.75486L20 10L12.2451 12.2451L10 20L7.75486 12.2451L0 10L7.75486 7.75486L10 0Z" fill="currentColor"/>
                 </svg>
                 <span>Instant Access</span>
               </div>
