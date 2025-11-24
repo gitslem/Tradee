@@ -51,7 +51,6 @@ const PositionCalculator = () => {
   const [useLeverage, setUseLeverage] = useState<boolean>(false)
   const [selectedExchange, setSelectedExchange] = useState<string>('binance')
   const [accountType, setAccountType] = useState<AccountType>('futures')
-  const [positionMode, setPositionMode] = useState<'fixed-risk' | 'fixed-margin'>('fixed-risk')
 
   // Get exchange-specific fees
   const exchangeFees = getExchangeFees(selectedExchange, accountType)
@@ -78,47 +77,44 @@ const PositionCalculator = () => {
     // Risk Amount = Account Balance × Risk % per Trade
     const riskAmount = balance * (risk / 100)
 
-    // Calculate Position Size based on mode
-    let positionSize: number
-    let marginRequired: number
-    let notionalValue: number
-
-    if (positionMode === 'fixed-margin' && useLeverage && lev > 1) {
-      // Fixed Margin Mode: Margin stays constant, position size scales with leverage
-      // This allows profits to increase with leverage
-      marginRequired = riskAmount / stopLossDistance
-      positionSize = marginRequired * lev
-      notionalValue = positionSize
-    } else {
-      // Fixed Risk Mode (default): Position size based on risk, margin decreases with leverage
-      positionSize = riskAmount / stopLossDistance
-      marginRequired = positionSize / lev
-      notionalValue = positionSize
-    }
+    // Calculate Position Size (Isolated Margin Mode - Binance/Bybit Standard)
+    // Position size is based on risk amount and stop loss distance
+    // Leverage affects margin required, not position size
+    const positionSize = riskAmount / stopLossDistance
+    const marginRequired = positionSize / lev
+    const notionalValue = positionSize
 
     // Position Value in base currency (Quantity)
     const positionValue = positionSize / entry
     const quantity = positionValue
 
     // Liquidation Price Calculation (Isolated Margin - Bybit/Binance Formula)
-    // This formula accounts for maintenance margin and matches real exchange calculations
-    // For LONG: Liquidation Price = Entry - [(Initial Margin - Maintenance Margin - Close Fee) / Quantity]
-    // For SHORT: Liquidation Price = Entry + [(Initial Margin - Maintenance Margin - Close Fee) / Quantity]
+    // This formula accounts for maintenance margin, fees, and available buffer margin
+    // For LONG: Liquidation Price = Entry - [(Total Margin - Maintenance Margin - Close Fee) / Quantity]
+    // For SHORT: Liquidation Price = Entry + [(Total Margin - Maintenance Margin - Close Fee) / Quantity]
     let liquidationPrice = 0
     if (useLeverage && lev > 1) {
       // Get maintenance margin rate for the current leverage level
       const maintenanceMarginRate = getMaintenanceMargin(selectedExchange, lev)
 
-      // Calculate margins
+      // Calculate position values
       const positionValueInUsdt = entry * quantity
-      const initialMargin = positionValueInUsdt / lev
+      const minimumMargin = positionValueInUsdt / lev
       const maintenanceMargin = (positionValueInUsdt * maintenanceMarginRate) / 100
+
+      // Calculate available buffer from account (up to 2x the risk amount or 10% of balance, whichever is smaller)
+      // This represents additional margin that could be allocated to prevent liquidation
+      const maxBuffer = Math.min(riskAmount * 2, balance * 0.1)
+      const marginBuffer = Math.max(0, maxBuffer - minimumMargin)
+
+      // Total margin allocated = minimum required + buffer available
+      const totalMargin = minimumMargin + marginBuffer
 
       // Calculate estimated fee to close the position
       const closeFee = positionValueInUsdt * (exchangeFees.taker / 100)
 
       // Available margin for price movement before liquidation
-      const availableMargin = initialMargin - maintenanceMargin - closeFee
+      const availableMargin = totalMargin - maintenanceMargin - closeFee
 
       if (positionType === 'long') {
         liquidationPrice = entry - (availableMargin / quantity)
@@ -457,19 +453,6 @@ const PositionCalculator = () => {
 
             {useLeverage && (
               <>
-                <div className="form-group">
-                  <label>Position Sizing Mode</label>
-                  <select value={positionMode} onChange={(e) => setPositionMode(e.target.value as 'fixed-risk' | 'fixed-margin')}>
-                    <option value="fixed-risk">Fixed Risk (Conservative)</option>
-                    <option value="fixed-margin">Fixed Margin (Scales with Leverage)</option>
-                  </select>
-                  <small>
-                    {positionMode === 'fixed-risk'
-                      ? '💡 Risk amount stays constant, margin decreases with leverage'
-                      : '⚡ Margin stays constant, position size & profit scale with leverage'}
-                  </small>
-                </div>
-
                 <div className="form-group leverage-section">
                   <label>
                     Leverage Multiplier
