@@ -186,6 +186,82 @@
   font-size: 0.875rem;
 }
 
+.section-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.add-item-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  background: linear-gradient(135deg, var(--gold-primary) 0%, var(--gold-light) 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 2px 12px rgba(212, 175, 55, 0.3);
+}
+
+.add-item-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(212, 175, 55, 0.4);
+}
+
+.add-item-btn:active {
+  transform: translateY(0);
+}
+
+.view-toggle {
+  display: flex;
+  gap: 0.25rem;
+  background: var(--background);
+  padding: 0.25rem;
+  border-radius: 10px;
+  border: 2px solid rgba(212, 175, 55, 0.2);
+}
+
+.toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 0.75rem;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.toggle-btn:hover {
+  background: rgba(212, 175, 55, 0.1);
+  color: var(--gold-dark);
+}
+
+.toggle-btn.active {
+  background: linear-gradient(135deg, var(--gold-primary) 0%, var(--gold-light) 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(212, 175, 55, 0.3);
+}
+
+.full-component-view {
+  margin-top: 1rem;
+}
+
+.full-component-view .trading-journal,
+.full-component-view .personal-notes {
+  padding: 0;
+  min-height: auto;
+  background: transparent;
+}
+
 /* Cards Grid */
 .cards-grid {
   display: grid;
@@ -852,6 +928,22 @@
 
   .section-title h2 {
     font-size: 1.25rem;
+  }
+
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .section-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .add-item-btn {
+    flex: 1;
+    justify-content: center;
   }
 
   .detail-grid {
