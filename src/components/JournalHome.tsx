@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   User, Download, TrendingUp, TrendingDown, BookOpen,
-  Calendar, DollarSign, X, Pin,
+  Calendar, DollarSign, X, Pin, List, Grid,
   FileText, FileJson, FileSpreadsheet, File
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { firestoreService } from '../services/firestoreService'
 import type { Trade, JournalNote } from '../services/firestoreService'
+import TradingJournal from './TradingJournal'
+import PersonalNotes from './PersonalNotes'
 import './JournalHome.css'
 
 // Export Modal Component
@@ -430,6 +432,8 @@ const JournalHome = () => {
   const [showExportModal, setShowExportModal] = useState(false)
   const [selectedTrade, setSelectedTrade] = useState<Trade | null>(null)
   const [selectedNote, setSelectedNote] = useState<JournalNote | null>(null)
+  const [tradesView, setTradesView] = useState<'recent' | 'all'>('recent')
+  const [notesView, setNotesView] = useState<'recent' | 'all'>('recent')
 
   useEffect(() => {
     if (loading) return
@@ -493,92 +497,144 @@ const JournalHome = () => {
       </div>
 
       <div className="journal-content-grid">
-        {/* Recent Trades Section */}
+        {/* Trades Section */}
         <div className="journal-section">
           <div className="section-header">
             <div className="section-title">
               <TrendingUp size={24} className="section-icon" />
-              <h2>Recent Trades</h2>
+              <h2>Trades</h2>
             </div>
-            <span className="section-count">{trades.length} total</span>
+            <div className="section-actions">
+              <div className="view-toggle">
+                <button
+                  className={`toggle-btn ${tradesView === 'recent' ? 'active' : ''}`}
+                  onClick={() => setTradesView('recent')}
+                  title="Recent view"
+                >
+                  <Grid size={16} />
+                </button>
+                <button
+                  className={`toggle-btn ${tradesView === 'all' ? 'active' : ''}`}
+                  onClick={() => setTradesView('all')}
+                  title="All trades"
+                >
+                  <List size={16} />
+                </button>
+              </div>
+              <span className="section-count">{trades.length} total</span>
+            </div>
           </div>
 
-          {recentTrades.length === 0 ? (
-            <div className="empty-state">
-              <TrendingUp size={48} />
-              <p>No trades yet. Start tracking your performance!</p>
-            </div>
-          ) : (
-            <div className="cards-grid">
-              {recentTrades.map(trade => (
-                <div
-                  key={trade.id}
-                  className={`journal-card trade-card ${trade.status}`}
-                  onClick={() => setSelectedTrade(trade)}
-                >
-                  <div className="card-header">
-                    <span className="card-title">{trade.pair}</span>
-                    <span className={`card-badge ${trade.type}`}>{trade.type}</span>
-                  </div>
-                  <div className="card-body">
-                    <div className="card-info">
-                      <DollarSign size={16} />
-                      <span>${trade.entryPrice}</span>
-                    </div>
-                    <div className={`card-pnl ${trade.profitLoss >= 0 ? 'profit' : 'loss'}`}>
-                      {trade.profitLoss >= 0 ? <TrendingUp size={16} /> : <TrendingDown size={16} />}
-                      <span>${Math.abs(trade.profitLoss).toFixed(2)}</span>
-                    </div>
-                  </div>
-                  <div className="card-footer">
-                    <Calendar size={14} />
-                    <span>{new Date(trade.entryDate).toLocaleDateString()}</span>
-                  </div>
+          {tradesView === 'recent' ? (
+            <>
+              {recentTrades.length === 0 ? (
+                <div className="empty-state">
+                  <TrendingUp size={48} />
+                  <p>No trades yet. Start tracking your performance!</p>
                 </div>
-              ))}
+              ) : (
+                <div className="cards-grid">
+                  {recentTrades.map(trade => (
+                    <div
+                      key={trade.id}
+                      className={`journal-card trade-card ${trade.status}`}
+                      onClick={() => setSelectedTrade(trade)}
+                    >
+                      <div className="card-header">
+                        <span className="card-title">{trade.pair}</span>
+                        <span className={`card-badge ${trade.type}`}>{trade.type}</span>
+                      </div>
+                      <div className="card-body">
+                        <div className="card-info">
+                          <DollarSign size={16} />
+                          <span>${trade.entryPrice}</span>
+                        </div>
+                        <div className={`card-pnl ${trade.profitLoss >= 0 ? 'profit' : 'loss'}`}>
+                          {trade.profitLoss >= 0 ? <TrendingUp size={16} /> : <TrendingDown size={16} />}
+                          <span>${Math.abs(trade.profitLoss).toFixed(2)}</span>
+                        </div>
+                      </div>
+                      <div className="card-footer">
+                        <Calendar size={14} />
+                        <span>{new Date(trade.entryDate).toLocaleDateString()}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="full-component-view">
+              <TradingJournal onTradesUpdate={setTrades} compact={false} />
             </div>
           )}
         </div>
 
-        {/* Recent Notes Section */}
+        {/* Notes Section */}
         <div className="journal-section">
           <div className="section-header">
             <div className="section-title">
               <BookOpen size={24} className="section-icon" />
-              <h2>Recent Notes</h2>
+              <h2>Notes</h2>
             </div>
-            <span className="section-count">{notes.length} total</span>
+            <div className="section-actions">
+              <div className="view-toggle">
+                <button
+                  className={`toggle-btn ${notesView === 'recent' ? 'active' : ''}`}
+                  onClick={() => setNotesView('recent')}
+                  title="Recent view"
+                >
+                  <Grid size={16} />
+                </button>
+                <button
+                  className={`toggle-btn ${notesView === 'all' ? 'active' : ''}`}
+                  onClick={() => setNotesView('all')}
+                  title="All notes"
+                >
+                  <List size={16} />
+                </button>
+              </div>
+              <span className="section-count">{notes.length} total</span>
+            </div>
           </div>
 
-          {recentNotes.length === 0 ? (
-            <div className="empty-state">
-              <BookOpen size={48} />
-              <p>No notes yet. Document your strategies and insights!</p>
-            </div>
-          ) : (
-            <div className="cards-grid">
-              {recentNotes.map(note => (
-                <div
-                  key={note.id}
-                  className="journal-card note-card"
-                  onClick={() => setSelectedNote(note)}
-                >
-                  <div className="card-header">
-                    <span className="card-title">{note.title}</span>
-                    {note.isPinned && <Pin size={16} className="pinned-badge" />}
-                  </div>
-                  <div className="card-body">
-                    <span className={`note-category-badge ${note.category}`}>
-                      {note.category}
-                    </span>
-                    <p className="note-preview">{note.content.substring(0, 100)}...</p>
-                  </div>
-                  <div className="card-footer">
-                    <Calendar size={14} />
-                    <span>{new Date(note.createdAt).toLocaleDateString()}</span>
-                  </div>
+          {notesView === 'recent' ? (
+            <>
+              {recentNotes.length === 0 ? (
+                <div className="empty-state">
+                  <BookOpen size={48} />
+                  <p>No notes yet. Document your strategies and insights!</p>
                 </div>
-              ))}
+              ) : (
+                <div className="cards-grid">
+                  {recentNotes.map(note => (
+                    <div
+                      key={note.id}
+                      className="journal-card note-card"
+                      onClick={() => setSelectedNote(note)}
+                    >
+                      <div className="card-header">
+                        <span className="card-title">{note.title}</span>
+                        {note.isPinned && <Pin size={16} className="pinned-badge" />}
+                      </div>
+                      <div className="card-body">
+                        <span className={`note-category-badge ${note.category}`}>
+                          {note.category}
+                        </span>
+                        <p className="note-preview">{note.content.substring(0, 100)}...</p>
+                      </div>
+                      <div className="card-footer">
+                        <Calendar size={14} />
+                        <span>{new Date(note.createdAt).toLocaleDateString()}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="full-component-view">
+              <PersonalNotes trades={trades} compact={false} />
             </div>
           )}
         </div>

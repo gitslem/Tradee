@@ -186,6 +186,56 @@
   font-size: 0.875rem;
 }
 
+.section-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.view-toggle {
+  display: flex;
+  gap: 0.25rem;
+  background: var(--background);
+  padding: 0.25rem;
+  border-radius: 10px;
+  border: 2px solid rgba(212, 175, 55, 0.2);
+}
+
+.toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 0.75rem;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.toggle-btn:hover {
+  background: rgba(212, 175, 55, 0.1);
+  color: var(--gold-dark);
+}
+
+.toggle-btn.active {
+  background: linear-gradient(135deg, var(--gold-primary) 0%, var(--gold-light) 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(212, 175, 55, 0.3);
+}
+
+.full-component-view {
+  margin-top: 1rem;
+}
+
+.full-component-view .trading-journal,
+.full-component-view .personal-notes {
+  padding: 0;
+  min-height: auto;
+  background: transparent;
+}
+
 /* Cards Grid */
 .cards-grid {
   display: grid;
