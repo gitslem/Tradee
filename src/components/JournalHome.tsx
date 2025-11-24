@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   User, Download, TrendingUp, TrendingDown, BookOpen,
-  Calendar, DollarSign, X, Pin, List, Grid,
+  Calendar, DollarSign, X, Pin, List, Grid, Plus,
   FileText, FileJson, FileSpreadsheet, File
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
@@ -505,6 +505,14 @@ const JournalHome = () => {
               <h2>Trades</h2>
             </div>
             <div className="section-actions">
+              <button
+                className="add-item-btn"
+                onClick={() => setTradesView('all')}
+                title="Add new trade"
+              >
+                <Plus size={18} />
+                <span>Add Trade</span>
+              </button>
               <div className="view-toggle">
                 <button
                   className={`toggle-btn ${tradesView === 'recent' ? 'active' : ''}`}
@@ -578,6 +586,14 @@ const JournalHome = () => {
               <h2>Notes</h2>
             </div>
             <div className="section-actions">
+              <button
+                className="add-item-btn"
+                onClick={() => setNotesView('all')}
+                title="Add new note"
+              >
+                <Plus size={18} />
+                <span>Add Note</span>
+              </button>
               <div className="view-toggle">
                 <button
                   className={`toggle-btn ${notesView === 'recent' ? 'active' : ''}`}
