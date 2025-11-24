@@ -35,6 +35,7 @@ interface CalculationResults {
   totalFees: number
   fundingCost: number
   roiOnMargin: number
+  actualRiskWithLeverage: number
 }
 
 const PositionCalculator = () => {
@@ -78,13 +79,17 @@ const PositionCalculator = () => {
     const riskAmount = balance * (risk / 100)
 
     // Calculate Position Size (Isolated Margin Mode - Binance/Bybit Standard)
-    // Position size is based on risk amount and stop loss distance
-    // Leverage affects margin required, not position size
-    const positionSize = riskAmount / stopLossDistance
-    const marginRequired = positionSize / lev
+    // Base position size from risk and stop loss
+    const basePositionSize = riskAmount / stopLossDistance
+
+    // When using leverage, position size is multiplied by leverage
+    // This allows controlling a larger position with the same risk/margin
+    const positionSize = basePositionSize * lev
+    const marginRequired = basePositionSize // Margin stays the same as base position
     const notionalValue = positionSize
 
     // Position Value in base currency (Quantity)
+    // With leverage, quantity increases proportionally
     const positionValue = positionSize / entry
     const quantity = positionValue
 
@@ -143,7 +148,8 @@ const PositionCalculator = () => {
     if (!isNaN(takeProfit)) {
       const tpDistance = Math.abs(takeProfit - entry)
       const tpPercentDistance = (tpDistance / entry) * 100
-      // Profit is NOT multiplied by leverage - leverage only affects ROI on margin
+      // Profit is calculated from quantity which increases with leverage
+      // Higher leverage = larger position = more profit (and more risk)
       const potentialProfit = quantity * tpDistance
       const rrRatio = tpDistance / Math.abs(entry - stop)
 
@@ -212,6 +218,10 @@ const PositionCalculator = () => {
       ? (potentialProfit / marginRequired) * 100
       : 0
 
+    // Calculate actual risk with leverage
+    // When leverage is used, the actual amount at risk is: position size × stop distance
+    const actualRiskWithLeverage = positionSize * stopLossDistance
+
     return {
       stopLossDistance: stopLossDistance * 100,
       riskAmount,
@@ -231,7 +241,8 @@ const PositionCalculator = () => {
       maintenanceMarginRate,
       totalFees,
       fundingCost,
-      roiOnMargin
+      roiOnMargin,
+      actualRiskWithLeverage
     }
   }
 
@@ -282,6 +293,12 @@ const PositionCalculator = () => {
       // Check exchange leverage limit
       if (lev > maxLeverageAllowed) {
         warnings.push(`🚨 INVALID: ${selectedExchange} ${accountType} max leverage is ${maxLeverageAllowed}x`)
+      }
+
+      // Warn about actual risk multiplier
+      if (results && results.actualRiskWithLeverage > results.riskAmount) {
+        const actualRiskPercent = (results.actualRiskWithLeverage / parseFloat(accountBalance)) * 100
+        warnings.push(`⚠️ LEVERAGE RISK: With ${lev}x leverage, your actual risk at stop loss is $${results.actualRiskWithLeverage.toFixed(2)} (${actualRiskPercent.toFixed(2)}% of account)`)
       }
 
       if (lev >= 20) {
@@ -522,10 +539,20 @@ const PositionCalculator = () => {
               </div>
 
               <div className="result-card">
-                <h3>Risk Amount</h3>
+                <h3>{useLeverage && parseFloat(leverage) > 1 ? 'Initial Margin' : 'Risk Amount'}</h3>
                 <div className="result-value">${results.riskAmount.toFixed(2)}</div>
                 <div className="result-subtext">{riskPercentage}% of account</div>
               </div>
+
+              {useLeverage && parseFloat(leverage) > 1 && (
+                <div className="result-card danger">
+                  <h3>Actual Risk at Stop Loss</h3>
+                  <div className="result-value">${results.actualRiskWithLeverage.toFixed(2)}</div>
+                  <div className="result-subtext">
+                    {((results.actualRiskWithLeverage / parseFloat(accountBalance)) * 100).toFixed(2)}% of account ({leverage}x multiplier)
+                  </div>
+                </div>
+              )}
 
               <div className="result-card">
                 <h3>Stop Loss Distance</h3>

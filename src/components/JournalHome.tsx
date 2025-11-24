@@ -10,6 +10,7 @@ import { firestoreService } from '../services/firestoreService'
 import type { Trade, JournalNote } from '../services/firestoreService'
 import TradingJournal from './TradingJournal'
 import PersonalNotes from './PersonalNotes'
+import CryptoRecommendations from './CryptoRecommendations'
 import './JournalHome.css'
 
 // Export Modal Component
@@ -507,6 +508,9 @@ const JournalHome = () => {
           <span>Export</span>
         </button>
       </div>
+
+      {/* AI-Powered Crypto Recommendations */}
+      <CryptoRecommendations />
 
       <div className="journal-content-grid">
         {/* Trades Section */}
