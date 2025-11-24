@@ -106,9 +106,6 @@ const PersonalNotes = ({ trades = [], compact = false }: PersonalNotesProps) => 
       {!compact && (
         <div className="notes-header-section">
         <div className="notes-title-group">
-          <div className="notes-icon-wrapper">
-            <BookOpen size={32} />
-          </div>
           <div className="notes-title-content">
             <h2>Personal Journal</h2>
             <p>Capture your trading insights, strategies, and reflections</p>

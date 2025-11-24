@@ -164,9 +164,6 @@ const TradingJournal = ({ onTradesUpdate, compact = false }: TradingJournalProps
       {!compact && (
         <div className="journal-header-section">
           <div className="journal-title-group">
-            <div className="journal-icon-wrapper">
-              <TrendingUp size={32} />
-            </div>
             <div className="journal-title-content">
               <h2>Trading Journal</h2>
               <p>Track, analyze, and improve your trading performance</p>
