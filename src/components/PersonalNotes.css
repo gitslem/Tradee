@@ -66,10 +66,10 @@
 }
 
 .notes-title-content p {
-  font-size: var(--font-size-lg);
-  color: var(--color-text-primary);
-  font-weight: var(--font-weight-medium);
-  opacity: 1;
+  color: var(--color-text-muted);
+  font-size: 1rem;
+  margin: 0;
+  animation: slideUp 0.5s ease-out 0.3s backwards;
 }
 
 .notes-header-actions {
