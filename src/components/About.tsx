@@ -5,7 +5,7 @@ const About = () => {
   return (
     <div className="about-page">
       <div className="about-hero">
-        <h1>About Tradee</h1>
+        <h1>About Traddii</h1>
         <p>Your Complete Trading Performance Platform</p>
       </div>
 
@@ -17,7 +17,7 @@ const About = () => {
           </div>
           <h2>Our Mission</h2>
           <p>
-            Tradee is dedicated to empowering traders with the tools they need to track, analyze, and improve their trading performance. We believe that successful trading requires discipline, careful analysis, and continuous improvement. Our platform provides you with everything you need to maintain a professional trading journal and make data-driven decisions.
+            Traddii is dedicated to empowering traders with the tools they need to track, analyze, and improve their trading performance. We believe that successful trading requires discipline, careful analysis, and continuous improvement. Our platform provides you with everything you need to maintain a professional trading journal and make data-driven decisions.
           </p>
         </section>
 
@@ -65,7 +65,7 @@ const About = () => {
 
         {/* Why Choose Us Section */}
         <section className="about-section highlight">
-          <h2>Why Choose Tradee?</h2>
+          <h2>Why Choose Traddii?</h2>
           <div className="benefits-list">
             <div className="benefit-item">
               <div className="benefit-icon">✓</div>
@@ -102,7 +102,7 @@ const About = () => {
         <section className="about-section">
           <h2>Built with Modern Technology</h2>
           <p>
-            Tradee is built using cutting-edge web technologies including React, TypeScript, and Firebase, ensuring a fast, reliable, and secure experience. Our platform is continuously updated with new features and improvements based on trader feedback.
+            Traddii is built using cutting-edge web technologies including React, TypeScript, and Firebase, ensuring a fast, reliable, and secure experience. Our platform is continuously updated with new features and improvements based on trader feedback.
           </p>
           <div className="tech-stack">
             <span className="tech-badge">React</span>
@@ -120,7 +120,7 @@ const About = () => {
           </div>
           <h2>Our Team</h2>
           <p>
-            Tradee is developed by a passionate team of traders and software engineers who understand the challenges of maintaining trading discipline and performance tracking. We're committed to building tools that make a real difference in your trading journey.
+            Traddii is developed by a passionate team of traders and software engineers who understand the challenges of maintaining trading discipline and performance tracking. We're committed to building tools that make a real difference in your trading journey.
           </p>
         </section>
 
@@ -137,7 +137,7 @@ const About = () => {
             </div>
             <div className="contact-item">
               <strong>Email:</strong>
-              <p>support@tradee.app</p>
+              <p>traddii.web.app@gmail.com</p>
             </div>
           </div>
         </section>
@@ -146,7 +146,7 @@ const About = () => {
         <section className="about-section cta-section">
           <h2>Start Your Trading Journey Today</h2>
           <p>
-            Join thousands of traders who are improving their performance with Tradee. Track your trades, analyze your performance, and become a better trader.
+            Join thousands of traders who are improving their performance with Traddii. Track your trades, analyze your performance, and become a better trader.
           </p>
           <button className="cta-button" onClick={() => window.location.href = '/journal'}>
             Get Started Free

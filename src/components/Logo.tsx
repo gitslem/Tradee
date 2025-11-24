@@ -6,8 +6,8 @@ const Logo = ({ size = 32, variant = 'primary' }: { size?: number; variant?: 'pr
   // Use logo1 as primary, logo2 as secondary - now using local files from public directory
   const logoUrl = variant === 'primary' ? '/logo1.jpeg' : '/logo2.jpeg'
   const fallbackUrl = variant === 'primary'
-    ? 'https://raw.githubusercontent.com/gitslem/Tradee/main/logo1.jpeg'
-    : 'https://raw.githubusercontent.com/gitslem/Tradee/main/logo2.jpeg'
+    ? 'https://raw.githubusercontent.com/gitslem/Traddii/main/logo1.jpeg'
+    : 'https://raw.githubusercontent.com/gitslem/Traddii/main/logo2.jpeg'
 
   return (
     <img
