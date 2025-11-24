@@ -27,7 +27,7 @@ const ExportModal = ({ trades, notes, onClose }: ExportModalProps) => {
 
   const handleExport = () => {
     try {
-      let dataToExport: any
+      let dataToExport: string | undefined
       let filename = `export-${new Date().toISOString().split('T')[0]}`
 
       if (showItemSelection && selectedItems.size > 0) {
@@ -508,10 +508,10 @@ const JournalHome = () => {
               <button
                 className="add-item-btn"
                 onClick={() => setTradesView('all')}
-                title="Add new trade"
+                title="View all trades"
               >
                 <Plus size={18} />
-                <span>Add Trade</span>
+                <span>View Trades</span>
               </button>
               <div className="view-toggle">
                 <button
@@ -589,10 +589,10 @@ const JournalHome = () => {
               <button
                 className="add-item-btn"
                 onClick={() => setNotesView('all')}
-                title="Add new note"
+                title="View all notes"
               >
                 <Plus size={18} />
-                <span>Add Note</span>
+                <span>View Notes</span>
               </button>
               <div className="view-toggle">
                 <button
