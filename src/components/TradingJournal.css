@@ -1,30 +1,9 @@
-:root {
-  --journal-primary: #d4af37;
-  --journal-primary-dark: #b8941f;
-  --journal-primary-light: #f4d03f;
-  --journal-accent: #fbbf24;
-  --color-background: #f9fafb;
-  --color-text: #1f2937;
-  --color-text-muted: #6b7280;
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 20px;
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 16px;
-  --space-5: 20px;
-  --space-6: 24px;
-  --space-8: 32px;
-}
-
 .trading-journal {
   min-height: 100vh;
   padding: 40px 60px;
   position: relative;
   z-index: 1;
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--color-surface);
   animation: fadeIn 0.4s ease-out;
 }
 
@@ -68,9 +47,9 @@
 .journal-title-content h2 {
   font-size: 2rem;
   font-weight: 800;
-  color: var(--color-text);
+  color: var(--color-text-primary);
   margin: 0 0 var(--space-2) 0;
-  background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -78,7 +57,7 @@
 }
 
 .journal-title-content p {
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
   font-size: 1rem;
   margin: 0;
   animation: slideUp 0.5s ease-out 0.3s backwards;
