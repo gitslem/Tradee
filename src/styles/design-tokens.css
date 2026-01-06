@@ -128,9 +128,34 @@
   --z-tooltip: 1070;
 }
 
-/* Dark Mode Support */
+/* Night Mode - Automatic based on user location and time */
+[data-theme='night'] {
+  --color-background: #0f172a;
+  --color-background-hover: #1e293b;
+  --color-surface: #1e293b;
+  --color-surface-elevated: #334155;
+  --color-border: #334155;
+  --color-border-light: #475569;
+
+  --color-text-primary: #f1f5f9;
+  --color-text-secondary: #cbd5e1;
+  --color-text-tertiary: #64748b;
+
+  --glass-background: rgba(30, 41, 59, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+
+  /* Enhanced shadows for night mode */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.6), 0 10px 10px -5px rgba(0, 0, 0, 0.4);
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+}
+
+/* Fallback for system preference */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme='day']) {
     --color-background: #0f172a;
     --color-background-hover: #1e293b;
     --color-surface: #1e293b;
