@@ -6,8 +6,10 @@ import {
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { firestoreService } from '../services/firestoreService'
+import { analyticsService } from '../services/analyticsService'
 import type { Trade, JournalNote, TradeStats } from '../services/firestoreService'
 import TradingBackground from './TradingBackground'
+import PerformanceCharts from './PerformanceCharts'
 import './Dashboard.css'
 
 const Dashboard = () => {
@@ -110,6 +112,9 @@ const Dashboard = () => {
   const recentTrades = trades.slice(0, 5)
   const recentNotes = notes.slice(0, 5)
 
+  // Calculate advanced stats for charts
+  const advancedStats = trades.length > 0 ? analyticsService.calculateAdvancedStats(trades) : null
+
   if (loading) {
     return (
       <div className="dashboard">
@@ -202,6 +207,63 @@ const Dashboard = () => {
               <span className="stat-detail">{notes.filter(n => n.isPinned).length} pinned</span>
             </div>
           </div>
+
+          {advancedStats && (
+            <>
+              <div className={`dashboard-stat-card ${advancedStats.expectancy >= 0 ? 'profit' : 'loss'}`}>
+                <div className="stat-icon">
+                  <TrendingUp size={28} />
+                </div>
+                <div className="stat-content">
+                  <span className="stat-label">Expectancy</span>
+                  <span className="stat-value">
+                    {advancedStats.expectancy >= 0 ? '+' : ''}${advancedStats.expectancy.toFixed(2)}
+                  </span>
+                  <span className="stat-detail">Per trade average</span>
+                </div>
+              </div>
+
+              <div className="dashboard-stat-card loss">
+                <div className="stat-icon">
+                  <TrendingDown size={28} />
+                </div>
+                <div className="stat-content">
+                  <span className="stat-label">Max Drawdown</span>
+                  <span className="stat-value">{advancedStats.maxDrawdown.toFixed(1)}%</span>
+                  <span className="stat-detail">Peak to trough</span>
+                </div>
+              </div>
+
+              <div className="dashboard-stat-card win">
+                <div className="stat-icon">
+                  <Target size={28} />
+                </div>
+                <div className="stat-content">
+                  <span className="stat-label">Best Streak</span>
+                  <span className="stat-value">{advancedStats.longestWinStreak}</span>
+                  <span className="stat-detail">Consecutive wins</span>
+                </div>
+              </div>
+
+              <div className="dashboard-stat-card total">
+                <div className="stat-icon">
+                  <BarChart3 size={28} />
+                </div>
+                <div className="stat-content">
+                  <span className="stat-label">Sharpe Ratio</span>
+                  <span className="stat-value">{advancedStats.sharpeRatio.toFixed(2)}</span>
+                  <span className="stat-detail">Risk-adjusted return</span>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
+      {/* Performance Charts Section */}
+      {trades.length > 0 && (
+        <div className="dashboard-charts-section">
+          <PerformanceCharts trades={trades} initialBalance={10000} />
         </div>
       )}
 
