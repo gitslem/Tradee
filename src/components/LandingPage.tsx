@@ -1,319 +1,423 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { Calculator, TrendingUp, Target, Shield, Zap, BarChart3, AlertTriangle, DollarSign, BookOpen, ChevronLeft, ChevronRight } from 'lucide-react'
+import {
+  Calculator,
+  TrendingUp,
+  Target,
+  BookOpen,
+  ArrowRight,
+  BarChart3,
+  Shield,
+  Zap,
+  LineChart,
+  Activity,
+  Layers,
+  PieChart,
+  ArrowUpRight,
+  ArrowDownRight,
+  Sparkles
+} from 'lucide-react'
 import TradingBackground from './TradingBackground'
-import TradingCharts from './TradingCharts'
 import LiveTradingChart from './LiveTradingChart'
 import EmailSubscription from './EmailSubscription'
 import './LandingPage.css'
 
-const LandingPage = () => {
-  const [currentSlide, setCurrentSlide] = useState(0)
+// Simulated live prices for the ticker
+const cryptoPairs = [
+  { symbol: 'BTC/USDT', price: 67482.50, change: 2.34 },
+  { symbol: 'ETH/USDT', price: 3521.80, change: 1.87 },
+  { symbol: 'SOL/USDT', price: 142.65, change: -0.54 },
+  { symbol: 'BNB/USDT', price: 598.20, change: 0.92 },
+  { symbol: 'XRP/USDT', price: 0.5234, change: 3.21 },
+  { symbol: 'DOGE/USDT', price: 0.1245, change: -1.23 },
+]
 
-  const features = [
+const LandingPage = () => {
+  const [activeTool, setActiveTool] = useState(0)
+  const [tickerPrices, setTickerPrices] = useState(cryptoPairs)
+
+  // Simulate live price updates
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTickerPrices(prev => prev.map(pair => ({
+        ...pair,
+        price: pair.price * (1 + (Math.random() - 0.5) * 0.002),
+        change: pair.change + (Math.random() - 0.5) * 0.1
+      })))
+    }, 2000)
+    return () => clearInterval(interval)
+  }, [])
+
+  const tools = [
     {
-      icon: <Calculator size={40} />,
-      title: 'Position Size Calculator',
-      description: 'Essential for protecting your capital. Calculate exact position sizes based on your account balance, risk percentage, and stop-loss distance. Prevent overleveraging and blown accounts.',
-      benefits: ['Risk-based position sizing with leverage', 'Liquidation price calculator', 'Multiple take-profit target planning', 'Breakeven price calculation'],
-      usage: 'Use before every trade to determine how much to invest',
-      importance: 'Critical for risk management and capital preservation',
+      icon: <Calculator size={24} />,
+      title: 'Position Calculator',
+      description: 'Calculate exact position sizes with leverage, liquidation prices, and multi-target TP planning.',
       link: '/calculator',
-      color: '#667eea'
+      tag: 'Risk Management',
+      gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
     },
     {
-      icon: <TrendingUp size={40} />,
-      title: 'Market Structure Analysis',
-      description: 'Identify the current market trend and key price levels. Understand whether the market is bullish, bearish, or ranging to align your strategy with market conditions.',
-      benefits: ['Higher-high and higher-low trend analysis', 'Support & resistance level identification', 'Market bias determination (bullish/bearish/neutral)', 'Break of structure detection'],
-      usage: 'Analyze before entering trades to trade with the trend',
-      importance: 'Essential for timing entries and understanding market context',
+      icon: <TrendingUp size={24} />,
+      title: 'Market Structure',
+      description: 'Identify trends, support/resistance levels, and break of structure signals.',
       link: '/market-structure',
-      color: '#ec4899'
+      tag: 'Technical Analysis',
+      gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'
     },
     {
-      icon: <Target size={40} />,
-      title: 'Price Action Analysis',
-      description: 'Master candlestick patterns for precise entry and exit timing. Recognize reversal and continuation patterns to predict price movements based on historical behavior.',
-      benefits: ['23+ candlestick pattern recognition', 'Real-time price action signals', 'Pattern reliability and probability data', 'Entry/exit timing optimization'],
-      usage: 'Check patterns on your timeframe to confirm trade setups',
-      importance: 'Improves entry timing and increases win rate',
+      icon: <Target size={24} />,
+      title: 'Price Action',
+      description: 'Recognize 23+ candlestick patterns with real-time signals and probability data.',
       link: '/price-action',
-      color: '#f093fb'
+      tag: 'Pattern Recognition',
+      gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)'
     },
     {
-      icon: <BookOpen size={40} />,
+      icon: <BookOpen size={24} />,
       title: 'Trading Journal',
-      description: 'Track every trade with detailed metrics. Analyze your performance over time to identify what works and what doesn\'t. Data-driven improvement for consistent profitability.',
-      benefits: ['Complete trade history logging', 'Win rate and P&L tracking', 'Performance analytics dashboard', 'CSV export for advanced analysis'],
-      usage: 'Log all trades to track performance and find patterns',
-      importance: 'Crucial for continuous improvement and accountability',
+      description: 'Track every trade with detailed metrics, analytics dashboard, and performance insights.',
       link: '/journal',
-      color: '#10b981'
+      tag: 'Performance Tracking',
+      gradient: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)'
     }
   ]
 
-  const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % features.length)
-  }
+  const metrics = [
+    { label: 'Trading Tools', value: '4', icon: <Layers size={20} /> },
+    { label: 'Pattern Types', value: '23+', icon: <Activity size={20} /> },
+    { label: 'Uptime', value: '99.9%', icon: <Zap size={20} /> },
+    { label: 'Free Forever', value: '$0', icon: <Sparkles size={20} /> }
+  ]
 
-  const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + features.length) % features.length)
-  }
-
-  const goToSlide = (index: number) => {
-    setCurrentSlide(index)
-  }
-
-  const whyUseIt = [
+  const features = [
     {
-      icon: <Shield size={32} />,
-      title: 'Risk Management',
-      description: 'Protect your capital with precise position sizing and stop-loss calculations'
+      icon: <Shield size={28} />,
+      title: 'Risk-First Approach',
+      description: 'Never risk more than you can afford. Our tools help you calculate precise position sizes based on your risk tolerance.'
     },
     {
-      icon: <Zap size={32} />,
-      title: 'Lightning Fast',
-      description: 'Get instant calculations and analysis without leaving your browser'
+      icon: <LineChart size={28} />,
+      title: 'Data-Driven Decisions',
+      description: 'Make informed trading decisions with comprehensive analytics, pattern recognition, and market structure analysis.'
     },
     {
-      icon: <BarChart3 size={32} />,
-      title: 'Professional Tools',
-      description: 'Access institutional-grade trading tools completely free'
+      icon: <BarChart3 size={28} />,
+      title: 'Track Everything',
+      description: 'Log every trade, analyze your performance over time, and identify what works best for your trading style.'
     },
     {
-      icon: <DollarSign size={32} />,
-      title: 'Maximize Profits',
-      description: 'Optimize your risk-reward ratio for consistent profitability'
+      icon: <PieChart size={28} />,
+      title: 'Portfolio Insights',
+      description: 'Understand your win rate, profit factor, and risk-reward ratios with detailed performance breakdowns.'
     }
   ]
 
   return (
     <div className="landing-page">
       <TradingBackground variant="home" />
+
+      {/* Live Price Ticker */}
+      <div className="price-ticker">
+        <div className="ticker-track">
+          {[...tickerPrices, ...tickerPrices].map((pair, index) => (
+            <div key={index} className="ticker-item">
+              <span className="ticker-symbol">{pair.symbol}</span>
+              <span className="ticker-price">${pair.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              <span className={`ticker-change ${pair.change >= 0 ? 'positive' : 'negative'}`}>
+                {pair.change >= 0 ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
+                {Math.abs(pair.change).toFixed(2)}%
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Hero Section */}
       <section className="hero">
-        <div className="hero-content">
-          <div className="hero-badge">
-            <Zap size={16} />
-            <span>Professional Trading Tools</span>
-          </div>
-          <h1 className="hero-title">
-            Professional Crypto Trading Tools for
-            <span className="gradient-text"> Consistent Profitability</span>
-          </h1>
-          <p className="hero-subtitle">
-            Complete toolkit for serious traders: Calculate position sizes, analyze market structure, identify price action patterns, and track your performance. Everything you need to trade with discipline and precision.
-          </p>
-          <div className="hero-cta">
-            <Link to="/calculator" className="btn-primary">
-              Start Calculating
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path d="M7.5 15L12.5 10L7.5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </Link>
-            <a href="#features" className="btn-secondary">
-              Explore Features
-            </a>
-          </div>
-          <div className="hero-stats">
-            <div className="stat-badge">
-              <span className="stat-number">4</span>
-              <span className="stat-text">Tools</span>
+        <div className="hero-grid-bg"></div>
+        <div className="hero-glow"></div>
+
+        <div className="hero-container">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <div className="badge-pulse"></div>
+              <span>Professional Trading Suite</span>
             </div>
-            <div className="stat-badge">
-              <span className="stat-number">∞</span>
-              <span className="stat-text">Access</span>
+
+            <h1 className="hero-title">
+              Trade with
+              <span className="hero-title-highlight"> Precision</span>
+              <br />
+              Not Emotion
+            </h1>
+
+            <p className="hero-subtitle">
+              The complete toolkit for disciplined traders. Calculate risk, analyze markets,
+              recognize patterns, and track your journey to consistent profitability.
+            </p>
+
+            <div className="hero-actions">
+              <Link to="/calculator" className="hero-btn-primary">
+                <span>Start Trading Smarter</span>
+                <ArrowRight size={20} />
+              </Link>
+              <a href="#tools" className="hero-btn-secondary">
+                <span>Explore Tools</span>
+              </a>
             </div>
-            <div className="stat-badge">
-              <span className="stat-number">24/7</span>
-              <span className="stat-text">Available</span>
-            </div>
-          </div>
-        </div>
-        <div className="hero-illustration">
-          <TradingCharts />
-        </div>
-      </section>
 
-      {/* Features Section - Modern Slider */}
-      <section id="features" className="features-section">
-        <div className="section-header">
-          <h2 className="section-title">Complete Trading Toolkit</h2>
-          <p className="section-subtitle">
-            Four essential tools that professional traders use daily. Each tool serves a specific purpose in your trading workflow.
-          </p>
-        </div>
-
-        <div className="features-slider-container">
-          <div className="features-slider">
-            <div
-              className="features-slider-track"
-              style={{ transform: `translateX(-${currentSlide * 100}%)` }}
-            >
-              {features.map((feature, index) => (
-                <div key={index} className="feature-slide">
-                  <div className="feature-card" style={{ '--card-color': feature.color } as React.CSSProperties}>
-                    <div className="feature-icon" style={{ backgroundColor: `${feature.color}15` }}>
-                      <div style={{ color: feature.color }}>{feature.icon}</div>
-                    </div>
-                    <h3 className="feature-title">{feature.title}</h3>
-                    <p className="feature-description">{feature.description}</p>
-
-                    <div className="feature-meta">
-                      <div className="feature-usage">
-                        <strong>When to Use:</strong> {feature.usage}
-                      </div>
-                      <div className="feature-importance">
-                        <strong>Why It Matters:</strong> {feature.importance}
-                      </div>
-                    </div>
-
-                    <div className="feature-divider"></div>
-
-                    <ul className="feature-benefits">
-                      {feature.benefits.map((benefit, i) => (
-                        <li key={i}>
-                          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                            <path d="M13.5 4L6 11.5L2.5 8" stroke={feature.color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                          </svg>
-                          {benefit}
-                        </li>
-                      ))}
-                    </ul>
-                    <Link to={feature.link} className="feature-link" style={{ color: feature.color }}>
-                      Open Tool
-                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                        <path d="M6 12L10 8L6 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </Link>
+            <div className="hero-metrics">
+              {metrics.map((metric, index) => (
+                <div key={index} className="metric-item">
+                  <div className="metric-icon">{metric.icon}</div>
+                  <div className="metric-content">
+                    <span className="metric-value">{metric.value}</span>
+                    <span className="metric-label">{metric.label}</span>
                   </div>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Slider Controls */}
-          <button className="slider-btn slider-btn-prev" onClick={prevSlide} aria-label="Previous slide">
-            <ChevronLeft size={32} />
-          </button>
-          <button className="slider-btn slider-btn-next" onClick={nextSlide} aria-label="Next slide">
-            <ChevronRight size={32} />
-          </button>
+          <div className="hero-visual">
+            <div className="terminal-window">
+              <div className="terminal-header">
+                <div className="terminal-dots">
+                  <span className="dot red"></span>
+                  <span className="dot yellow"></span>
+                  <span className="dot green"></span>
+                </div>
+                <span className="terminal-title">Trade Analysis</span>
+              </div>
+              <div className="terminal-body">
+                <div className="terminal-row">
+                  <span className="terminal-label">Position Size</span>
+                  <span className="terminal-value highlight">0.45 BTC</span>
+                </div>
+                <div className="terminal-row">
+                  <span className="terminal-label">Entry Price</span>
+                  <span className="terminal-value">$67,450.00</span>
+                </div>
+                <div className="terminal-row">
+                  <span className="terminal-label">Stop Loss</span>
+                  <span className="terminal-value danger">$65,800.00</span>
+                </div>
+                <div className="terminal-row">
+                  <span className="terminal-label">Take Profit</span>
+                  <span className="terminal-value success">$71,200.00</span>
+                </div>
+                <div className="terminal-divider"></div>
+                <div className="terminal-row">
+                  <span className="terminal-label">Risk Amount</span>
+                  <span className="terminal-value">$742.50 (2%)</span>
+                </div>
+                <div className="terminal-row">
+                  <span className="terminal-label">Potential Profit</span>
+                  <span className="terminal-value success">$1,687.50</span>
+                </div>
+                <div className="terminal-row">
+                  <span className="terminal-label">Risk/Reward</span>
+                  <span className="terminal-value highlight">1:2.27</span>
+                </div>
+                <div className="terminal-status">
+                  <div className="status-indicator"></div>
+                  <span>Trade Setup Valid</span>
+                </div>
+              </div>
+            </div>
+            <div className="floating-element floating-1">
+              <TrendingUp size={20} />
+              <span>+12.4%</span>
+            </div>
+            <div className="floating-element floating-2">
+              <Activity size={20} />
+              <span>Win Rate: 68%</span>
+            </div>
+          </div>
+        </div>
+      </section>
 
-          {/* Slider Indicators */}
-          <div className="slider-indicators">
-            {features.map((_, index) => (
-              <button
+      {/* Tools Bento Grid */}
+      <section id="tools" className="tools-section">
+        <div className="section-container">
+          <div className="section-header">
+            <span className="section-tag">Trading Arsenal</span>
+            <h2 className="section-title">Four Essential Tools</h2>
+            <p className="section-subtitle">
+              Everything you need to trade with discipline and precision,
+              from position sizing to performance tracking.
+            </p>
+          </div>
+
+          <div className="tools-bento">
+            {/* Main Featured Tool */}
+            <div
+              className={`tool-card tool-featured ${activeTool === 0 ? 'active' : ''}`}
+              onMouseEnter={() => setActiveTool(0)}
+            >
+              <div className="tool-card-bg" style={{ background: tools[0].gradient }}></div>
+              <div className="tool-card-content">
+                <div className="tool-tag">{tools[0].tag}</div>
+                <div className="tool-icon">{tools[0].icon}</div>
+                <h3 className="tool-title">{tools[0].title}</h3>
+                <p className="tool-description">{tools[0].description}</p>
+                <Link to={tools[0].link} className="tool-link">
+                  Open Tool <ArrowRight size={16} />
+                </Link>
+              </div>
+              <div className="tool-preview">
+                <div className="preview-calc">
+                  <div className="calc-row">
+                    <span>Account Balance</span>
+                    <span>$10,000</span>
+                  </div>
+                  <div className="calc-row">
+                    <span>Risk %</span>
+                    <span>2%</span>
+                  </div>
+                  <div className="calc-row highlight">
+                    <span>Position Size</span>
+                    <span>0.45 BTC</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Secondary Tools */}
+            {tools.slice(1).map((tool, index) => (
+              <div
                 key={index}
-                className={`slider-indicator ${index === currentSlide ? 'active' : ''}`}
-                onClick={() => goToSlide(index)}
-                aria-label={`Go to slide ${index + 1}`}
-              />
+                className={`tool-card ${activeTool === index + 1 ? 'active' : ''}`}
+                onMouseEnter={() => setActiveTool(index + 1)}
+              >
+                <div className="tool-card-bg" style={{ background: tool.gradient }}></div>
+                <div className="tool-card-content">
+                  <div className="tool-tag">{tool.tag}</div>
+                  <div className="tool-icon">{tool.icon}</div>
+                  <h3 className="tool-title">{tool.title}</h3>
+                  <p className="tool-description">{tool.description}</p>
+                  <Link to={tool.link} className="tool-link">
+                    Open Tool <ArrowRight size={16} />
+                  </Link>
+                </div>
+              </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Why Use Section */}
-      <section className="why-section">
-        <div className="section-header">
-          <h2 className="section-title">Why Traders Choose Our Tools</h2>
-          <p className="section-subtitle">
-            Built by traders, for traders
-          </p>
-        </div>
-        <div className="why-grid">
-          {whyUseIt.map((item, index) => (
-            <div key={index} className="why-card">
-              <div className="why-icon">{item.icon}</div>
-              <h3 className="why-title">{item.title}</h3>
-              <p className="why-description">{item.description}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Risk Warning */}
-      <section className="warning-section">
-        <div className="warning-card">
-          <AlertTriangle size={32} color="#ff9800" />
-          <div className="warning-content">
-            <h3>Important Risk Disclosure</h3>
-            <p>
-              Trading cryptocurrencies carries a high level of risk and may not be suitable for all investors.
-              Always use proper risk management and never risk more than you can afford to lose.
-              These tools are for educational purposes and should not be considered financial advice.
+      {/* Features Grid */}
+      <section className="features-section">
+        <div className="section-container">
+          <div className="section-header">
+            <span className="section-tag">Why Traders Choose Us</span>
+            <h2 className="section-title">Built for Serious Traders</h2>
+            <p className="section-subtitle">
+              Every feature is designed with one goal: helping you become a more
+              disciplined and profitable trader.
             </p>
+          </div>
+
+          <div className="features-grid">
+            {features.map((feature, index) => (
+              <div key={index} className="feature-card">
+                <div className="feature-icon-wrapper">
+                  {feature.icon}
+                </div>
+                <h3 className="feature-title">{feature.title}</h3>
+                <p className="feature-description">{feature.description}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Testimonials Section */}
+      {/* Live Chart Section */}
+      <section className="chart-section">
+        <div className="section-container">
+          <div className="section-header light">
+            <span className="section-tag">Real-Time Analysis</span>
+            <h2 className="section-title">Watch the Market Move</h2>
+            <p className="section-subtitle">
+              Live market visualization with buy and sell signals.
+              Practice identifying setups in real-time.
+            </p>
+          </div>
+
+          <div className="chart-wrapper">
+            <LiveTradingChart />
+          </div>
+
+          <div className="chart-cta">
+            <Link to="/calculator" className="chart-btn-primary">
+              <Zap size={20} />
+              <span>Start Your Analysis</span>
+            </Link>
+            <Link to="/journal" className="chart-btn-secondary">
+              <BookOpen size={20} />
+              <span>Track Your Trades</span>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials */}
       <section className="testimonials-section">
-        <div className="testimonials-container">
-          <div className="testimonials-header">
-            <h2>Trusted by Traders Worldwide</h2>
-            <p>See what our users say about their experience with Traddii</p>
+        <div className="section-container">
+          <div className="section-header">
+            <span className="section-tag">Trader Stories</span>
+            <h2 className="section-title">Trusted by Traders Worldwide</h2>
           </div>
 
           <div className="testimonials-grid">
             <div className="testimonial-card">
-              <div className="testimonial-rating">
-                {[...Array(5)].map((_, i) => (
-                  <svg key={i} width="20" height="20" viewBox="0 0 20 20" fill="#F59E0B">
-                    <path d="M10 0L12.2451 7.75486L20 10L12.2451 12.2451L10 20L7.75486 12.2451L0 10L7.75486 7.75486L10 0Z"/>
-                  </svg>
-                ))}
+              <div className="testimonial-content">
+                <p>
+                  "The position calculator changed how I approach every trade.
+                  I finally understand proper risk management and my account has
+                  been growing steadily."
+                </p>
               </div>
-              <p className="testimonial-text">
-                "The position calculator is a game-changer! I used to risk way too much per trade, but now I know exactly how much to invest based on my stop-loss. My account has been growing steadily since I started using it."
-              </p>
               <div className="testimonial-author">
                 <div className="author-avatar">MK</div>
                 <div className="author-info">
                   <strong>Marcus Kim</strong>
-                  <span>Day Trader, Singapore</span>
+                  <span>Day Trader • Singapore</span>
                 </div>
               </div>
             </div>
 
-            <div className="testimonial-card">
-              <div className="testimonial-rating">
-                {[...Array(5)].map((_, i) => (
-                  <svg key={i} width="20" height="20" viewBox="0 0 20 20" fill="#F59E0B">
-                    <path d="M10 0L12.2451 7.75486L20 10L12.2451 12.2451L10 20L7.75486 12.2451L0 10L7.75486 7.75486L10 0Z"/>
-                  </svg>
-                ))}
+            <div className="testimonial-card featured">
+              <div className="testimonial-content">
+                <p>
+                  "The analytics dashboard showed me I was overtrading during
+                  low-volatility hours. After adjusting my strategy, my win rate
+                  increased by 15%."
+                </p>
               </div>
-              <p className="testimonial-text">
-                "Finally, a trading journal that actually helps me improve! The analytics dashboard showed me I was trading too much during low-volatility hours. After adjusting my strategy, my win rate increased by 15%."
-              </p>
               <div className="testimonial-author">
                 <div className="author-avatar">SJ</div>
                 <div className="author-info">
                   <strong>Sarah Johnson</strong>
-                  <span>Swing Trader, United States</span>
+                  <span>Swing Trader • United States</span>
                 </div>
               </div>
             </div>
 
             <div className="testimonial-card">
-              <div className="testimonial-rating">
-                {[...Array(5)].map((_, i) => (
-                  <svg key={i} width="20" height="20" viewBox="0 0 20 20" fill="#F59E0B">
-                    <path d="M10 0L12.2451 7.75486L20 10L12.2451 12.2451L10 20L7.75486 12.2451L0 10L7.75486 7.75486L10 0Z"/>
-                  </svg>
-                ))}
+              <div className="testimonial-content">
+                <p>
+                  "Simple yet powerful. The market structure analysis helps me
+                  understand trends, and the price action tool improved my
+                  entry timing significantly."
+                </p>
               </div>
-              <p className="testimonial-text">
-                "As a beginner, I was overwhelmed by all the trading tools out there. Traddii is simple yet powerful. The market structure analysis helps me understand trends, and the price action tool improved my entry timing significantly."
-              </p>
               <div className="testimonial-author">
                 <div className="author-avatar">RP</div>
                 <div className="author-info">
                   <strong>Raj Patel</strong>
-                  <span>Crypto Trader, India</span>
+                  <span>Crypto Trader • India</span>
                 </div>
               </div>
             </div>
@@ -321,50 +425,42 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Email Subscription Section */}
+      {/* Email Subscription */}
       <EmailSubscription />
 
-      {/* CTA Section */}
-      <section className="cta-section">
+      {/* Final CTA */}
+      <section className="final-cta">
         <div className="cta-container">
-          <div className="cta-header">
-            <h2 className="cta-title">Ready to Level Up Your Trading?</h2>
-            <p className="cta-subtitle cta-subtitle-dark">Watch live market action with real-time buy and sell signals</p>
-          </div>
-
-          <div className="cta-chart-wrapper">
-            <LiveTradingChart />
-          </div>
-
-          <div className="cta-actions">
-            <div className="cta-buttons">
-              <Link to="/calculator" className="btn-cta-primary">
-                <Zap size={20} />
-                Start Trading Smarter
-              </Link>
-              <Link to="/journal" className="btn-cta-secondary">
-                <BarChart3 size={20} />
-                Track Your Trades
+          <div className="cta-content">
+            <h2 className="cta-title">Ready to Trade with Discipline?</h2>
+            <p className="cta-subtitle">
+              Join thousands of traders who have transformed their approach to the markets.
+              Start using professional-grade tools today — completely free.
+            </p>
+            <div className="cta-actions">
+              <Link to="/calculator" className="cta-btn-primary">
+                <span>Get Started Now</span>
+                <ArrowRight size={20} />
               </Link>
             </div>
             <div className="cta-features">
-              <div className="cta-feature-item cta-feature-dark">
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                  <path d="M10 0L12.2451 7.75486L20 10L12.2451 12.2451L10 20L7.75486 12.2451L0 10L7.75486 7.75486L10 0Z" fill="currentColor"/>
+              <div className="cta-feature">
+                <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                 </svg>
-                <span>No Registration Required</span>
+                <span>No registration required</span>
               </div>
-              <div className="cta-feature-item cta-feature-dark">
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                  <path d="M10 0L12.2451 7.75486L20 10L12.2451 12.2451L10 20L7.75486 12.2451L0 10L7.75486 7.75486L10 0Z" fill="currentColor"/>
+              <div className="cta-feature">
+                <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                 </svg>
-                <span>Real-Time Signals</span>
+                <span>100% free forever</span>
               </div>
-              <div className="cta-feature-item cta-feature-dark">
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                  <path d="M10 0L12.2451 7.75486L20 10L12.2451 12.2451L10 20L7.75486 12.2451L0 10L7.75486 7.75486L10 0Z" fill="currentColor"/>
+              <div className="cta-feature">
+                <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                 </svg>
-                <span>Instant Access</span>
+                <span>Instant access</span>
               </div>
             </div>
           </div>
