@@ -1,6 +1,6 @@
 .crypto-recommendations {
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(168, 85, 247, 0.05) 100%);
-  border: 1px solid rgba(99, 102, 241, 0.2);
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(168, 85, 247, 0.1) 100%);
+  border: 1px solid rgba(99, 102, 241, 0.3);
   border-radius: 16px;
   padding: 24px;
   margin-bottom: 32px;
@@ -22,20 +22,20 @@
 }
 
 .header-icon {
-  color: #6366f1;
+  color: #8b5cf6;
   flex-shrink: 0;
 }
 
 .recommendations-header h2 {
   font-size: 24px;
   font-weight: 700;
-  color: #1a1a2e;
+  color: #f1f5f9;
   margin: 0;
 }
 
 .header-subtitle {
   font-size: 14px;
-  color: #64748b;
+  color: #94a3b8;
   margin: 4px 0 0 0;
 }
 
@@ -47,12 +47,12 @@
 
 .last-update {
   font-size: 13px;
-  color: #64748b;
+  color: #94a3b8;
 }
 
 .refresh-btn {
-  background: white;
-  border: 1px solid #e2e8f0;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
   padding: 8px 12px;
   display: flex;
@@ -60,12 +60,13 @@
   gap: 6px;
   cursor: pointer;
   transition: all 0.2s;
-  color: #64748b;
+  color: #94a3b8;
 }
 
 .refresh-btn:hover:not(:disabled) {
-  border-color: #6366f1;
-  color: #6366f1;
+  border-color: #8b5cf6;
+  color: #8b5cf6;
+  background: rgba(139, 92, 246, 0.1);
   transform: translateY(-1px);
 }
 
@@ -90,7 +91,7 @@
 .loading-recs {
   text-align: center;
   padding: 60px 20px;
-  color: #64748b;
+  color: #94a3b8;
 }
 
 .loading-recs .spinner {
@@ -101,7 +102,7 @@
 .no-recommendations {
   text-align: center;
   padding: 60px 20px;
-  color: #64748b;
+  color: #94a3b8;
 }
 
 .no-recommendations svg {
@@ -111,18 +112,19 @@
 
 .retry-btn {
   margin-top: 16px;
-  background: #6366f1;
+  background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
   color: white;
   border: none;
   border-radius: 8px;
   padding: 10px 20px;
   cursor: pointer;
   transition: all 0.2s;
+  font-weight: 600;
 }
 
 .retry-btn:hover {
-  background: #4f46e5;
   transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3);
 }
 
 .recommendations-grid {
@@ -133,27 +135,28 @@
 }
 
 .recommendation-card {
-  background: white;
-  border: 2px solid #e2e8f0;
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
   padding: 20px;
   position: relative;
   transition: all 0.3s;
+  backdrop-filter: blur(10px);
 }
 
 .recommendation-card:hover {
-  border-color: #6366f1;
+  border-color: #8b5cf6;
   transform: translateY(-4px);
-  box-shadow: 0 12px 24px rgba(99, 102, 241, 0.15);
+  box-shadow: 0 12px 24px rgba(139, 92, 246, 0.2);
 }
 
 .recommendation-card.rank-1 {
-  border-color: #fbbf24;
-  background: linear-gradient(135deg, rgba(251, 191, 36, 0.05) 0%, rgba(255, 255, 255, 1) 100%);
+  border-color: rgba(251, 191, 36, 0.5);
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.1) 0%, rgba(30, 41, 59, 0.9) 100%);
 }
 
 .recommendation-card.rank-1:hover {
-  border-color: #f59e0b;
+  border-color: #fbbf24;
   box-shadow: 0 12px 24px rgba(251, 191, 36, 0.2);
 }
 
@@ -161,8 +164,8 @@
   position: absolute;
   top: 12px;
   right: 12px;
-  background: #f1f5f9;
-  color: #64748b;
+  background: rgba(255, 255, 255, 0.1);
+  color: #94a3b8;
   font-weight: 700;
   font-size: 12px;
   padding: 4px 8px;
@@ -171,7 +174,7 @@
 
 .rank-1 .card-rank {
   background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
-  color: white;
+  color: #0f172a;
 }
 
 .card-header {
@@ -189,14 +192,14 @@
 .pair-name {
   font-size: 20px;
   font-weight: 700;
-  color: #1a1a2e;
+  color: #f1f5f9;
   margin: 0 0 6px 0;
 }
 
 .narrative-badge {
   display: inline-block;
-  background: rgba(99, 102, 241, 0.1);
-  color: #6366f1;
+  background: rgba(139, 92, 246, 0.2);
+  color: #a78bfa;
   font-size: 11px;
   font-weight: 600;
   padding: 4px 8px;
@@ -212,7 +215,7 @@
   min-width: 60px;
   padding: 8px;
   border-radius: 8px;
-  background: #f1f5f9;
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .score-badge.excellent {
@@ -257,12 +260,12 @@
 
 .reason-text {
   font-size: 14px;
-  color: #475569;
+  color: #cbd5e1;
   line-height: 1.5;
   padding: 10px;
-  background: #f8fafc;
+  background: rgba(15, 23, 42, 0.6);
   border-radius: 6px;
-  border-left: 3px solid #6366f1;
+  border-left: 3px solid #8b5cf6;
 }
 
 .metrics-row {
@@ -276,18 +279,18 @@
   flex-direction: column;
   align-items: center;
   padding: 8px;
-  background: #f8fafc;
+  background: rgba(15, 23, 42, 0.6);
   border-radius: 6px;
   gap: 4px;
 }
 
 .metric svg {
-  color: #64748b;
+  color: #94a3b8;
 }
 
 .metric-label {
   font-size: 10px;
-  color: #94a3b8;
+  color: #64748b;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -295,7 +298,7 @@
 .metric-value {
   font-size: 13px;
   font-weight: 600;
-  color: #1e293b;
+  color: #e2e8f0;
 }
 
 .price-change {
@@ -303,7 +306,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 10px;
-  background: #f8fafc;
+  background: rgba(15, 23, 42, 0.6);
   border-radius: 6px;
 }
 
@@ -326,18 +329,18 @@
 
 .change-label {
   font-size: 12px;
-  color: #94a3b8;
+  color: #64748b;
 }
 
 .recommendations-footer {
   margin-top: 16px;
   padding-top: 16px;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .disclaimer {
   font-size: 12px;
-  color: #94a3b8;
+  color: #64748b;
   text-align: center;
   margin: 0;
   line-height: 1.5;
@@ -354,6 +357,14 @@
     align-items: flex-start;
   }
 
+  .recommendations-header h2 {
+    font-size: 1.25rem;
+  }
+
+  .header-subtitle {
+    font-size: 0.8rem;
+  }
+
   .header-right {
     width: 100%;
     justify-content: space-between;
@@ -363,51 +374,55 @@
     grid-template-columns: 1fr;
   }
 
-  .metrics-row {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* Dark mode support (optional) */
-@media (prefers-color-scheme: dark) {
-  .crypto-recommendations {
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(168, 85, 247, 0.1) 100%);
-    border-color: rgba(99, 102, 241, 0.3);
-  }
-
-  .recommendations-header h2 {
-    color: #f1f5f9;
-  }
-
   .recommendation-card {
-    background: #1e293b;
-    border-color: #334155;
+    padding: 16px;
   }
 
   .pair-name {
-    color: #f1f5f9;
+    font-size: 1.125rem;
+  }
+
+  .score-value {
+    font-size: 20px;
   }
 
   .reason-text {
-    background: #0f172a;
-    color: #cbd5e1;
+    font-size: 0.8125rem;
+    padding: 8px;
+  }
+
+  .metrics-row {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
   }
 
   .metric {
-    background: #0f172a;
+    padding: 6px;
+  }
+
+  .metric-label {
+    font-size: 9px;
   }
 
   .metric-value {
-    color: #f1f5f9;
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 400px) {
+  .crypto-recommendations {
+    padding: 12px;
   }
 
-  .price-change {
-    background: #0f172a;
+  .recommendations-header h2 {
+    font-size: 1.125rem;
   }
 
-  .refresh-btn {
-    background: #1e293b;
-    border-color: #334155;
-    color: #cbd5e1;
+  .recommendation-card {
+    padding: 14px;
+  }
+
+  .metrics-row {
+    grid-template-columns: 1fr;
   }
 }
