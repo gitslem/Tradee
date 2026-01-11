@@ -2,7 +2,9 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Plus, TrendingUp, TrendingDown, Calendar, DollarSign, Target,
-  Edit2, Trash2, CheckCircle, Clock
+  Edit2, Trash2, CheckCircle, Clock, X, BarChart3, Award,
+  Percent, Activity, ArrowUpRight, ArrowDownRight, Zap, Filter,
+  ChevronLeft, ChevronRight, Search
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { firestoreService } from '../services/firestoreService'
@@ -26,9 +28,9 @@ const TradingJournal = ({ onTradesUpdate, compact = false }: TradingJournalProps
   const [filter, setFilter] = useState<'all' | 'open' | 'closed' | 'wins' | 'losses'>('all')
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage] = useState(5)
+  const [searchTerm, setSearchTerm] = useState('')
 
   useEffect(() => {
-    // Wait for auth to finish loading before checking authentication
     if (loading) return
 
     if (!isAuthenticated) {
@@ -37,7 +39,6 @@ const TradingJournal = ({ onTradesUpdate, compact = false }: TradingJournalProps
     }
 
     if (user?.uid) {
-      // Subscribe to real-time updates from Firestore
       const unsubscribe = firestoreService.subscribeToUserTrades(user.uid, (updatedTrades) => {
         setTrades(updatedTrades)
         const userStats = firestoreService.calculateStats(updatedTrades)
@@ -64,7 +65,6 @@ const TradingJournal = ({ onTradesUpdate, compact = false }: TradingJournalProps
     if (confirm('Are you sure you want to delete this trade? This action cannot be undone.')) {
       try {
         await firestoreService.deleteTrade(tradeId)
-        alert('Trade deleted successfully!')
       } catch (error) {
         console.error('Delete error:', error)
         alert('Failed to delete trade. Please try again.')
@@ -85,7 +85,6 @@ const TradingJournal = ({ onTradesUpdate, compact = false }: TradingJournalProps
     }
 
     try {
-      // Calculate P&L based on quantity type
       const baseQuantity = trade.quantityType === 'base'
         ? trade.quantity
         : trade.quantity / trade.entryPrice
@@ -111,7 +110,7 @@ const TradingJournal = ({ onTradesUpdate, compact = false }: TradingJournalProps
       })
 
       const isProfitable = profitLoss > 0
-      alert(`Trade closed successfully!\n\nP&L: ${isProfitable ? '+' : ''}$${profitLoss.toFixed(2)} (${isProfitable ? '+' : ''}${profitLossPercent.toFixed(2)}%)`)
+      alert(`Trade closed!\n\nP&L: ${isProfitable ? '+' : ''}$${profitLoss.toFixed(2)} (${isProfitable ? '+' : ''}${profitLossPercent.toFixed(2)}%)`)
     } catch (error) {
       console.error('Close trade error:', error)
       alert('Failed to close trade. Please try again.')
@@ -119,37 +118,35 @@ const TradingJournal = ({ onTradesUpdate, compact = false }: TradingJournalProps
   }
 
   const filteredTrades = trades.filter(trade => {
-    if (filter === 'all') return true
-    if (filter === 'open') return trade.status === 'open'
-    if (filter === 'closed') return trade.status === 'closed'
-    if (filter === 'wins') return trade.outcome === 'win'
-    if (filter === 'losses') return trade.outcome === 'loss'
-    return true
+    const matchesFilter = filter === 'all' ? true
+      : filter === 'open' ? trade.status === 'open'
+      : filter === 'closed' ? trade.status === 'closed'
+      : filter === 'wins' ? trade.outcome === 'win'
+      : filter === 'losses' ? trade.outcome === 'loss'
+      : true
+
+    const matchesSearch = searchTerm === '' ||
+      trade.pair.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      trade.exchange.toLowerCase().includes(searchTerm.toLowerCase())
+
+    return matchesFilter && matchesSearch
   })
 
-  // Pagination logic
   const totalPages = Math.ceil(filteredTrades.length / itemsPerPage)
   const indexOfLastTrade = currentPage * itemsPerPage
   const indexOfFirstTrade = indexOfLastTrade - itemsPerPage
   const currentTrades = filteredTrades.slice(indexOfFirstTrade, indexOfLastTrade)
 
-  // Reset to page 1 when filter changes
   useEffect(() => {
     setCurrentPage(1)
-  }, [filter])
+  }, [filter, searchTerm])
 
   if (loading) {
     return (
       <div className="trading-journal">
-        <div style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          minHeight: '100vh',
-          fontSize: '1.2rem',
-          color: '#6b7280'
-        }}>
-          Loading...
+        <div className="journal-loading">
+          <div className="loading-spinner"></div>
+          <span>Loading your trades...</span>
         </div>
       </div>
     )
@@ -161,21 +158,22 @@ const TradingJournal = ({ onTradesUpdate, compact = false }: TradingJournalProps
 
   return (
     <div className={`trading-journal ${compact ? 'compact' : ''}`}>
+      {/* Header Section */}
       {!compact && (
-        <div className="journal-header-section">
-          <div className="journal-title-group">
-            <div className="journal-title-content">
+        <div className="tj-header">
+          <div className="tj-header-content">
+            <div className="tj-icon">
+              <BarChart3 size={28} />
+            </div>
+            <div className="tj-title-group">
               <h2>Trading Journal</h2>
-              <p>Track, analyze, and improve your trading performance</p>
+              <p>Track and analyze your trading performance</p>
             </div>
           </div>
-
-          <div className="journal-header-actions">
-            <button onClick={handleAddTrade} className="add-trade-btn-primary">
-              <Plus size={20} />
-              <span>New Trade</span>
-            </button>
-          </div>
+          <button onClick={handleAddTrade} className="tj-add-btn">
+            <Plus size={20} />
+            <span>New Trade</span>
+          </button>
         </div>
       )}
 
@@ -189,125 +187,142 @@ const TradingJournal = ({ onTradesUpdate, compact = false }: TradingJournalProps
         </div>
       )}
 
+      {/* Stats Dashboard */}
       {stats && (
-        <div className="stats-grid">
-          <div className="stat-card total">
-            <div className="stat-icon">
-              <TrendingUp size={24} />
+        <div className="tj-stats-dashboard">
+          <div className="tj-stat-card highlight">
+            <div className="stat-icon-wrap primary">
+              <Activity size={22} />
             </div>
-            <div className="stat-content">
-              <span className="stat-label">Total Trades</span>
+            <div className="stat-info">
               <span className="stat-value">{stats.totalTrades}</span>
+              <span className="stat-label">Total Trades</span>
             </div>
           </div>
 
-          <div className="stat-card win">
-            <div className="stat-icon">
-              <CheckCircle size={24} />
+          <div className="tj-stat-card">
+            <div className="stat-icon-wrap success">
+              <Percent size={22} />
             </div>
-            <div className="stat-content">
-              <span className="stat-label">Win Rate</span>
+            <div className="stat-info">
               <span className="stat-value">{stats.winRate.toFixed(1)}%</span>
+              <span className="stat-label">Win Rate</span>
               <span className="stat-detail">{stats.wins}W / {stats.losses}L</span>
             </div>
           </div>
 
-          <div className={`stat-card ${stats.totalProfitLoss >= 0 ? 'profit' : 'loss'}`}>
-            <div className="stat-icon">
-              <DollarSign size={24} />
+          <div className={`tj-stat-card ${stats.totalProfitLoss >= 0 ? 'profit' : 'loss'}`}>
+            <div className={`stat-icon-wrap ${stats.totalProfitLoss >= 0 ? 'success' : 'danger'}`}>
+              <DollarSign size={22} />
             </div>
-            <div className="stat-content">
-              <span className="stat-label">Total P&L</span>
+            <div className="stat-info">
               <span className="stat-value">
-                {stats.totalProfitLoss >= 0 ? '+' : ''}${stats.totalProfitLoss.toFixed(2)}
+                {stats.totalProfitLoss >= 0 ? '+' : '-'}${Math.abs(stats.totalProfitLoss).toFixed(2)}
               </span>
+              <span className="stat-label">Total P&L</span>
+            </div>
+            <div className="stat-trend">
+              {stats.totalProfitLoss >= 0 ? <ArrowUpRight size={18} /> : <ArrowDownRight size={18} />}
             </div>
           </div>
 
-          <div className="stat-card">
-            <div className="stat-icon">
-              <Target size={24} />
+          <div className="tj-stat-card">
+            <div className="stat-icon-wrap warning">
+              <Target size={22} />
             </div>
-            <div className="stat-content">
-              <span className="stat-label">Profit Factor</span>
+            <div className="stat-info">
               <span className="stat-value">
                 {stats.profitFactor === Infinity ? '∞' : stats.profitFactor.toFixed(2)}
               </span>
+              <span className="stat-label">Profit Factor</span>
             </div>
           </div>
 
-          <div className="stat-card open">
-            <div className="stat-icon">
-              <Clock size={24} />
+          <div className="tj-stat-card">
+            <div className="stat-icon-wrap info">
+              <Clock size={22} />
             </div>
-            <div className="stat-content">
-              <span className="stat-label">Open Trades</span>
+            <div className="stat-info">
               <span className="stat-value">{stats.openTrades}</span>
+              <span className="stat-label">Open Trades</span>
             </div>
           </div>
 
-          <div className="stat-card">
-            <div className="stat-icon">
-              <TrendingUp size={24} />
+          <div className="tj-stat-card">
+            <div className="stat-icon-wrap purple">
+              <Award size={22} />
             </div>
-            <div className="stat-content">
-              <span className="stat-label">Best Pair</span>
+            <div className="stat-info">
               <span className="stat-value stat-text">{stats.bestPair}</span>
+              <span className="stat-label">Best Pair</span>
             </div>
           </div>
         </div>
       )}
 
-      <div className="journal-content">
-        <div className="trades-header">
-          <h2>Your Trades</h2>
-          <div className="filter-buttons">
-            <button
-              className={filter === 'all' ? 'active' : ''}
-              onClick={() => setFilter('all')}
-            >
-              All ({trades.length})
-            </button>
-            <button
-              className={filter === 'open' ? 'active' : ''}
-              onClick={() => setFilter('open')}
-            >
-              Open ({trades.filter(t => t.status === 'open').length})
-            </button>
-            <button
-              className={filter === 'closed' ? 'active' : ''}
-              onClick={() => setFilter('closed')}
-            >
-              Closed ({trades.filter(t => t.status === 'closed').length})
-            </button>
-            <button
-              className={filter === 'wins' ? 'active' : ''}
-              onClick={() => setFilter('wins')}
-            >
-              Wins ({trades.filter(t => t.outcome === 'win').length})
-            </button>
-            <button
-              className={filter === 'losses' ? 'active' : ''}
-              onClick={() => setFilter('losses')}
-            >
-              Losses ({trades.filter(t => t.outcome === 'loss').length})
-            </button>
+      {/* Content Section */}
+      <div className="tj-content">
+        <div className="tj-content-header">
+          <div className="tj-search-filter">
+            <div className="tj-search">
+              <Search size={18} />
+              <input
+                type="text"
+                placeholder="Search trades..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              {searchTerm && (
+                <button onClick={() => setSearchTerm('')} className="clear-search">
+                  <X size={16} />
+                </button>
+              )}
+            </div>
+
+            <div className="tj-filters">
+              <Filter size={16} />
+              {[
+                { key: 'all', label: 'All', count: trades.length },
+                { key: 'open', label: 'Open', count: trades.filter(t => t.status === 'open').length },
+                { key: 'closed', label: 'Closed', count: trades.filter(t => t.status === 'closed').length },
+                { key: 'wins', label: 'Wins', count: trades.filter(t => t.outcome === 'win').length },
+                { key: 'losses', label: 'Losses', count: trades.filter(t => t.outcome === 'loss').length }
+              ].map(f => (
+                <button
+                  key={f.key}
+                  className={`filter-btn ${filter === f.key ? 'active' : ''}`}
+                  onClick={() => setFilter(f.key as typeof filter)}
+                >
+                  {f.label}
+                  <span className="filter-count">{f.count}</span>
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
         {filteredTrades.length === 0 ? (
-          <div className="empty-state">
-            <TrendingUp size={64} />
-            <h3>No trades yet</h3>
-            <p>Start tracking your trades to analyze your performance</p>
-            <button onClick={handleAddTrade} className="action-btn primary">
-              <Plus size={18} />
-              Add Your First Trade
-            </button>
+          <div className="tj-empty-state">
+            <div className="empty-icon">
+              <TrendingUp size={56} />
+            </div>
+            <h3>{searchTerm || filter !== 'all' ? 'No trades found' : 'No trades yet'}</h3>
+            <p>
+              {searchTerm || filter !== 'all'
+                ? 'Try adjusting your search or filter criteria'
+                : 'Start tracking your trades to analyze your performance'
+              }
+            </p>
+            {!searchTerm && filter === 'all' && (
+              <button onClick={handleAddTrade} className="tj-add-btn large">
+                <Plus size={20} />
+                <span>Add Your First Trade</span>
+              </button>
+            )}
           </div>
         ) : (
           <>
-            <div className="trades-list">
+            <div className="tj-trades-list">
               {currentTrades.map(trade => (
                 <TradeCard
                   key={trade.id}
@@ -320,23 +335,26 @@ const TradingJournal = ({ onTradesUpdate, compact = false }: TradingJournalProps
             </div>
 
             {totalPages > 1 && (
-              <div className="pagination">
+              <div className="tj-pagination">
                 <button
                   onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                   disabled={currentPage === 1}
                   className="pagination-btn"
                 >
-                  ← Previous
+                  <ChevronLeft size={18} />
+                  Previous
                 </button>
-                <span className="pagination-info">
-                  Page {currentPage} of {totalPages} ({filteredTrades.length} trades)
-                </span>
+                <div className="pagination-info">
+                  <span>Page {currentPage} of {totalPages}</span>
+                  <span className="pagination-total">({filteredTrades.length} trades)</span>
+                </div>
                 <button
                   onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                   disabled={currentPage === totalPages}
                   className="pagination-btn"
                 >
-                  Next →
+                  Next
+                  <ChevronRight size={18} />
                 </button>
               </div>
             )}
@@ -344,6 +362,7 @@ const TradingJournal = ({ onTradesUpdate, compact = false }: TradingJournalProps
         )}
       </div>
 
+      {/* Trade Modal */}
       {showAddModal && (
         <TradeModal
           trade={editingTrade}
@@ -356,10 +375,8 @@ const TradingJournal = ({ onTradesUpdate, compact = false }: TradingJournalProps
             try {
               if (editingTrade) {
                 await firestoreService.updateTrade(editingTrade.id, tradeData)
-                alert('Trade updated successfully!')
               } else {
                 await firestoreService.addTrade(user.uid, tradeData as Omit<Trade, 'id' | 'userId' | 'createdAt' | 'updatedAt'>)
-                alert('Trade added successfully!')
               }
               setShowAddModal(false)
               setEditingTrade(null)
@@ -385,88 +402,80 @@ interface TradeCardProps {
 const TradeCard = ({ trade, onEdit, onDelete, onClose }: TradeCardProps) => {
   const isProfitable = trade.profitLoss > 0
   const isOpen = trade.status === 'open'
-
-  // Get currency from pair (default to 'base' for backward compatibility)
   const [baseCurrency, quoteCurrency] = trade.pair.split('/')
   const quantityType = trade.quantityType || 'base'
   const currency = quantityType === 'base' ? baseCurrency : quoteCurrency
 
   return (
-    <div className={`trade-card ${trade.status} ${trade.outcome}`}>
-      <div className="trade-card-header">
-        <div className="trade-pair">
-          <span className="pair-name">{trade.pair}</span>
-          <span className={`trade-type ${trade.type}`}>{trade.type.toUpperCase()}</span>
-          <span className="trade-leverage">{trade.leverage}x</span>
+    <div className={`tj-trade-card ${trade.status} ${trade.outcome || ''}`}>
+      <div className="trade-card-left">
+        <div className={`trade-direction ${trade.type}`}>
+          {trade.type === 'long' ? <TrendingUp size={20} /> : <TrendingDown size={20} />}
         </div>
+        <div className="trade-main-info">
+          <div className="trade-pair-row">
+            <span className="trade-pair">{trade.pair}</span>
+            <span className={`trade-type-badge ${trade.type}`}>{trade.type.toUpperCase()}</span>
+            <span className="trade-leverage">{trade.leverage}x</span>
+          </div>
+          <div className="trade-details-row">
+            <span className="trade-entry">Entry: ${trade.entryPrice.toFixed(2)}</span>
+            <span className="trade-divider">→</span>
+            <span className="trade-exit">
+              {trade.exitPrice ? `Exit: $${trade.exitPrice.toFixed(2)}` : 'Open'}
+            </span>
+            <span className="trade-qty">{trade.quantity} {currency}</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="trade-card-right">
+        {!isOpen && (
+          <div className={`trade-pnl ${isProfitable ? 'profit' : 'loss'}`}>
+            <span className="pnl-amount">
+              {isProfitable ? '+' : '-'}${Math.abs(trade.profitLoss).toFixed(2)}
+            </span>
+            <span className="pnl-percent">
+              {isProfitable ? '+' : ''}{trade.profitLossPercent.toFixed(2)}%
+            </span>
+          </div>
+        )}
+
+        {isOpen && (
+          <div className="trade-status-open">
+            <Clock size={16} />
+            <span>Open</span>
+          </div>
+        )}
+
         <div className="trade-actions">
           {isOpen && (
-            <button onClick={() => onClose(trade)} className="action-icon close-trade" title="Close Trade">
-              <Target size={16} />
+            <button onClick={() => onClose(trade)} className="action-btn close" title="Close Trade">
+              <CheckCircle size={16} />
             </button>
           )}
-          <button onClick={() => onEdit(trade)} className="action-icon" title="Edit">
+          <button onClick={() => onEdit(trade)} className="action-btn edit" title="Edit">
             <Edit2 size={16} />
           </button>
-          <button onClick={() => onDelete(trade.id)} className="action-icon delete" title="Delete">
+          <button onClick={() => onDelete(trade.id)} className="action-btn delete" title="Delete">
             <Trash2 size={16} />
           </button>
         </div>
       </div>
 
-      <div className="trade-card-body">
-        <div className="trade-info-grid">
-          <div className="info-item">
-            <span className="info-label">Entry</span>
-            <span className="info-value">${trade.entryPrice.toFixed(2)}</span>
-          </div>
-          <div className="info-item">
-            <span className="info-label">Exit</span>
-            <span className="info-value">
-              {trade.exitPrice ? `$${trade.exitPrice.toFixed(2)}` : 'Open'}
-            </span>
-          </div>
-          <div className="info-item">
-            <span className="info-label">Quantity</span>
-            <span className="info-value">{trade.quantity} {currency || ''}</span>
-          </div>
-          <div className="info-item">
-            <span className="info-label">Exchange</span>
-            <span className="info-value">{trade.exchange}</span>
-          </div>
-        </div>
-
-        {!isOpen && (
-          <div className={`pnl-display ${isProfitable ? 'profit' : 'loss'}`}>
-            <div className="pnl-amount">
-              {isProfitable ? <TrendingUp size={20} /> : <TrendingDown size={20} />}
-              <span>
-                {isProfitable ? '+' : ''}${trade.profitLoss.toFixed(2)}
-              </span>
-            </div>
-            <div className="pnl-percent">
-              {isProfitable ? '+' : ''}{trade.profitLossPercent.toFixed(2)}%
-            </div>
-          </div>
-        )}
-
-        {trade.notes && (
-          <div className="trade-notes">
-            <p>{trade.notes}</p>
-          </div>
-        )}
-
-        <div className="trade-date">
+      <div className="trade-card-footer">
+        <div className="trade-meta">
           <Calendar size={14} />
-          {new Date(trade.entryDate).toLocaleDateString()}
-          {trade.exitDate && ` - ${new Date(trade.exitDate).toLocaleDateString()}`}
+          <span>{new Date(trade.entryDate).toLocaleDateString()}</span>
         </div>
+        <div className="trade-exchange">{trade.exchange}</div>
+        {trade.notes && <div className="trade-has-notes" title={trade.notes}>📝</div>}
       </div>
     </div>
   )
 }
 
-// Simplified Trade Modal - We'll expand this later
+// Trade Modal Component
 interface TradeModalProps {
   trade: Trade | null
   onClose: () => void
@@ -491,18 +500,14 @@ const TradeModal = ({ trade, onClose, onSave }: TradeModalProps) => {
     tags: trade?.tags?.join(', ') || ''
   })
 
-  // Handle Escape key to close modal
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onClose()
-      }
+      if (e.key === 'Escape') onClose()
     }
     window.addEventListener('keydown', handleEscape)
     return () => window.removeEventListener('keydown', handleEscape)
   }, [onClose])
 
-  // Get currency names from pair
   const getCurrencies = (pair: string) => {
     const [base, quote] = pair.split('/')
     return { base, quote }
@@ -510,24 +515,16 @@ const TradeModal = ({ trade, onClose, onSave }: TradeModalProps) => {
 
   const currencies = getCurrencies(formData.pair)
 
-  // Calculate actual quantity in base currency for P&L
   const getBaseQuantity = () => {
     const qty = parseFloat(formData.quantity)
     const price = parseFloat(formData.entryPrice)
     if (isNaN(qty) || isNaN(price)) return 0
-
-    if (formData.quantityType === 'base') {
-      return qty
-    } else {
-      // Convert quote to base: if 1000 USDT at $3000/ETH = 0.333 ETH
-      return qty / price
-    }
+    return formData.quantityType === 'base' ? qty : qty / price
   }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
-    // Validate required fields
     const entryPrice = parseFloat(formData.entryPrice)
     const inputQuantity = parseFloat(formData.quantity)
     const leverage = parseFloat(formData.leverage)
@@ -553,7 +550,7 @@ const TradeModal = ({ trade, onClose, onSave }: TradeModalProps) => {
       return
     }
 
-    const baseQuantity = getBaseQuantity() // Always use base quantity for calculations
+    const baseQuantity = getBaseQuantity()
 
     let profitLoss = 0
     let profitLossPercent = 0
@@ -561,7 +558,6 @@ const TradeModal = ({ trade, onClose, onSave }: TradeModalProps) => {
     let outcome: 'win' | 'loss' | 'pending' = 'pending'
 
     if (exitPrice) {
-      // P&L calculations always use base quantity
       profitLoss = formData.type === 'long'
         ? (exitPrice - entryPrice) * baseQuantity
         : (entryPrice - exitPrice) * baseQuantity
@@ -579,8 +575,8 @@ const TradeModal = ({ trade, onClose, onSave }: TradeModalProps) => {
       type: formData.type,
       entryPrice,
       exitPrice,
-      quantity: inputQuantity, // Store the user's input quantity
-      quantityType: formData.quantityType, // Store which type they entered
+      quantity: inputQuantity,
+      quantityType: formData.quantityType,
       entryDate: new Date(formData.entryDate).toISOString(),
       exitDate: formData.exitDate ? new Date(formData.exitDate).toISOString() : null,
       stopLoss: formData.stopLoss ? parseFloat(formData.stopLoss) : null,
@@ -601,128 +597,172 @@ const TradeModal = ({ trade, onClose, onSave }: TradeModalProps) => {
   }
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
-          <h2>{trade ? 'Edit Trade' : 'Add New Trade'}</h2>
-          <button onClick={onClose} className="close-modal">×</button>
+    <div className="tj-modal-overlay" onClick={onClose}>
+      <div className="tj-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="tj-modal-header">
+          <div className="modal-title-group">
+            <Zap size={24} />
+            <h2>{trade ? 'Edit Trade' : 'Log New Trade'}</h2>
+          </div>
+          <button onClick={onClose} className="modal-close-btn">
+            <X size={24} />
+          </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="trade-form">
-          <div className="form-row">
-            <div className="form-group">
-              <label>Trading Pair</label>
-              <select
-                value={formData.pair}
-                onChange={(e) => setFormData({ ...formData, pair: e.target.value })}
-              >
-                <option>BTC/USDT</option>
-                <option>ETH/USDT</option>
-                <option>BNB/USDT</option>
-                <option>SOL/USDT</option>
-                <option>XRP/USDT</option>
-                <option>ADA/USDT</option>
-                <option>DOGE/USDT</option>
-                <option>MATIC/USDT</option>
-                <option>DOT/USDT</option>
-                <option>AVAX/USDT</option>
-              </select>
+        <form onSubmit={handleSubmit} className="tj-modal-form">
+          <div className="form-section">
+            <h3>Trade Details</h3>
+            <div className="form-grid">
+              <div className="form-group">
+                <label>Trading Pair</label>
+                <select
+                  value={formData.pair}
+                  onChange={(e) => setFormData({ ...formData, pair: e.target.value })}
+                >
+                  <option>BTC/USDT</option>
+                  <option>ETH/USDT</option>
+                  <option>BNB/USDT</option>
+                  <option>SOL/USDT</option>
+                  <option>XRP/USDT</option>
+                  <option>ADA/USDT</option>
+                  <option>DOGE/USDT</option>
+                  <option>MATIC/USDT</option>
+                  <option>DOT/USDT</option>
+                  <option>AVAX/USDT</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label>Direction</label>
+                <div className="direction-toggle">
+                  <button
+                    type="button"
+                    className={`direction-btn long ${formData.type === 'long' ? 'active' : ''}`}
+                    onClick={() => setFormData({ ...formData, type: 'long' })}
+                  >
+                    <TrendingUp size={18} />
+                    Long
+                  </button>
+                  <button
+                    type="button"
+                    className={`direction-btn short ${formData.type === 'short' ? 'active' : ''}`}
+                    onClick={() => setFormData({ ...formData, type: 'short' })}
+                  >
+                    <TrendingDown size={18} />
+                    Short
+                  </button>
+                </div>
+              </div>
             </div>
 
-            <div className="form-group">
-              <label>Trade Type</label>
-              <select
-                value={formData.type}
-                onChange={(e) => setFormData({ ...formData, type: e.target.value as 'long' | 'short' })}
-              >
-                <option value="long">Long (Buy)</option>
-                <option value="short">Short (Sell)</option>
-              </select>
+            <div className="form-grid">
+              <div className="form-group">
+                <label>Entry Price</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={formData.entryPrice}
+                  onChange={(e) => setFormData({ ...formData, entryPrice: e.target.value })}
+                  placeholder="0.00"
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Exit Price (optional)</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={formData.exitPrice}
+                  onChange={(e) => setFormData({ ...formData, exitPrice: e.target.value })}
+                  placeholder="Leave empty if still open"
+                />
+              </div>
+            </div>
+
+            <div className="form-grid three">
+              <div className="form-group">
+                <label>Quantity Type</label>
+                <select
+                  value={formData.quantityType}
+                  onChange={(e) => setFormData({ ...formData, quantityType: e.target.value as 'base' | 'quote' })}
+                >
+                  <option value="base">{currencies.base}</option>
+                  <option value="quote">{currencies.quote}</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label>Quantity</label>
+                <input
+                  type="number"
+                  step="0.00000001"
+                  value={formData.quantity}
+                  onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
+                  placeholder={`Amount in ${formData.quantityType === 'base' ? currencies.base : currencies.quote}`}
+                  required
+                />
+                {formData.entryPrice && formData.quantity && (
+                  <small className="conversion-hint">
+                    ≈ {formData.quantityType === 'base'
+                      ? `${(parseFloat(formData.quantity) * parseFloat(formData.entryPrice)).toFixed(2)} ${currencies.quote}`
+                      : `${(parseFloat(formData.quantity) / parseFloat(formData.entryPrice)).toFixed(8)} ${currencies.base}`
+                    }
+                  </small>
+                )}
+              </div>
+
+              <div className="form-group">
+                <label>Leverage</label>
+                <input
+                  type="number"
+                  step="1"
+                  min="1"
+                  max="125"
+                  value={formData.leverage}
+                  onChange={(e) => setFormData({ ...formData, leverage: e.target.value })}
+                  required
+                />
+              </div>
             </div>
           </div>
 
-          <div className="form-row">
-            <div className="form-group">
-              <label>Entry Price</label>
-              <input
-                type="number"
-                step="0.01"
-                value={formData.entryPrice}
-                onChange={(e) => setFormData({ ...formData, entryPrice: e.target.value })}
-                required
-              />
-            </div>
+          <div className="form-section">
+            <h3>Risk Management</h3>
+            <div className="form-grid three">
+              <div className="form-group">
+                <label>Stop Loss</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={formData.stopLoss}
+                  onChange={(e) => setFormData({ ...formData, stopLoss: e.target.value })}
+                  placeholder="Optional"
+                />
+              </div>
 
-            <div className="form-group">
-              <label>Exit Price (optional)</label>
-              <input
-                type="number"
-                step="0.01"
-                value={formData.exitPrice}
-                onChange={(e) => setFormData({ ...formData, exitPrice: e.target.value })}
-              />
-            </div>
-          </div>
+              <div className="form-group">
+                <label>Take Profit</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={formData.takeProfit}
+                  onChange={(e) => setFormData({ ...formData, takeProfit: e.target.value })}
+                  placeholder="Optional"
+                />
+              </div>
 
-          <div className="form-row">
-            <div className="form-group">
-              <label>Quantity Type</label>
-              <select
-                value={formData.quantityType}
-                onChange={(e) => setFormData({ ...formData, quantityType: e.target.value as 'base' | 'quote' })}
-              >
-                <option value="base">{currencies.base} (Base Currency)</option>
-                <option value="quote">{currencies.quote} (Quote Currency)</option>
-              </select>
-            </div>
-
-            <div className="form-group">
-              <label>Quantity ({formData.quantityType === 'base' ? currencies.base : currencies.quote})</label>
-              <input
-                type="number"
-                step="0.00000001"
-                value={formData.quantity}
-                onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
-                placeholder={formData.quantityType === 'base' ? `Amount in ${currencies.base}` : `Amount in ${currencies.quote}`}
-                required
-              />
-              {formData.entryPrice && formData.quantity && (
-                <small className="conversion-hint">
-                  ≈ {formData.quantityType === 'base'
-                    ? `${(parseFloat(formData.quantity) * parseFloat(formData.entryPrice)).toFixed(2)} ${currencies.quote}`
-                    : `${(parseFloat(formData.quantity) / parseFloat(formData.entryPrice)).toFixed(8)} ${currencies.base}`
-                  }
-                </small>
-              )}
-            </div>
-          </div>
-
-          <div className="form-row">
-            <div className="form-group">
-              <label>Leverage (1-125x)</label>
-              <input
-                type="number"
-                step="1"
-                min="1"
-                max="125"
-                value={formData.leverage}
-                onChange={(e) => setFormData({ ...formData, leverage: e.target.value })}
-                required
-              />
-            </div>
-          </div>
-
-          <div className="form-row">
-            <div className="form-group">
-              <label>Exchange</label>
-              <select
-                value={formData.exchange}
-                onChange={(e) => setFormData({ ...formData, exchange: e.target.value })}
-              >
-                {Object.values(EXCHANGES).map(ex => (
-                  <option key={ex.id} value={ex.id}>{ex.displayName}</option>
-                ))}
-              </select>
+              <div className="form-group">
+                <label>Exchange</label>
+                <select
+                  value={formData.exchange}
+                  onChange={(e) => setFormData({ ...formData, exchange: e.target.value })}
+                >
+                  {Object.values(EXCHANGES).map(ex => (
+                    <option key={ex.id} value={ex.id}>{ex.displayName}</option>
+                  ))}
+                </select>
+              </div>
             </div>
 
             <div className="form-group">
@@ -736,54 +776,36 @@ const TradeModal = ({ trade, onClose, onSave }: TradeModalProps) => {
             </div>
           </div>
 
-          <div className="form-row">
+          <div className="form-section">
+            <h3>Notes & Tags</h3>
             <div className="form-group">
-              <label>Stop Loss (optional)</label>
-              <input
-                type="number"
-                step="0.01"
-                value={formData.stopLoss}
-                onChange={(e) => setFormData({ ...formData, stopLoss: e.target.value })}
+              <label>Trade Notes</label>
+              <textarea
+                value={formData.notes}
+                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                rows={3}
+                placeholder="Strategy, market conditions, emotions, lessons learned..."
               />
             </div>
 
             <div className="form-group">
-              <label>Take Profit (optional)</label>
+              <label>Tags</label>
               <input
-                type="number"
-                step="0.01"
-                value={formData.takeProfit}
-                onChange={(e) => setFormData({ ...formData, takeProfit: e.target.value })}
+                type="text"
+                value={formData.tags}
+                onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
+                placeholder="breakout, trend-following, scalp (comma separated)"
               />
             </div>
           </div>
 
-          <div className="form-group full-width">
-            <label>Notes</label>
-            <textarea
-              value={formData.notes}
-              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-              rows={4}
-              placeholder="Add any notes about this trade (strategy, market conditions, emotions, etc.)"
-            />
-          </div>
-
-          <div className="form-group full-width">
-            <label>Tags (comma separated)</label>
-            <input
-              type="text"
-              value={formData.tags}
-              onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
-              placeholder="breakout, trend-following, scalp"
-            />
-          </div>
-
-          <div className="modal-actions">
-            <button type="button" onClick={onClose} className="btn-secondary">
+          <div className="tj-modal-footer">
+            <button type="button" onClick={onClose} className="btn-cancel">
               Cancel
             </button>
-            <button type="submit" className="btn-primary">
-              {trade ? 'Update Trade' : 'Add Trade'}
+            <button type="submit" className="btn-save">
+              <CheckCircle size={18} />
+              {trade ? 'Update Trade' : 'Save Trade'}
             </button>
           </div>
         </form>

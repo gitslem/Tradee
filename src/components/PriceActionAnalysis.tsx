@@ -268,7 +268,7 @@ const PriceActionAnalysis = () => {
           <div className="pa-left-panel">
             {/* Live Candle Data Card */}
             <div className="glass-card candle-data-section">
-              <CandleDataCard pair={cryptoPair} onUseCandleData={handleUseCandleData} />
+              <CandleDataCard pair={cryptoPair} timeframe={timeframe} onUseCandleData={handleUseCandleData} autoFill={true} />
             </div>
 
             {/* Interactive Candle Visualization */}
