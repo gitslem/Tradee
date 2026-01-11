@@ -6,15 +6,24 @@ import './CandleDataCard.css'
 
 interface CandleDataCardProps {
   pair: string
+  timeframe?: string
   onUseCandleData?: (data: OHLCVData) => void
+  autoFill?: boolean
 }
 
-const CandleDataCard = ({ pair, onUseCandleData }: CandleDataCardProps) => {
+const CandleDataCard = ({ pair, timeframe, onUseCandleData, autoFill = true }: CandleDataCardProps) => {
   const [candleData, setCandleData] = useState<OHLCVData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [refreshing, setRefreshing] = useState(false)
-  const [selectedInterval, setSelectedInterval] = useState('15m')
+  const [selectedInterval, setSelectedInterval] = useState(timeframe || '15m')
+
+  // Sync with external timeframe prop
+  useEffect(() => {
+    if (timeframe && timeframe !== selectedInterval) {
+      setSelectedInterval(timeframe)
+    }
+  }, [timeframe])
 
   const fetchCandleData = async () => {
     try {
@@ -22,6 +31,10 @@ const CandleDataCard = ({ pair, onUseCandleData }: CandleDataCardProps) => {
       const data = await getOHLCVData(pair, selectedInterval)
       if (data) {
         setCandleData(data)
+        // Auto-fill data if enabled and callback exists
+        if (autoFill && onUseCandleData) {
+          onUseCandleData(data)
+        }
       } else {
         setError('Failed to fetch candle data')
       }
@@ -93,16 +106,19 @@ const CandleDataCard = ({ pair, onUseCandleData }: CandleDataCardProps) => {
       <div className="candle-header">
         <div className="candle-title">
           <Clock size={18} />
-          <span>Candle Data</span>
-          <select
-            value={selectedInterval}
-            onChange={(e) => setSelectedInterval(e.target.value)}
-            className="interval-selector"
-          >
-            {Object.entries(INTERVALS).map(([key, label]) => (
-              <option key={key} value={key}>{label}</option>
-            ))}
-          </select>
+          <span>Live Data</span>
+          {!timeframe && (
+            <select
+              value={selectedInterval}
+              onChange={(e) => setSelectedInterval(e.target.value)}
+              className="interval-selector"
+            >
+              {Object.entries(INTERVALS).map(([key, label]) => (
+                <option key={key} value={key}>{label}</option>
+              ))}
+            </select>
+          )}
+          {timeframe && <span className="interval-badge">{INTERVALS[timeframe as keyof typeof INTERVALS] || timeframe}</span>}
         </div>
         <button
           onClick={handleRefresh}
@@ -182,10 +198,10 @@ const CandleDataCard = ({ pair, onUseCandleData }: CandleDataCardProps) => {
         </span>
       </div>
 
-      {/* Action Button */}
-      {onUseCandleData && (
+      {/* Action Button - only show if not auto-filling */}
+      {onUseCandleData && !autoFill && (
         <button onClick={handleUseData} className="use-data-btn">
-          Auto-Fill Data
+          Apply Data
         </button>
       )}
     </div>

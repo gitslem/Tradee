@@ -247,7 +247,7 @@ const MarketStructure = () => {
 
             {/* Live Price Data */}
             <div className="glass-card price-data-section">
-              <CandleDataCard pair={cryptoPair} onUseCandleData={handleUsePriceData} />
+              <CandleDataCard pair={cryptoPair} onUseCandleData={handleUsePriceData} autoFill={true} />
             </div>
 
             {/* Manual Input Toggle */}
