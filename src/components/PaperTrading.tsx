@@ -139,6 +139,7 @@ const PaperTrading = () => {
       gridColor: 'rgba(255, 255, 255, 0.05)',
       hide_top_toolbar: false,
       hide_legend: false,
+      hide_side_toolbar: false,
       save_image: true,
       hide_volume: false,
       support_host: 'https://www.tradingview.com',
@@ -151,6 +152,7 @@ const PaperTrading = () => {
       popup_width: '1000',
       popup_height: '650',
       withdateranges: true,
+      drawings_access: { type: 'all' },
       container_id: 'tradingview_chart'
     })
 
@@ -639,7 +641,10 @@ const PaperTrading = () => {
 
             {ticker && (
               <div className="ticker-display">
-                <span className="ticker-price">${parseFloat(ticker.lastPrice).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                <div className="ticker-price-wrapper">
+                  <span className="ticker-price">${parseFloat(ticker.lastPrice).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  <span className="ticker-source">Bybit API</span>
+                </div>
                 <span className={`ticker-change ${parseFloat(ticker.price24hPcnt) >= 0 ? 'positive' : 'negative'}`}>
                   {parseFloat(ticker.price24hPcnt) >= 0 ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
                   {(parseFloat(ticker.price24hPcnt) * 100).toFixed(2)}%
