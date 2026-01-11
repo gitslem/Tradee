@@ -1,16 +1,30 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import './MarketStructure.css'
 import CandleDataCard from './CandleDataCard'
-import CollapsibleSection from './CollapsibleSection'
 import TradingBackground from './TradingBackground'
 import { calculateSupportResistance } from '../services/ohlcvService'
 import type { OHLCVData } from '../services/ohlcvService'
+import {
+  Layers, TrendingUp, TrendingDown, Activity, Target, Plus, X,
+  ChevronDown, ChevronUp, BarChart2, Shield, AlertTriangle,
+  ArrowUpRight, ArrowDownRight, Minus, Info, Sparkles
+} from 'lucide-react'
 
 interface SupportResistance {
   level: string
   strength: 'weak' | 'moderate' | 'strong'
   touches: string
 }
+
+const FIBONACCI_LEVELS = [
+  { level: 0, label: '0%', color: '#ef4444' },
+  { level: 0.236, label: '23.6%', color: '#f97316' },
+  { level: 0.382, label: '38.2%', color: '#f59e0b' },
+  { level: 0.5, label: '50%', color: '#eab308' },
+  { level: 0.618, label: '61.8%', color: '#84cc16' },
+  { level: 0.786, label: '78.6%', color: '#22c55e' },
+  { level: 1, label: '100%', color: '#10b981' },
+]
 
 const MarketStructure = () => {
   const [cryptoPair, setCryptoPair] = useState<string>('ETH/USDT')
@@ -19,6 +33,7 @@ const MarketStructure = () => {
   const [recentLow, setRecentLow] = useState<string>('3200')
   const [prevHigh, setPrevHigh] = useState<string>('3750')
   const [prevLow, setPrevLow] = useState<string>('3250')
+  const [showManual, setShowManual] = useState<boolean>(false)
 
   const [supportLevels, setSupportLevels] = useState<SupportResistance[]>([
     { level: '3400', strength: 'strong', touches: '5' },
@@ -31,22 +46,13 @@ const MarketStructure = () => {
   ])
 
   const handleUsePriceData = (ohlcv: OHLCVData) => {
-    // Calculate support/resistance from real data
     const levels = calculateSupportResistance(ohlcv)
-
-    // Set current price
     setCurrentPrice(ohlcv.current.close.toString())
-
-    // Set recent high/low from current candle
     setRecentHigh(ohlcv.current.high.toString())
     setRecentLow(ohlcv.current.low.toString())
-
-    // Set previous high/low from previous candle
     setPrevHigh(ohlcv.previous.high.toString())
     setPrevLow(ohlcv.previous.low.toString())
 
-    // Auto-fill support/resistance levels from calculated data
-    // Assign strength based on proximity to round numbers and previous levels
     setSupportLevels(levels.support.map((price, index) => ({
       level: price.toFixed(2),
       strength: index === 0 ? 'strong' : 'moderate',
@@ -60,57 +66,78 @@ const MarketStructure = () => {
     })))
   }
 
-  const calculateFibonacciLevels = () => {
+  const fibonacciLevels = useMemo(() => {
     const high = parseFloat(recentHigh)
     const low = parseFloat(recentLow)
     const diff = high - low
+    const current = parseFloat(currentPrice)
 
-    return {
-      '0%': low,
-      '23.6%': low + diff * 0.236,
-      '38.2%': low + diff * 0.382,
-      '50%': low + diff * 0.5,
-      '61.8%': low + diff * 0.618,
-      '78.6%': low + diff * 0.786,
-      '100%': high
-    }
-  }
+    return FIBONACCI_LEVELS.map(fib => ({
+      ...fib,
+      price: low + diff * fib.level,
+      isNearby: Math.abs((low + diff * fib.level) - current) / current < 0.01
+    }))
+  }, [recentHigh, recentLow, currentPrice])
 
-  const analyzeMarketStructure = () => {
+  const marketAnalysis = useMemo(() => {
     const current = parseFloat(currentPrice)
     const high = parseFloat(recentHigh)
     const low = parseFloat(recentLow)
     const pHigh = parseFloat(prevHigh)
     const pLow = parseFloat(prevLow)
 
-    const analysis: string[] = []
+    let trend: 'uptrend' | 'downtrend' | 'expansion' | 'range' = 'range'
+    let trendDescription = ''
 
-    // Trend Analysis
     if (high > pHigh && low > pLow) {
-      analysis.push('📈 UPTREND: Higher Highs and Higher Lows detected')
+      trend = 'uptrend'
+      trendDescription = 'Higher Highs and Higher Lows detected'
     } else if (high < pHigh && low < pLow) {
-      analysis.push('📉 DOWNTREND: Lower Highs and Lower Lows detected')
+      trend = 'downtrend'
+      trendDescription = 'Lower Highs and Lower Lows detected'
     } else if (high > pHigh && low < pLow) {
-      analysis.push('⚡ EXPANSION: Range is expanding - high volatility')
+      trend = 'expansion'
+      trendDescription = 'Range expanding - high volatility'
     } else {
-      analysis.push('📊 RANGE: Market consolidating between support and resistance')
+      trend = 'range'
+      trendDescription = 'Consolidating between support and resistance'
     }
 
-    // Position in range
     const rangePosition = ((current - low) / (high - low)) * 100
+    let positionLabel = ''
+    let positionType: 'warning' | 'neutral' | 'info' = 'neutral'
+
     if (rangePosition > 80) {
-      analysis.push('⚠️ Price near recent HIGH - potential resistance')
+      positionLabel = 'Near resistance zone'
+      positionType = 'warning'
     } else if (rangePosition < 20) {
-      analysis.push('⚠️ Price near recent LOW - potential support')
-    } else if (rangePosition > 40 && rangePosition < 60) {
-      analysis.push('✅ Price in middle of range - good for range trading')
+      positionLabel = 'Near support zone'
+      positionType = 'info'
+    } else {
+      positionLabel = 'Mid-range position'
+      positionType = 'neutral'
     }
 
-    return { analysis, rangePosition }
+    return { trend, trendDescription, rangePosition, positionLabel, positionType }
+  }, [currentPrice, recentHigh, recentLow, prevHigh, prevLow])
+
+  const getTrendIcon = () => {
+    switch (marketAnalysis.trend) {
+      case 'uptrend': return <TrendingUp size={24} />
+      case 'downtrend': return <TrendingDown size={24} />
+      case 'expansion': return <Activity size={24} />
+      default: return <Minus size={24} />
+    }
   }
 
-  const fibLevels = calculateFibonacciLevels()
-  const marketAnalysis = analyzeMarketStructure()
+  const getTrendColor = () => {
+    switch (marketAnalysis.trend) {
+      case 'uptrend': return '#10b981'
+      case 'downtrend': return '#ef4444'
+      case 'expansion': return '#f59e0b'
+      default: return '#8b5cf6'
+    }
+  }
 
   const addSupport = () => {
     setSupportLevels([...supportLevels, { level: '', strength: 'moderate', touches: '1' }])
@@ -141,231 +168,368 @@ const MarketStructure = () => {
   }
 
   return (
-    <div className="market-structure">
+    <div className="market-structure-page">
       <TradingBackground variant="market" />
-      <h1>Market Structure Analysis</h1>
-      <p>Identify trends, support & resistance levels, and market bias for better trading decisions</p>
 
-      <div className="structure-grid">
-        <div className="input-section">
-          <h3>Price Levels</h3>
+      {/* Hero Section */}
+      <div className="ms-hero">
+        <div className="hero-icon">
+          <Layers size={40} />
+        </div>
+        <h1>Market Structure</h1>
+        <p>Identify trends, support & resistance levels for smarter trading decisions</p>
+      </div>
 
-          {/* Crypto Pair Selector */}
-          <div className="form-group">
-            <label>Crypto Pair</label>
-            <select value={cryptoPair} onChange={(e) => setCryptoPair(e.target.value)}>
-              <option>BTC/USDT</option>
-              <option>ETH/USDT</option>
-              <option>BNB/USDT</option>
-              <option>SOL/USDT</option>
-              <option>XRP/USDT</option>
-              <option>ADA/USDT</option>
-              <option>DOGE/USDT</option>
-              <option>MATIC/USDT</option>
-              <option>DOT/USDT</option>
-              <option>AVAX/USDT</option>
-            </select>
+      <div className="ms-container">
+        {/* Trend Overview Card */}
+        <div className="trend-overview glass-card">
+          <div className="trend-main">
+            <div className="trend-icon" style={{ background: `${getTrendColor()}20`, color: getTrendColor() }}>
+              {getTrendIcon()}
+            </div>
+            <div className="trend-info">
+              <span className="trend-label" style={{ color: getTrendColor() }}>
+                {marketAnalysis.trend.toUpperCase()}
+              </span>
+              <span className="trend-desc">{marketAnalysis.trendDescription}</span>
+            </div>
           </div>
 
-          {/* Live Price Data */}
-          <CandleDataCard pair={cryptoPair} onUseCandleData={handleUsePriceData} />
-
-          {/* Manual Input - Collapsible */}
-          <CollapsibleSection title="Manual Input (Optional)" defaultOpen={false} badge="Advanced">
-          <div className="form-group">
-            <label>Current Price</label>
-            <input
-              type="number"
-              value={currentPrice}
-              onChange={(e) => setCurrentPrice(e.target.value)}
-              step="0.01"
-            />
+          <div className="price-display">
+            <span className="price-label">Current Price</span>
+            <span className="price-value">${parseFloat(currentPrice).toLocaleString()}</span>
           </div>
 
-          <div className="form-group">
-            <label>Recent High</label>
-            <input
-              type="number"
-              value={recentHigh}
-              onChange={(e) => setRecentHigh(e.target.value)}
-              step="0.01"
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Recent Low</label>
-            <input
-              type="number"
-              value={recentLow}
-              onChange={(e) => setRecentLow(e.target.value)}
-              step="0.01"
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Previous High</label>
-            <input
-              type="number"
-              value={prevHigh}
-              onChange={(e) => setPrevHigh(e.target.value)}
-              step="0.01"
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Previous Low</label>
-            <input
-              type="number"
-              value={prevLow}
-              onChange={(e) => setPrevLow(e.target.value)}
-              step="0.01"
-            />
-          </div>
-          </CollapsibleSection>
-
-          <div className="levels-section">
-            <h3>Support Levels</h3>
-            {supportLevels.map((level, index) => (
-              <div key={index} className="level-row">
-                <input
-                  type="number"
-                  placeholder="Price"
-                  value={level.level}
-                  onChange={(e) => updateSupport(index, 'level', e.target.value)}
+          <div className="range-position">
+            <div className="range-header">
+              <span>Range Position</span>
+              <span className={`position-badge ${marketAnalysis.positionType}`}>
+                {marketAnalysis.positionLabel}
+              </span>
+            </div>
+            <div className="range-visual">
+              <div className="range-bar">
+                <div
+                  className="range-indicator"
+                  style={{ left: `${Math.min(Math.max(marketAnalysis.rangePosition, 0), 100)}%` }}
                 />
-                <select
-                  value={level.strength}
-                  onChange={(e) => updateSupport(index, 'strength', e.target.value)}
-                >
-                  <option value="weak">Weak</option>
-                  <option value="moderate">Moderate</option>
-                  <option value="strong">Strong</option>
-                </select>
-                <input
-                  type="number"
-                  placeholder="Touches"
-                  value={level.touches}
-                  onChange={(e) => updateSupport(index, 'touches', e.target.value)}
-                  style={{ width: '80px' }}
-                />
-                <button onClick={() => removeSupport(index)} className="remove-btn">✕</button>
               </div>
-            ))}
-            <button onClick={addSupport} className="add-btn">+ Add Support</button>
-          </div>
-
-          <div className="levels-section">
-            <h3>Resistance Levels</h3>
-            {resistanceLevels.map((level, index) => (
-              <div key={index} className="level-row">
-                <input
-                  type="number"
-                  placeholder="Price"
-                  value={level.level}
-                  onChange={(e) => updateResistance(index, 'level', e.target.value)}
-                />
-                <select
-                  value={level.strength}
-                  onChange={(e) => updateResistance(index, 'strength', e.target.value)}
-                >
-                  <option value="weak">Weak</option>
-                  <option value="moderate">Moderate</option>
-                  <option value="strong">Strong</option>
-                </select>
-                <input
-                  type="number"
-                  placeholder="Touches"
-                  value={level.touches}
-                  onChange={(e) => updateResistance(index, 'touches', e.target.value)}
-                  style={{ width: '80px' }}
-                />
-                <button onClick={() => removeResistance(index)} className="remove-btn">✕</button>
+              <div className="range-labels">
+                <span>${parseFloat(recentLow).toFixed(0)}</span>
+                <span>{marketAnalysis.rangePosition.toFixed(0)}%</span>
+                <span>${parseFloat(recentHigh).toFixed(0)}</span>
               </div>
-            ))}
-            <button onClick={addResistance} className="add-btn">+ Add Resistance</button>
+            </div>
           </div>
         </div>
 
-        <div className="analysis-section">
-          <h3>Market Structure Analysis</h3>
-
-          <div className="analysis-card">
-            <h4>Trend Analysis</h4>
-            {marketAnalysis.analysis.map((item, index) => (
-              <p key={index} className="analysis-item">{item}</p>
-            ))}
-          </div>
-
-          <div className="analysis-card">
-            <h4>Range Position</h4>
-            <div className="range-bar">
-              <div
-                className="range-indicator"
-                style={{ left: `${marketAnalysis.rangePosition}%` }}
-              />
+        <div className="ms-main-grid">
+          {/* Left Panel */}
+          <div className="ms-left-panel">
+            {/* Pair Selector */}
+            <div className="glass-card pair-section">
+              <div className="pair-selector">
+                <label>Trading Pair</label>
+                <select value={cryptoPair} onChange={(e) => setCryptoPair(e.target.value)}>
+                  <option>BTC/USDT</option>
+                  <option>ETH/USDT</option>
+                  <option>BNB/USDT</option>
+                  <option>SOL/USDT</option>
+                  <option>XRP/USDT</option>
+                  <option>ADA/USDT</option>
+                  <option>DOGE/USDT</option>
+                  <option>MATIC/USDT</option>
+                  <option>DOT/USDT</option>
+                  <option>AVAX/USDT</option>
+                </select>
+              </div>
             </div>
-            <p className="range-text">
-              Price is at {marketAnalysis.rangePosition.toFixed(1)}% of recent range
-            </p>
-          </div>
 
-          <div className="analysis-card">
-            <h4>Fibonacci Retracement Levels</h4>
-            <div className="fib-levels">
-              {Object.entries(fibLevels).reverse().map(([level, price]) => (
-                <div key={level} className="fib-level">
-                  <span className="fib-label">{level}</span>
-                  <span className="fib-price">${price.toFixed(2)}</span>
-                  {Math.abs(price - parseFloat(currentPrice)) < 50 && (
-                    <span className="fib-nearby">← Near current price</span>
-                  )}
+            {/* Live Price Data */}
+            <div className="glass-card price-data-section">
+              <CandleDataCard pair={cryptoPair} onUseCandleData={handleUsePriceData} />
+            </div>
+
+            {/* Manual Input Toggle */}
+            <div className="glass-card manual-toggle" onClick={() => setShowManual(!showManual)}>
+              <div className="toggle-content">
+                <BarChart2 size={18} />
+                <span>Manual Price Levels</span>
+              </div>
+              {showManual ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+            </div>
+
+            {showManual && (
+              <div className="glass-card manual-inputs animated-section">
+                <div className="input-grid">
+                  <div className="input-group">
+                    <label>Current Price</label>
+                    <input
+                      type="number"
+                      value={currentPrice}
+                      onChange={(e) => setCurrentPrice(e.target.value)}
+                      step="0.01"
+                    />
+                  </div>
+                  <div className="input-group">
+                    <label>Recent High</label>
+                    <input
+                      type="number"
+                      value={recentHigh}
+                      onChange={(e) => setRecentHigh(e.target.value)}
+                      step="0.01"
+                    />
+                  </div>
+                  <div className="input-group">
+                    <label>Recent Low</label>
+                    <input
+                      type="number"
+                      value={recentLow}
+                      onChange={(e) => setRecentLow(e.target.value)}
+                      step="0.01"
+                    />
+                  </div>
+                  <div className="input-group">
+                    <label>Previous High</label>
+                    <input
+                      type="number"
+                      value={prevHigh}
+                      onChange={(e) => setPrevHigh(e.target.value)}
+                      step="0.01"
+                    />
+                  </div>
+                  <div className="input-group">
+                    <label>Previous Low</label>
+                    <input
+                      type="number"
+                      value={prevLow}
+                      onChange={(e) => setPrevLow(e.target.value)}
+                      step="0.01"
+                    />
+                  </div>
                 </div>
-              ))}
+              </div>
+            )}
+
+            {/* Support Levels */}
+            <div className="glass-card levels-section support">
+              <div className="levels-header">
+                <h3>
+                  <Shield size={18} />
+                  Support Levels
+                </h3>
+                <button className="add-level-btn" onClick={addSupport}>
+                  <Plus size={16} />
+                </button>
+              </div>
+              <div className="levels-list">
+                {supportLevels.map((level, index) => (
+                  <div key={index} className="level-item">
+                    <div className="level-price">
+                      <input
+                        type="number"
+                        placeholder="Price"
+                        value={level.level}
+                        onChange={(e) => updateSupport(index, 'level', e.target.value)}
+                      />
+                    </div>
+                    <select
+                      value={level.strength}
+                      onChange={(e) => updateSupport(index, 'strength', e.target.value)}
+                      className={`strength-select ${level.strength}`}
+                    >
+                      <option value="weak">Weak</option>
+                      <option value="moderate">Moderate</option>
+                      <option value="strong">Strong</option>
+                    </select>
+                    <div className="touches-input">
+                      <input
+                        type="number"
+                        value={level.touches}
+                        onChange={(e) => updateSupport(index, 'touches', e.target.value)}
+                        min="1"
+                      />
+                      <span>touches</span>
+                    </div>
+                    <button className="remove-btn" onClick={() => removeSupport(index)}>
+                      <X size={14} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Resistance Levels */}
+            <div className="glass-card levels-section resistance">
+              <div className="levels-header">
+                <h3>
+                  <Target size={18} />
+                  Resistance Levels
+                </h3>
+                <button className="add-level-btn" onClick={addResistance}>
+                  <Plus size={16} />
+                </button>
+              </div>
+              <div className="levels-list">
+                {resistanceLevels.map((level, index) => (
+                  <div key={index} className="level-item">
+                    <div className="level-price">
+                      <input
+                        type="number"
+                        placeholder="Price"
+                        value={level.level}
+                        onChange={(e) => updateResistance(index, 'level', e.target.value)}
+                      />
+                    </div>
+                    <select
+                      value={level.strength}
+                      onChange={(e) => updateResistance(index, 'strength', e.target.value)}
+                      className={`strength-select ${level.strength}`}
+                    >
+                      <option value="weak">Weak</option>
+                      <option value="moderate">Moderate</option>
+                      <option value="strong">Strong</option>
+                    </select>
+                    <div className="touches-input">
+                      <input
+                        type="number"
+                        value={level.touches}
+                        onChange={(e) => updateResistance(index, 'touches', e.target.value)}
+                        min="1"
+                      />
+                      <span>touches</span>
+                    </div>
+                    <button className="remove-btn" onClick={() => removeResistance(index)}>
+                      <X size={14} />
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
-          <div className="analysis-card">
-            <h4>Key Levels Summary</h4>
-            <div className="levels-summary">
-              <div className="resistance-summary">
-                <h5>Resistance (above)</h5>
-                {resistanceLevels
-                  .filter(r => parseFloat(r.level) > parseFloat(currentPrice))
-                  .sort((a, b) => parseFloat(a.level) - parseFloat(b.level))
-                  .map((level, index) => (
-                    <div key={index} className={`level-item ${level.strength}`}>
-                      <span>${level.level}</span>
-                      <span className="strength-badge">{level.strength}</span>
-                    </div>
-                  ))}
-              </div>
-              <div className="current-price-display">
-                <strong>Current: ${currentPrice}</strong>
-              </div>
-              <div className="support-summary">
-                <h5>Support (below)</h5>
-                {supportLevels
-                  .filter(s => parseFloat(s.level) < parseFloat(currentPrice))
-                  .sort((a, b) => parseFloat(b.level) - parseFloat(a.level))
-                  .map((level, index) => (
-                    <div key={index} className={`level-item ${level.strength}`}>
-                      <span>${level.level}</span>
-                      <span className="strength-badge">{level.strength}</span>
-                    </div>
-                  ))}
+          {/* Right Panel */}
+          <div className="ms-right-panel">
+            {/* Key Levels Visual */}
+            <div className="glass-card key-levels-visual">
+              <h3>
+                <Sparkles size={18} />
+                Key Levels Map
+              </h3>
+              <div className="levels-map">
+                {/* Resistance Zone */}
+                <div className="zone resistance-zone">
+                  <span className="zone-label">Resistance Zone</span>
+                  {resistanceLevels
+                    .filter(r => parseFloat(r.level) > parseFloat(currentPrice))
+                    .sort((a, b) => parseFloat(a.level) - parseFloat(b.level))
+                    .map((level, index) => (
+                      <div key={index} className={`level-line resistance ${level.strength}`}>
+                        <span className="level-price">${parseFloat(level.level).toFixed(2)}</span>
+                        <div className="level-bar">
+                          <div className="bar-fill" style={{ width: `${parseInt(level.touches) * 20}%` }} />
+                        </div>
+                        <span className={`strength-badge ${level.strength}`}>{level.strength}</span>
+                      </div>
+                    ))}
+                </div>
+
+                {/* Current Price Line */}
+                <div className="current-price-line">
+                  <ArrowUpRight size={16} />
+                  <span className="current-label">Current</span>
+                  <span className="current-value">${parseFloat(currentPrice).toFixed(2)}</span>
+                  <ArrowDownRight size={16} />
+                </div>
+
+                {/* Support Zone */}
+                <div className="zone support-zone">
+                  <span className="zone-label">Support Zone</span>
+                  {supportLevels
+                    .filter(s => parseFloat(s.level) < parseFloat(currentPrice))
+                    .sort((a, b) => parseFloat(b.level) - parseFloat(a.level))
+                    .map((level, index) => (
+                      <div key={index} className={`level-line support ${level.strength}`}>
+                        <span className="level-price">${parseFloat(level.level).toFixed(2)}</span>
+                        <div className="level-bar">
+                          <div className="bar-fill" style={{ width: `${parseInt(level.touches) * 20}%` }} />
+                        </div>
+                        <span className={`strength-badge ${level.strength}`}>{level.strength}</span>
+                      </div>
+                    ))}
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="trading-suggestions">
-            <h4>💡 Trading Suggestions</h4>
-            <ul>
-              <li>Consider buying near strong support levels</li>
-              <li>Consider selling near strong resistance levels</li>
-              <li>Wait for breakout confirmation above resistance</li>
-              <li>Use Fibonacci levels as potential reversal points</li>
-              <li>Higher timeframe structure is more reliable</li>
-            </ul>
+            {/* Fibonacci Levels */}
+            <div className="glass-card fibonacci-section">
+              <h3>
+                <Activity size={18} />
+                Fibonacci Retracement
+              </h3>
+              <div className="fib-visual">
+                <div className="fib-chart">
+                  {fibonacciLevels.map((fib, index) => (
+                    <div
+                      key={index}
+                      className={`fib-level ${fib.isNearby ? 'nearby' : ''}`}
+                      style={{ '--fib-color': fib.color } as React.CSSProperties}
+                    >
+                      <div className="fib-line" />
+                      <div className="fib-info">
+                        <span className="fib-label">{fib.label}</span>
+                        <span className="fib-price">${fib.price.toFixed(2)}</span>
+                        {fib.isNearby && <span className="fib-nearby-badge">Near price</span>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="fib-legend">
+                  <div className="legend-item">
+                    <span className="legend-color" style={{ background: '#ef4444' }} />
+                    <span>0% (Low)</span>
+                  </div>
+                  <div className="legend-item">
+                    <span className="legend-color" style={{ background: '#eab308' }} />
+                    <span>Golden Zone (38.2% - 61.8%)</span>
+                  </div>
+                  <div className="legend-item">
+                    <span className="legend-color" style={{ background: '#10b981' }} />
+                    <span>100% (High)</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Trading Suggestions */}
+            <div className="glass-card suggestions-section">
+              <h3>
+                <Info size={18} />
+                Trading Suggestions
+              </h3>
+              <div className="suggestions-list">
+                <div className="suggestion-item bullish">
+                  <TrendingUp size={16} />
+                  <span>Look for buying opportunities near strong support levels</span>
+                </div>
+                <div className="suggestion-item bearish">
+                  <TrendingDown size={16} />
+                  <span>Consider taking profits near strong resistance levels</span>
+                </div>
+                <div className="suggestion-item neutral">
+                  <AlertTriangle size={16} />
+                  <span>Wait for breakout confirmation before entering</span>
+                </div>
+                <div className="suggestion-item info">
+                  <Activity size={16} />
+                  <span>Fibonacci golden zone (38.2%-61.8%) offers high-probability entries</span>
+                </div>
+                <div className="suggestion-item info">
+                  <Target size={16} />
+                  <span>Higher timeframe structure provides stronger signals</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
