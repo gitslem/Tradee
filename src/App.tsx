@@ -11,6 +11,7 @@ import JournalHome from './components/JournalHome'
 import PositionCalculator from './components/PositionCalculator'
 import MarketStructure from './components/MarketStructure'
 import PriceActionAnalysis from './components/PriceActionAnalysis'
+import PaperTrading from './components/PaperTrading'
 import Support from './components/Support'
 import FAQ from './components/FAQ'
 import Terms from './components/Terms'
@@ -41,6 +42,11 @@ function App() {
             <Route path="/price-action" element={
               <main className="main-content">
                 <PriceActionAnalysis />
+              </main>
+            } />
+            <Route path="/paper-trading" element={
+              <main className="main-content">
+                <PaperTrading />
               </main>
             } />
             <Route path="/about" element={<About />} />
