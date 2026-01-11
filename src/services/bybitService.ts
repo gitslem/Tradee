@@ -15,7 +15,10 @@
 
 import { apiKeyService } from './apiKeyService'
 
-// Bybit Testnet Base URL
+// Bybit API URLs
+// Mainnet for public market data (prices match TradingView charts)
+const MAINNET_BASE_URL = 'https://api.bybit.com'
+// Testnet for authenticated trading operations (demo trading)
 const TESTNET_BASE_URL = 'https://api-testnet.bybit.com'
 
 export interface BybitPosition {
@@ -143,7 +146,10 @@ class BybitService {
     const timestamp = Date.now().toString()
     const recvWindow = '20000'
 
-    let url = `${TESTNET_BASE_URL}${endpoint}`
+    // Use mainnet for public market data (prices match TradingView)
+    // Use testnet for authenticated trading operations
+    const baseUrl = isPrivate ? TESTNET_BASE_URL : MAINNET_BASE_URL
+    let url = `${baseUrl}${endpoint}`
     let queryString = ''
     let body: string | undefined
 
