@@ -560,15 +560,6 @@
   grid-column: span 1;
 }
 
-/* Make bottom row 3 columns */
-.tools-bento-5 .tool-bottom:nth-of-type(3) {
-  grid-column: 1;
-}
-
-.tools-bento-5 .tool-bottom:nth-of-type(4) {
-  grid-column: 2;
-}
-
 /* Three-column bottom row wrapper */
 @media (min-width: 1025px) {
   .tools-bento-5 {
@@ -1168,15 +1159,18 @@
 @media (max-width: 1024px) {
   .tools-bento-5 {
     grid-template-columns: 1fr;
+    gap: 16px;
   }
 
   .tools-bento-5 .tool-featured-left,
   .tools-bento-5 .tool-featured-right {
     grid-column: 1;
+    grid-template-columns: 1fr;
+    min-height: auto;
   }
 
-  .tools-bento-5 .tool-bottom {
-    grid-column: 1;
+  .tools-bento-5 .tool-card.tool-bottom {
+    grid-column: 1 !important;
   }
 
   .features-grid {
@@ -1305,15 +1299,32 @@
     grid-template-columns: 1fr;
   }
 
+  .tools-bento-5 {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
   .tools-bento-5 .tool-featured-left,
   .tools-bento-5 .tool-featured-right {
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
     min-height: auto;
+  }
+
+  .tools-bento-5 .tool-card.tool-bottom {
+    width: 100%;
   }
 
   .tool-preview {
     border-left: none;
     border-top: 1px solid var(--color-border);
+    padding: 20px;
+  }
+
+  .preview-calc,
+  .preview-trade {
+    max-width: 100%;
   }
 
   .features-grid {
@@ -1379,12 +1390,70 @@
     font-size: 0.95rem;
   }
 
+  /* Tools section mobile fixes */
+  .tools-section {
+    padding: 60px 0;
+  }
+
+  .tools-bento-5 {
+    gap: 12px;
+  }
+
+  .tools-bento-5 .tool-featured-left,
+  .tools-bento-5 .tool-featured-right,
+  .tools-bento-5 .tool-card.tool-bottom {
+    border-radius: 14px;
+  }
+
   .tool-card-content {
-    padding: 24px;
+    padding: 20px;
+  }
+
+  .tool-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    margin-bottom: 14px;
+  }
+
+  .tool-tag {
+    font-size: 0.65rem;
+    padding: 4px 10px;
+    margin-bottom: 12px;
   }
 
   .tool-title {
-    font-size: 1.25rem;
+    font-size: 1.125rem;
+    margin-bottom: 8px;
+  }
+
+  .tool-description {
+    font-size: 0.875rem;
+    margin-bottom: 16px;
+    line-height: 1.5;
+  }
+
+  .tool-link {
+    font-size: 0.85rem;
+  }
+
+  .tool-preview {
+    padding: 16px;
+  }
+
+  .calc-row,
+  .trade-row {
+    font-size: 0.8rem;
+    padding: 12px;
+  }
+
+  .trade-header {
+    padding-bottom: 10px;
+    margin-bottom: 12px;
+  }
+
+  .trade-pair {
+    font-size: 0.9rem;
   }
 
   .feature-card {
