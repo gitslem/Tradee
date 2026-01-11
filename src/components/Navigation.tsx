@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { Home, Calculator, TrendingUp, Target, Menu, X, BookOpen, LogIn, LogOut, User } from 'lucide-react'
+import { Home, Calculator, TrendingUp, Target, Menu, X, BookOpen, LogIn, LogOut, User, Play } from 'lucide-react'
 import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import Logo from './Logo'
@@ -16,7 +16,8 @@ const Navigation = () => {
     { path: '/journal', label: 'Journal', icon: <BookOpen size={20} />, authRequired: true },
     { path: '/calculator', label: 'Calculator', icon: <Calculator size={20} /> },
     { path: '/market-structure', label: 'Market', icon: <TrendingUp size={20} /> },
-    { path: '/price-action', label: 'Price', icon: <Target size={20} /> }
+    { path: '/price-action', label: 'Price', icon: <Target size={20} /> },
+    { path: '/paper-trading', label: 'Practice', icon: <Play size={20} /> }
   ]
 
   const isActive = (path: string) => {
