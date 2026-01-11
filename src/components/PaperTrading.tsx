@@ -643,7 +643,7 @@ const PaperTrading = () => {
               <div className="ticker-display">
                 <div className="ticker-price-wrapper">
                   <span className="ticker-price">${parseFloat(ticker.lastPrice).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                  <span className="ticker-source">Bybit API</span>
+                  <span className="ticker-source">Live</span>
                 </div>
                 <span className={`ticker-change ${parseFloat(ticker.price24hPcnt) >= 0 ? 'positive' : 'negative'}`}>
                   {parseFloat(ticker.price24hPcnt) >= 0 ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
