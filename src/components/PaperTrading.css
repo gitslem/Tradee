@@ -585,51 +585,28 @@
   position: relative;
 }
 
+.chart-container.tradingview-chart {
+  height: 600px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
 .chart-inner {
   width: 100%;
   height: 100%;
 }
 
-.chart-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background: rgba(10, 10, 15, 0.9);
-  color: #94a3b8;
-  z-index: 10;
+.chart-inner.tradingview-widget-container {
+  min-height: 100%;
 }
 
-.chart-overlay.error {
-  color: #ef4444;
+.chart-inner.tradingview-widget-container > div {
+  height: 100% !important;
 }
 
-.chart-overlay svg {
-  margin-bottom: 0.75rem;
-}
-
-.chart-overlay p {
-  margin: 0 0 1rem 0;
-  font-size: 0.875rem;
-}
-
-.chart-overlay button {
-  padding: 0.5rem 1rem;
-  background: rgba(139, 92, 246, 0.2);
-  border: 1px solid rgba(139, 92, 246, 0.3);
-  border-radius: 8px;
-  color: #8b5cf6;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.chart-overlay button:hover {
-  background: rgba(139, 92, 246, 0.3);
+/* TradingView Widget Styling */
+.tradingview-widget-container iframe {
+  border-radius: 12px;
 }
 
 /* Market Info */
@@ -1373,6 +1350,10 @@
 
   .chart-container {
     height: 350px;
+  }
+
+  .chart-container.tradingview-chart {
+    height: 450px;
   }
 
   .market-info {
