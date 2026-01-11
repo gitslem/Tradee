@@ -66,6 +66,11 @@ const MarketStructure = () => {
     })))
   }
 
+  // Fibonacci Retracement Calculation (Industry Standard Formula)
+  // Fib Level Price = Low + (High - Low) × Fib Ratio
+  // Standard Fibonacci Levels: 0%, 23.6%, 38.2%, 50%, 61.8%, 78.6%, 100%
+  // Golden Zone: 38.2% - 61.8% (high probability entry/exit zones)
+  // This formula is used by TradingView, Bybit, Binance, and all professional trading platforms
   const fibonacciLevels = useMemo(() => {
     const high = parseFloat(recentHigh)
     const low = parseFloat(recentLow)
@@ -79,6 +84,11 @@ const MarketStructure = () => {
     }))
   }, [recentHigh, recentLow, currentPrice])
 
+  // Market Structure Analysis (Industry Standard Price Action Analysis)
+  // Uptrend: Higher Highs (HH) and Higher Lows (HL)
+  // Downtrend: Lower Highs (LH) and Lower Lows (LL)
+  // Range Position = ((Current - Low) / (High - Low)) × 100
+  // This is standard Dow Theory market structure analysis used by all professional traders
   const marketAnalysis = useMemo(() => {
     const current = parseFloat(currentPrice)
     const high = parseFloat(recentHigh)
@@ -89,6 +99,7 @@ const MarketStructure = () => {
     let trend: 'uptrend' | 'downtrend' | 'expansion' | 'range' = 'range'
     let trendDescription = ''
 
+    // Dow Theory Market Structure Detection
     if (high > pHigh && low > pLow) {
       trend = 'uptrend'
       trendDescription = 'Higher Highs and Higher Lows detected'
@@ -103,6 +114,7 @@ const MarketStructure = () => {
       trendDescription = 'Consolidating between support and resistance'
     }
 
+    // Range Position Calculation
     const rangePosition = ((current - low) / (high - low)) * 100
     let positionLabel = ''
     let positionType: 'warning' | 'neutral' | 'info' = 'neutral'
