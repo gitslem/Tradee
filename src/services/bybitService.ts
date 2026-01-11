@@ -9,7 +9,8 @@
  * - Order placement (market, limit)
  * - Position management
  * - Order history
- * - Real-time price data via REST (WebSocket can be added later)
+ * - Real-time price data via REST
+ * - Kline/candlestick data for charts
  */
 
 import { apiKeyService } from './apiKeyService'
@@ -73,6 +74,15 @@ export interface BybitTicker {
   nextFundingTime: string
 }
 
+export interface BybitKline {
+  openTime: number
+  open: string
+  high: string
+  low: string
+  close: string
+  volume: string
+}
+
 export interface OrderParams {
   symbol: string
   side: 'Buy' | 'Sell'
@@ -87,53 +97,34 @@ export interface OrderParams {
 }
 
 class BybitService {
-  private generateSignature(
+  // Generate HMAC-SHA256 signature using Web Crypto API
+  private async generateSignature(
     timestamp: string,
     apiKey: string,
     apiSecret: string,
     recvWindow: string,
     queryString: string
-  ): string {
-    // Create the signature string
+  ): Promise<string> {
     const signaturePayload = `${timestamp}${apiKey}${recvWindow}${queryString}`
 
-    // HMAC-SHA256 signature
-    return this.hmacSHA256(signaturePayload, apiSecret)
-  }
-
-  private hmacSHA256(message: string, secret: string): string {
-    // Simple HMAC-SHA256 implementation for browser
-    // Using Web Crypto API would be better but requires async
-    // For now, use a synchronous approach
-
+    // Use Web Crypto API for proper HMAC-SHA256
     const encoder = new TextEncoder()
-    const keyData = encoder.encode(secret)
-    const messageData = encoder.encode(message)
+    const keyData = encoder.encode(apiSecret)
+    const messageData = encoder.encode(signaturePayload)
 
-    // Simple XOR-based HMAC simulation (for demo purposes)
-    // In production, use Web Crypto API or a proper crypto library
-    let hash = ''
-    for (let i = 0; i < messageData.length; i++) {
-      const byte = messageData[i] ^ keyData[i % keyData.length]
-      hash += byte.toString(16).padStart(2, '0')
-    }
+    const cryptoKey = await crypto.subtle.importKey(
+      'raw',
+      keyData,
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['sign']
+    )
 
-    // Additional mixing for better distribution
-    const finalHash = this.simpleHash(hash + secret)
-    return finalHash
-  }
+    const signature = await crypto.subtle.sign('HMAC', cryptoKey, messageData)
+    const hashArray = Array.from(new Uint8Array(signature))
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
 
-  private simpleHash(str: string): string {
-    let hash = 0
-    for (let i = 0; i < str.length; i++) {
-      const char = str.charCodeAt(i)
-      hash = ((hash << 5) - hash) + char
-      hash = hash & hash
-    }
-
-    // Convert to hex and pad
-    const hex = Math.abs(hash).toString(16)
-    return hex.padStart(64, '0').substring(0, 64)
+    return hashHex
   }
 
   private async makeRequest(
@@ -150,22 +141,23 @@ class BybitService {
     }
 
     const timestamp = Date.now().toString()
-    const recvWindow = '5000'
+    const recvWindow = '20000'
 
     let url = `${TESTNET_BASE_URL}${endpoint}`
     let queryString = ''
     let body: string | undefined
 
     if (params) {
-      const sortedParams = Object.keys(params)
-        .sort()
-        .map(key => `${key}=${params[key]}`)
-        .join('&')
-
       if (method === 'GET') {
+        // For GET requests, sort params alphabetically
+        const sortedParams = Object.keys(params)
+          .sort()
+          .map(key => `${key}=${encodeURIComponent(params[key])}`)
+          .join('&')
         queryString = sortedParams
         url += `?${queryString}`
       } else {
+        // For POST requests, use JSON body
         body = JSON.stringify(params)
         queryString = body
       }
@@ -176,7 +168,7 @@ class BybitService {
     }
 
     if (isPrivate && credentials) {
-      const signature = this.generateSignature(
+      const signature = await this.generateSignature(
         timestamp,
         credentials.apiKey,
         credentials.apiSecret,
@@ -200,15 +192,14 @@ class BybitService {
       const data = await response.json()
 
       if (data.retCode !== 0) {
-        throw new Error(data.retMsg || 'Bybit API error')
+        throw new Error(data.retMsg || `Bybit API error: ${data.retCode}`)
       }
 
       return data.result
     } catch (error) {
       if (error instanceof Error) {
-        // Handle CORS errors gracefully
-        if (error.message.includes('Failed to fetch') || error.message.includes('CORS')) {
-          throw new Error('Unable to connect to Bybit. Please check your network or use a CORS proxy.')
+        if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+          throw new Error('Network error: Unable to connect to Bybit testnet. Please check your internet connection.')
         }
         throw error
       }
@@ -250,19 +241,12 @@ class BybitService {
     return []
   }
 
-  // Public API - Get kline/candlestick data
+  // Public API - Get kline/candlestick data for charts
   async getKlines(
     symbol: string,
     interval: string,
     limit: number = 200
-  ): Promise<{
-    openTime: number
-    open: string
-    high: string
-    low: string
-    close: string
-    volume: string
-  }[]> {
+  ): Promise<BybitKline[]> {
     const result = await this.makeRequest(
       '/v5/market/kline',
       'GET',
@@ -284,10 +268,47 @@ class BybitService {
         low: k[3],
         close: k[4],
         volume: k[5]
-      })).reverse() // Bybit returns newest first, we want oldest first
+      })).reverse() // Bybit returns newest first, we want oldest first for charts
     }
 
     return []
+  }
+
+  // Public API - Get recent trades
+  async getRecentTrades(symbol: string, limit: number = 50): Promise<{
+    price: string
+    size: string
+    side: string
+    time: string
+  }[]> {
+    const result = await this.makeRequest(
+      '/v5/market/recent-trade',
+      'GET',
+      '',
+      { category: 'linear', symbol, limit: limit.toString() },
+      false
+    ) as { list: { price: string; size: string; side: string; time: string }[] }
+
+    return result.list || []
+  }
+
+  // Public API - Get orderbook
+  async getOrderbook(symbol: string, limit: number = 25): Promise<{
+    bids: [string, string][]
+    asks: [string, string][]
+  }> {
+    const result = await this.makeRequest(
+      '/v5/market/orderbook',
+      'GET',
+      '',
+      { category: 'linear', symbol, limit: limit.toString() },
+      false
+    ) as { b: [string, string][]; a: [string, string][] }
+
+    return {
+      bids: result.b || [],
+      asks: result.a || []
+    }
   }
 
   // Private API - Get wallet balance
@@ -308,7 +329,7 @@ class BybitService {
 
   // Private API - Get positions
   async getPositions(userId: string, symbol?: string): Promise<BybitPosition[]> {
-    const params: Record<string, string> = { category: 'linear' }
+    const params: Record<string, string> = { category: 'linear', settleCoin: 'USDT' }
     if (symbol) params.symbol = symbol
 
     const result = await this.makeRequest(
@@ -328,10 +349,13 @@ class BybitService {
       symbol: orderParams.symbol,
       side: orderParams.side,
       orderType: orderParams.orderType,
-      qty: orderParams.qty
+      qty: orderParams.qty,
+      timeInForce: orderParams.orderType === 'Market' ? 'IOC' : 'GTC'
     }
 
-    if (orderParams.price) params.price = orderParams.price
+    if (orderParams.orderType === 'Limit' && orderParams.price) {
+      params.price = orderParams.price
+    }
     if (orderParams.takeProfit) params.takeProfit = orderParams.takeProfit
     if (orderParams.stopLoss) params.stopLoss = orderParams.stopLoss
     if (orderParams.reduceOnly) params.reduceOnly = 'true'
@@ -398,24 +422,30 @@ class BybitService {
 
   // Private API - Set leverage
   async setLeverage(userId: string, symbol: string, leverage: string): Promise<boolean> {
-    await this.makeRequest(
-      '/v5/position/set-leverage',
-      'POST',
-      userId,
-      {
-        category: 'linear',
-        symbol,
-        buyLeverage: leverage,
-        sellLeverage: leverage
+    try {
+      await this.makeRequest(
+        '/v5/position/set-leverage',
+        'POST',
+        userId,
+        {
+          category: 'linear',
+          symbol,
+          buyLeverage: leverage,
+          sellLeverage: leverage
+        }
+      )
+      return true
+    } catch (error) {
+      // Leverage might already be set to this value
+      if (error instanceof Error && error.message.includes('leverage not modified')) {
+        return true
       }
-    )
-
-    return true
+      throw error
+    }
   }
 
   // Private API - Close position
   async closePosition(userId: string, symbol: string, side: 'Buy' | 'Sell', qty: string): Promise<{ orderId: string }> {
-    // To close a position, we need to place an opposite order with reduceOnly
     const closeSide = side === 'Buy' ? 'Sell' : 'Buy'
 
     return this.placeOrder(userId, {
@@ -427,7 +457,7 @@ class BybitService {
     })
   }
 
-  // Test connection
+  // Test connection with API keys
   async testConnection(userId: string): Promise<boolean> {
     try {
       await this.getWalletBalance(userId)
@@ -438,16 +468,22 @@ class BybitService {
   }
 
   // Get available trading pairs
-  async getSymbols(): Promise<{ symbol: string; baseCoin: string; quoteCoin: string }[]> {
+  async getSymbols(): Promise<{ symbol: string; baseCoin: string; quoteCoin: string; minOrderQty: string; qtyStep: string }[]> {
     const result = await this.makeRequest(
       '/v5/market/instruments-info',
       'GET',
       '',
-      { category: 'linear' },
+      { category: 'linear', status: 'Trading' },
       false
-    ) as { list: { symbol: string; baseCoin: string; quoteCoin: string }[] }
+    ) as { list: { symbol: string; baseCoin: string; quoteCoin: string; lotSizeFilter: { minOrderQty: string; qtyStep: string } }[] }
 
-    return result.list || []
+    return (result.list || []).map(item => ({
+      symbol: item.symbol,
+      baseCoin: item.baseCoin,
+      quoteCoin: item.quoteCoin,
+      minOrderQty: item.lotSizeFilter?.minOrderQty || '0.001',
+      qtyStep: item.lotSizeFilter?.qtyStep || '0.001'
+    }))
   }
 }
 
