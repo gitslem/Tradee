@@ -1,9 +1,12 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   User, Download, TrendingUp, TrendingDown, BookOpen,
   Calendar, DollarSign, X, Pin, List, Grid, Plus,
-  FileText, FileJson, FileSpreadsheet, File
+  FileText, FileJson, FileSpreadsheet, File,
+  Target, Activity, Award, Flame, BarChart3,
+  ArrowUpRight, ArrowDownRight, Clock, Zap,
+  PieChart, LineChart, Trophy, AlertCircle
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { firestoreService } from '../services/firestoreService'
@@ -11,6 +14,7 @@ import type { Trade, JournalNote } from '../services/firestoreService'
 import TradingJournal from './TradingJournal'
 import PersonalNotes from './PersonalNotes'
 import CryptoRecommendations from './CryptoRecommendations'
+import TradingBackground from './TradingBackground'
 import './JournalHome.css'
 
 // Export Modal Component
@@ -54,7 +58,6 @@ const ExportModal = ({ trades, notes, onClose }: ExportModalProps) => {
           return
         }
       } else {
-        // Export based on type
         if (exportType === 'all') {
           if (exportFormat === 'json') {
             dataToExport = firestoreService.exportCombinedToJSON(trades, notes)
@@ -102,7 +105,6 @@ const ExportModal = ({ trades, notes, onClose }: ExportModalProps) => {
 
       if (dataToExport) {
         if (exportFormat === 'txt') {
-          // Handle text export manually since downloadExport only supports csv and json
           const blob = new Blob([dataToExport], { type: 'text/plain' })
           const url = URL.createObjectURL(blob)
           const link = document.createElement('a')
@@ -176,7 +178,10 @@ const ExportModal = ({ trades, notes, onClose }: ExportModalProps) => {
     <div className="modal-overlay" onClick={onClose}>
       <div className="export-modal" onClick={e => e.stopPropagation()}>
         <div className="export-modal-header">
-          <h2>Export Journal Data</h2>
+          <div className="modal-header-content">
+            <Download className="modal-icon" />
+            <h2>Export Journal Data</h2>
+          </div>
           <button onClick={onClose} className="close-btn">
             <X size={24} />
           </button>
@@ -187,62 +192,81 @@ const ExportModal = ({ trades, notes, onClose }: ExportModalProps) => {
             <h3>What to Export</h3>
             <div className="export-type-buttons">
               <button
-                className={`export-type-btn ${exportType === 'all' ? 'active' : ''}`}
+                className={`export-type-btn ${exportType === 'all' && !showItemSelection ? 'active' : ''}`}
                 onClick={() => { setExportType('all'); setShowItemSelection(false) }}
               >
-                All Data ({trades.length} trades + {notes.length} notes)
+                <BarChart3 size={20} />
+                <span>All Data</span>
+                <small>{trades.length} trades + {notes.length} notes</small>
               </button>
               <button
-                className={`export-type-btn ${exportType === 'trades' ? 'active' : ''}`}
+                className={`export-type-btn ${exportType === 'trades' && !showItemSelection ? 'active' : ''}`}
                 onClick={() => { setExportType('trades'); setShowItemSelection(false) }}
               >
-                All Trades ({trades.length})
+                <TrendingUp size={20} />
+                <span>All Trades</span>
+                <small>{trades.length} trades</small>
               </button>
               <button
-                className={`export-type-btn ${exportType === 'notes' ? 'active' : ''}`}
+                className={`export-type-btn ${exportType === 'notes' && !showItemSelection ? 'active' : ''}`}
                 onClick={() => { setExportType('notes'); setShowItemSelection(false) }}
               >
-                All Notes ({notes.length})
+                <BookOpen size={20} />
+                <span>All Notes</span>
+                <small>{notes.length} notes</small>
               </button>
               <button
                 className={`export-type-btn ${showItemSelection ? 'active' : ''}`}
                 onClick={() => setShowItemSelection(!showItemSelection)}
               >
-                Select Individual Items
+                <Target size={20} />
+                <span>Select Items</span>
+                <small>Custom selection</small>
               </button>
             </div>
           </div>
 
           {showItemSelection && (
             <div className="export-section">
-              <h3>Select Items ({selectedItems.size} selected)</h3>
+              <h3>Select Items <span className="selection-count">{selectedItems.size} selected</span></h3>
               <div className="item-selection-list">
                 {trades.length > 0 && (
                   <div className="item-group">
-                    <h4>Trades</h4>
+                    <h4><TrendingUp size={16} /> Trades</h4>
                     {trades.map(trade => (
-                      <label key={trade.id} className="item-checkbox">
+                      <label key={trade.id} className={`item-checkbox ${selectedItems.has(trade.id) ? 'selected' : ''}`}>
                         <input
                           type="checkbox"
                           checked={selectedItems.has(trade.id)}
                           onChange={() => toggleItemSelection(trade.id)}
                         />
-                        <span>{trade.pair} - {trade.type.toUpperCase()} - ${trade.profitLoss.toFixed(2)}</span>
+                        <span className="checkbox-custom"></span>
+                        <span className="item-info">
+                          <span className="item-title">{trade.pair}</span>
+                          <span className={`item-badge ${trade.type}`}>{trade.type}</span>
+                          <span className={`item-pnl ${trade.profitLoss >= 0 ? 'profit' : 'loss'}`}>
+                            ${Math.abs(trade.profitLoss).toFixed(2)}
+                          </span>
+                        </span>
                       </label>
                     ))}
                   </div>
                 )}
                 {notes.length > 0 && (
                   <div className="item-group">
-                    <h4>Notes</h4>
+                    <h4><BookOpen size={16} /> Notes</h4>
                     {notes.map(note => (
-                      <label key={note.id} className="item-checkbox">
+                      <label key={note.id} className={`item-checkbox ${selectedItems.has(note.id) ? 'selected' : ''}`}>
                         <input
                           type="checkbox"
                           checked={selectedItems.has(note.id)}
                           onChange={() => toggleItemSelection(note.id)}
                         />
-                        <span>{note.title}</span>
+                        <span className="checkbox-custom"></span>
+                        <span className="item-info">
+                          <span className="item-title">{note.title}</span>
+                          <span className={`item-category ${note.category}`}>{note.category}</span>
+                        </span>
                       </label>
                     ))}
                   </div>
@@ -258,21 +282,21 @@ const ExportModal = ({ trades, notes, onClose }: ExportModalProps) => {
                 className={`format-btn ${exportFormat === 'json' ? 'active' : ''}`}
                 onClick={() => setExportFormat('json')}
               >
-                <FileJson size={20} />
+                <FileJson size={24} />
                 <span>JSON</span>
               </button>
               <button
                 className={`format-btn ${exportFormat === 'csv' ? 'active' : ''}`}
                 onClick={() => setExportFormat('csv')}
               >
-                <FileSpreadsheet size={20} />
+                <FileSpreadsheet size={24} />
                 <span>CSV</span>
               </button>
               <button
                 className={`format-btn ${exportFormat === 'txt' ? 'active' : ''}`}
                 onClick={() => setExportFormat('txt')}
               >
-                <FileText size={20} />
+                <FileText size={24} />
                 <span>Text</span>
               </button>
               <button
@@ -281,7 +305,7 @@ const ExportModal = ({ trades, notes, onClose }: ExportModalProps) => {
                 disabled
                 title="Coming soon"
               >
-                <File size={20} />
+                <File size={24} />
                 <span>PDF</span>
                 <small>(Soon)</small>
               </button>
@@ -297,7 +321,7 @@ const ExportModal = ({ trades, notes, onClose }: ExportModalProps) => {
             disabled={showItemSelection && selectedItems.size === 0}
           >
             <Download size={18} />
-            <span>Export</span>
+            <span>Export Now</span>
           </button>
         </div>
       </div>
@@ -318,7 +342,10 @@ const TradeDetailModal = ({ trade, onClose }: TradeDetailModalProps) => {
     <div className="modal-overlay" onClick={onClose}>
       <div className="detail-modal" onClick={e => e.stopPropagation()}>
         <div className="detail-modal-header">
-          <h2>Trade Details</h2>
+          <div className="modal-header-content">
+            {isProfitable ? <TrendingUp className="modal-icon profit" /> : <TrendingDown className="modal-icon loss" />}
+            <h2>Trade Details</h2>
+          </div>
           <button onClick={onClose} className="close-btn">
             <X size={24} />
           </button>
@@ -392,6 +419,7 @@ const NoteDetailModal = ({ note, onClose }: NoteDetailModalProps) => {
       <div className="detail-modal" onClick={e => e.stopPropagation()}>
         <div className="detail-modal-header">
           <div className="note-header-content">
+            <BookOpen className="modal-icon" />
             <h2>{note.title}</h2>
             {note.isPinned && <Pin size={20} className="pinned-icon" />}
           </div>
@@ -458,10 +486,117 @@ const JournalHome = () => {
     }
   }, [user, isAuthenticated, loading, navigate])
 
+  // Calculate analytics
+  const analytics = useMemo(() => {
+    const closedTrades = trades.filter(t => t.status === 'closed')
+    const winningTrades = closedTrades.filter(t => t.profitLoss > 0)
+    const losingTrades = closedTrades.filter(t => t.profitLoss < 0)
+
+    const totalPnL = closedTrades.reduce((sum, t) => sum + t.profitLoss, 0)
+    const winRate = closedTrades.length > 0 ? (winningTrades.length / closedTrades.length) * 100 : 0
+
+    const avgWin = winningTrades.length > 0
+      ? winningTrades.reduce((sum, t) => sum + t.profitLoss, 0) / winningTrades.length
+      : 0
+    const avgLoss = losingTrades.length > 0
+      ? Math.abs(losingTrades.reduce((sum, t) => sum + t.profitLoss, 0) / losingTrades.length)
+      : 0
+
+    const profitFactor = avgLoss > 0 ? avgWin / avgLoss : avgWin > 0 ? Infinity : 0
+
+    // Calculate streaks
+    let currentStreak = 0
+    let currentStreakType: 'win' | 'loss' | null = null
+    let bestWinStreak = 0
+    let tempWinStreak = 0
+
+    const sortedTrades = [...closedTrades].sort((a, b) =>
+      new Date(b.entryDate).getTime() - new Date(a.entryDate).getTime()
+    )
+
+    for (const trade of sortedTrades) {
+      const isWin = trade.profitLoss > 0
+
+      if (currentStreakType === null) {
+        currentStreakType = isWin ? 'win' : 'loss'
+        currentStreak = 1
+      } else if ((isWin && currentStreakType === 'win') || (!isWin && currentStreakType === 'loss')) {
+        currentStreak++
+      } else {
+        break
+      }
+
+      if (isWin) {
+        tempWinStreak++
+        bestWinStreak = Math.max(bestWinStreak, tempWinStreak)
+      } else {
+        tempWinStreak = 0
+      }
+    }
+
+    // Trades this week
+    const oneWeekAgo = new Date()
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7)
+    const tradesThisWeek = trades.filter(t => new Date(t.entryDate) >= oneWeekAgo).length
+
+    // Trades this month
+    const oneMonthAgo = new Date()
+    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1)
+    const tradesThisMonth = trades.filter(t => new Date(t.entryDate) >= oneMonthAgo).length
+
+    return {
+      totalPnL,
+      winRate,
+      avgWin,
+      avgLoss,
+      profitFactor,
+      totalTrades: trades.length,
+      closedTrades: closedTrades.length,
+      openTrades: trades.filter(t => t.status === 'open').length,
+      winningTrades: winningTrades.length,
+      losingTrades: losingTrades.length,
+      currentStreak,
+      currentStreakType,
+      bestWinStreak,
+      tradesThisWeek,
+      tradesThisMonth
+    }
+  }, [trades])
+
+  // Get recent activity
+  const recentActivity = useMemo(() => {
+    const allItems = [
+      ...trades.map(t => ({
+        id: t.id,
+        type: 'trade' as const,
+        title: t.pair,
+        subtitle: `${t.type.toUpperCase()} • $${Math.abs(t.profitLoss).toFixed(2)}`,
+        date: new Date(t.entryDate),
+        isProfit: t.profitLoss >= 0,
+        data: t
+      })),
+      ...notes.map(n => ({
+        id: n.id,
+        type: 'note' as const,
+        title: n.title,
+        subtitle: n.category,
+        date: new Date(n.createdAt),
+        isProfit: true,
+        data: n
+      }))
+    ]
+
+    return allItems.sort((a, b) => b.date.getTime() - a.date.getTime()).slice(0, 8)
+  }, [trades, notes])
+
   if (loading) {
     return (
       <div className="journal-home">
-        <div className="loading-container">Loading...</div>
+        <TradingBackground variant="journal" />
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <span>Loading your journal...</span>
+        </div>
       </div>
     )
   }
@@ -482,35 +617,205 @@ const JournalHome = () => {
   const indexOfFirstNote = indexOfLastNote - itemsPerPage
   const currentNotes = notes.slice(indexOfFirstNote, indexOfLastNote)
 
+  const getGreeting = () => {
+    const hour = new Date().getHours()
+    if (hour < 12) return 'Good morning'
+    if (hour < 18) return 'Good afternoon'
+    return 'Good evening'
+  }
+
   return (
     <div className="journal-home">
-      <div className="journal-home-header">
-        <div className="profile-section">
-          <div className="profile-avatar">
-            {user?.photoURL ? (
-              <img src={user.photoURL} alt={user.displayName || 'User'} />
-            ) : (
-              <User size={40} />
-            )}
+      <TradingBackground variant="journal" />
+
+      {/* Hero Section */}
+      <div className="journal-hero">
+        <div className="hero-icon-wrapper">
+          <div className="hero-icon">
+            <BookOpen size={48} />
           </div>
-          <div className="profile-info">
-            <h1>Welcome back, {user?.displayName?.split(' ')[0] || 'Trader'}</h1>
-            <p>Your trading journal - {trades.length} trades, {notes.length} notes</p>
+          <div className="hero-glow"></div>
+        </div>
+        <div className="hero-content">
+          <h1>{getGreeting()}, {user?.displayName?.split(' ')[0] || 'Trader'}</h1>
+          <p>Your trading journal dashboard - track performance, analyze patterns, grow consistently</p>
+        </div>
+        <div className="hero-actions">
+          <button
+            onClick={() => setShowExportModal(true)}
+            className="export-btn"
+            disabled={trades.length === 0 && notes.length === 0}
+          >
+            <Download size={20} />
+            <span>Export Data</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Quick Stats Bar */}
+      <div className="quick-stats-bar">
+        <div className="stat-chip">
+          <Activity size={18} />
+          <span>{analytics.totalTrades} Trades</span>
+        </div>
+        <div className="stat-chip">
+          <BookOpen size={18} />
+          <span>{notes.length} Notes</span>
+        </div>
+        <div className="stat-chip">
+          <Clock size={18} />
+          <span>{analytics.tradesThisWeek} This Week</span>
+        </div>
+        <div className={`stat-chip ${analytics.totalPnL >= 0 ? 'profit' : 'loss'}`}>
+          {analytics.totalPnL >= 0 ? <TrendingUp size={18} /> : <TrendingDown size={18} />}
+          <span>${Math.abs(analytics.totalPnL).toFixed(2)} Total P/L</span>
+        </div>
+      </div>
+
+      {/* Performance Dashboard */}
+      <div className="performance-dashboard">
+        <div className="dashboard-header">
+          <h2><BarChart3 size={24} /> Performance Overview</h2>
+        </div>
+        <div className="stats-grid">
+          <div className="stat-card primary">
+            <div className="stat-icon">
+              <Target size={24} />
+            </div>
+            <div className="stat-content">
+              <span className="stat-value">{analytics.winRate.toFixed(1)}%</span>
+              <span className="stat-label">Win Rate</span>
+            </div>
+            <div className="stat-bar">
+              <div
+                className="stat-bar-fill win"
+                style={{ width: `${analytics.winRate}%` }}
+              ></div>
+            </div>
+          </div>
+
+          <div className={`stat-card ${analytics.totalPnL >= 0 ? 'profit' : 'loss'}`}>
+            <div className="stat-icon">
+              <DollarSign size={24} />
+            </div>
+            <div className="stat-content">
+              <span className="stat-value">
+                {analytics.totalPnL >= 0 ? '+' : '-'}${Math.abs(analytics.totalPnL).toFixed(2)}
+              </span>
+              <span className="stat-label">Total Profit/Loss</span>
+            </div>
+            <div className="stat-trend">
+              {analytics.totalPnL >= 0 ? <ArrowUpRight size={20} /> : <ArrowDownRight size={20} />}
+            </div>
+          </div>
+
+          <div className="stat-card">
+            <div className="stat-icon">
+              <PieChart size={24} />
+            </div>
+            <div className="stat-content">
+              <span className="stat-value">{analytics.profitFactor === Infinity ? '∞' : analytics.profitFactor.toFixed(2)}</span>
+              <span className="stat-label">Profit Factor</span>
+            </div>
+            <div className="stat-indicator">
+              <span className={analytics.profitFactor >= 1.5 ? 'good' : analytics.profitFactor >= 1 ? 'neutral' : 'bad'}>
+                {analytics.profitFactor >= 1.5 ? 'Excellent' : analytics.profitFactor >= 1 ? 'Good' : 'Needs Work'}
+              </span>
+            </div>
+          </div>
+
+          <div className="stat-card">
+            <div className="stat-icon">
+              <Flame size={24} />
+            </div>
+            <div className="stat-content">
+              <span className="stat-value">{analytics.currentStreak}</span>
+              <span className="stat-label">
+                Current {analytics.currentStreakType === 'win' ? 'Win' : analytics.currentStreakType === 'loss' ? 'Loss' : ''} Streak
+              </span>
+            </div>
+            <div className="stat-badge">
+              <Trophy size={16} />
+              <span>Best: {analytics.bestWinStreak}</span>
+            </div>
           </div>
         </div>
 
-        <button
-          onClick={() => setShowExportModal(true)}
-          className="export-all-btn"
-          disabled={trades.length === 0 && notes.length === 0}
-        >
-          <Download size={20} />
-          <span>Export</span>
-        </button>
+        {/* Secondary Stats */}
+        <div className="secondary-stats">
+          <div className="mini-stat">
+            <span className="mini-label">Avg Win</span>
+            <span className="mini-value profit">+${analytics.avgWin.toFixed(2)}</span>
+          </div>
+          <div className="mini-stat">
+            <span className="mini-label">Avg Loss</span>
+            <span className="mini-value loss">-${analytics.avgLoss.toFixed(2)}</span>
+          </div>
+          <div className="mini-stat">
+            <span className="mini-label">Open Trades</span>
+            <span className="mini-value">{analytics.openTrades}</span>
+          </div>
+          <div className="mini-stat">
+            <span className="mini-label">Closed Trades</span>
+            <span className="mini-value">{analytics.closedTrades}</span>
+          </div>
+          <div className="mini-stat">
+            <span className="mini-label">This Month</span>
+            <span className="mini-value">{analytics.tradesThisMonth}</span>
+          </div>
+        </div>
       </div>
 
       {/* AI-Powered Crypto Recommendations */}
       <CryptoRecommendations />
+
+      {/* Recent Activity */}
+      <div className="activity-section">
+        <div className="section-header">
+          <div className="section-title">
+            <Zap size={24} className="section-icon" />
+            <h2>Recent Activity</h2>
+          </div>
+        </div>
+
+        {recentActivity.length > 0 ? (
+          <div className="activity-timeline">
+            {recentActivity.map((item) => (
+              <div
+                key={`${item.type}-${item.id}`}
+                className={`activity-item ${item.type}`}
+                onClick={() => {
+                  if (item.type === 'trade') {
+                    setSelectedTrade(item.data as Trade)
+                  } else {
+                    setSelectedNote(item.data as JournalNote)
+                  }
+                }}
+              >
+                <div className="activity-icon">
+                  {item.type === 'trade' ? (
+                    item.isProfit ? <TrendingUp size={18} /> : <TrendingDown size={18} />
+                  ) : (
+                    <BookOpen size={18} />
+                  )}
+                </div>
+                <div className="activity-content">
+                  <span className="activity-title">{item.title}</span>
+                  <span className="activity-subtitle">{item.subtitle}</span>
+                </div>
+                <div className="activity-time">
+                  {item.date.toLocaleDateString()}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="empty-activity">
+            <AlertCircle size={24} />
+            <p>No recent activity. Start tracking your trades!</p>
+          </div>
+        )}
+      </div>
 
       <div className="journal-content-grid">
         {/* Trades Section */}
@@ -527,7 +832,7 @@ const JournalHome = () => {
                 title="View all trades"
               >
                 <Plus size={18} />
-                <span>View Trades</span>
+                <span>Manage Trades</span>
               </button>
               <div className="view-toggle">
                 <button
@@ -553,8 +858,15 @@ const JournalHome = () => {
             <>
               {currentTrades.length === 0 ? (
                 <div className="empty-state">
-                  <TrendingUp size={48} />
-                  <p>No trades yet. Start tracking your performance!</p>
+                  <div className="empty-icon">
+                    <TrendingUp size={48} />
+                  </div>
+                  <h3>No trades yet</h3>
+                  <p>Start tracking your trading performance!</p>
+                  <button className="empty-action" onClick={() => setTradesView('all')}>
+                    <Plus size={18} />
+                    <span>Add Your First Trade</span>
+                  </button>
                 </div>
               ) : (
                 <>
@@ -582,6 +894,7 @@ const JournalHome = () => {
                       <div className="card-footer">
                         <Calendar size={14} />
                         <span>{new Date(trade.entryDate).toLocaleDateString()}</span>
+                        <span className="card-leverage">{trade.leverage}x</span>
                       </div>
                     </div>
                   ))}
@@ -632,7 +945,7 @@ const JournalHome = () => {
                 title="View all notes"
               >
                 <Plus size={18} />
-                <span>View Notes</span>
+                <span>Manage Notes</span>
               </button>
               <div className="view-toggle">
                 <button
@@ -658,8 +971,15 @@ const JournalHome = () => {
             <>
               {currentNotes.length === 0 ? (
                 <div className="empty-state">
-                  <BookOpen size={48} />
-                  <p>No notes yet. Document your strategies and insights!</p>
+                  <div className="empty-icon">
+                    <BookOpen size={48} />
+                  </div>
+                  <h3>No notes yet</h3>
+                  <p>Document your strategies and insights!</p>
+                  <button className="empty-action" onClick={() => setNotesView('all')}>
+                    <Plus size={18} />
+                    <span>Create Your First Note</span>
+                  </button>
                 </div>
               ) : (
                 <>

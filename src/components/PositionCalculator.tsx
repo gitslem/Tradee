@@ -1,11 +1,15 @@
-import { useState } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import './PositionCalculator.css'
 import LivePriceCard from './LivePriceCard'
 import FloatingExchangeSelector from './FloatingExchangeSelector'
-import CollapsibleSection from './CollapsibleSection'
 import TradingBackground from './TradingBackground'
 import { getExchangeFees, getMaxLeverage, getMaintenanceMargin, calculateFundingCost, EXCHANGES } from '../config/exchanges'
 import type { AccountType } from '../config/exchanges'
+import {
+  Calculator, TrendingUp, TrendingDown, Shield, AlertTriangle,
+  DollarSign, Percent, Target, Zap, ChevronDown, ChevronUp,
+  BarChart3, Activity, Wallet, Scale, Info, CheckCircle2, XCircle
+} from 'lucide-react'
 
 interface TakeProfitResult {
   name: string
@@ -38,6 +42,16 @@ interface CalculationResults {
   actualRiskWithLeverage: number
 }
 
+// Risk presets for quick selection
+const RISK_PRESETS = [
+  { label: 'Conservative', risk: 0.5, color: '#10b981' },
+  { label: 'Moderate', risk: 1, color: '#f59e0b' },
+  { label: 'Aggressive', risk: 2, color: '#ef4444' },
+]
+
+// Leverage presets
+const LEVERAGE_PRESETS = [1, 3, 5, 10, 20, 50]
+
 const PositionCalculator = () => {
   const [accountBalance, setAccountBalance] = useState<string>('10000')
   const [riskPercentage, setRiskPercentage] = useState<string>('1')
@@ -52,12 +66,14 @@ const PositionCalculator = () => {
   const [useLeverage, setUseLeverage] = useState<boolean>(false)
   const [selectedExchange, setSelectedExchange] = useState<string>('binance')
   const [accountType, setAccountType] = useState<AccountType>('futures')
+  const [showAdvanced, setShowAdvanced] = useState<boolean>(false)
+  const [showLeverage, setShowLeverage] = useState<boolean>(false)
 
   // Get exchange-specific fees
   const exchangeFees = getExchangeFees(selectedExchange, accountType)
   const maxLeverageAllowed = getMaxLeverage(selectedExchange, accountType)
 
-  const calculatePosition = (): CalculationResults | null => {
+  const calculatePosition = useCallback((): CalculationResults | null => {
     const balance = parseFloat(accountBalance)
     const risk = parseFloat(riskPercentage)
     const entry = parseFloat(entryPrice)
@@ -66,62 +82,31 @@ const PositionCalculator = () => {
     const tp2 = parseFloat(tp2Price)
     const tp3 = parseFloat(tp3Price)
     const lev = useLeverage ? parseFloat(leverage) : 1
-    const feePercent = exchangeFees.taker / 100 // Use exchange-specific taker fee
+    const feePercent = exchangeFees.taker / 100
 
     if (isNaN(balance) || isNaN(risk) || isNaN(entry) || isNaN(stop) || isNaN(lev)) {
       return null
     }
 
-    // Stop-Loss % Distance = |Entry Price – Stop Price| ÷ Entry Price
     const stopLossDistance = Math.abs(entry - stop) / entry
-
-    // Risk Amount = Account Balance × Risk % per Trade
     const riskAmount = balance * (risk / 100)
-
-    // Calculate Position Size (Isolated Margin Mode - Binance/Bybit Standard)
-    // Base position size from risk and stop loss
     const basePositionSize = riskAmount / stopLossDistance
-
-    // When using leverage, position size is multiplied by leverage
-    // This allows controlling a larger position with the same risk/margin
     const positionSize = basePositionSize * lev
-    const marginRequired = basePositionSize // Margin stays the same as base position
+    const marginRequired = basePositionSize
     const notionalValue = positionSize
-
-    // Position Value in base currency (Quantity)
-    // With leverage, quantity increases proportionally
     const positionValue = positionSize / entry
     const quantity = positionValue
 
-    // Liquidation Price Calculation (Isolated Margin - Bybit/Binance Formula)
-    // Accounts for margin buffer based on available account balance
-    // For LONG: Liquidation Price = Entry - [(Total Margin - Maintenance Margin - Close Fee) / Quantity]
-    // For SHORT: Liquidation Price = Entry + [(Total Margin - Maintenance Margin - Close Fee) / Quantity]
     let liquidationPrice = 0
     if (useLeverage && lev > 1) {
-      // Get maintenance margin rate for the current leverage level
       const maintenanceMarginRate = getMaintenanceMargin(selectedExchange, lev)
-
-      // Calculate position values
       const positionValueInUsdt = entry * quantity
       const minimumMargin = positionValueInUsdt / lev
       const maintenanceMargin = (positionValueInUsdt * maintenanceMarginRate) / 100
-
-      // Calculate available balance remaining after opening position
-      // This balance can be used as additional margin buffer
       const remainingBalance = balance - marginRequired
-
-      // Allocate 30% of remaining balance as safety buffer for liquidation
-      // This means larger accounts have more buffer and safer liquidation prices
       const marginBuffer = Math.max(0, remainingBalance * 0.3)
-
-      // Total margin allocated = minimum required + buffer from available balance
       const totalMargin = minimumMargin + marginBuffer
-
-      // Calculate estimated fee to close the position
       const closeFee = positionValueInUsdt * (exchangeFees.taker / 100)
-
-      // Available margin for price movement before liquidation
       const availableMargin = totalMargin - maintenanceMargin - closeFee
 
       if (positionType === 'long') {
@@ -131,25 +116,20 @@ const PositionCalculator = () => {
       }
     }
 
-    // Distance to liquidation (as percentage)
     const distanceToLiquidation = liquidationPrice > 0
       ? (Math.abs(entry - liquidationPrice) / entry) * 100
       : 0
 
-    // Breakeven Price (accounting for trading fees)
-    const breakevenDistance = entry * feePercent * 2 // Entry + Exit fee
+    const breakevenDistance = entry * feePercent * 2
     const breakevenPrice = positionType === 'long'
       ? entry + breakevenDistance
       : entry - breakevenDistance
 
-    // Take Profit Results
     const takeProfitResults: TakeProfitResult[] = []
 
     if (!isNaN(takeProfit)) {
       const tpDistance = Math.abs(takeProfit - entry)
       const tpPercentDistance = (tpDistance / entry) * 100
-      // Profit is calculated from quantity which increases with leverage
-      // Higher leverage = larger position = more profit (and more risk)
       const potentialProfit = quantity * tpDistance
       const rrRatio = tpDistance / Math.abs(entry - stop)
 
@@ -192,34 +172,25 @@ const PositionCalculator = () => {
       })
     }
 
-    // Primary Potential Profit and R:R
     const potentialProfit = takeProfitResults.length > 0 ? takeProfitResults[0].profit : 0
     const riskRewardRatio = takeProfitResults.length > 0 ? takeProfitResults[0].rrRatio : 0
-
-    // Win Rate Needed (to break even)
     const winRateNeeded = riskRewardRatio > 0 ? (1 / (1 + riskRewardRatio)) * 100 : 0
 
-    // Maintenance Margin Calculation
     const maintenanceMarginRate = getMaintenanceMargin(selectedExchange, lev)
     const maintenanceMargin = (notionalValue * maintenanceMarginRate) / 100
 
-    // Fee Calculations
     const entryFee = positionSize * (exchangeFees.taker / 100)
     const exitFee = positionSize * (exchangeFees.taker / 100)
     const totalFees = entryFee + exitFee
 
-    // Funding Cost (24 hours for futures)
     const fundingCost = accountType === 'futures'
       ? calculateFundingCost(selectedExchange, accountType, notionalValue, 24)
       : 0
 
-    // ROI on Margin (shows leverage benefit)
     const roiOnMargin = marginRequired > 0 && potentialProfit > 0
       ? (potentialProfit / marginRequired) * 100
       : 0
 
-    // Calculate actual risk with leverage
-    // When leverage is used, the actual amount at risk is: position size × stop distance
     const actualRiskWithLeverage = positionSize * stopLossDistance
 
     return {
@@ -244,12 +215,12 @@ const PositionCalculator = () => {
       roiOnMargin,
       actualRiskWithLeverage
     }
-  }
+  }, [accountBalance, riskPercentage, entryPrice, stopPrice, takeProfitPrice, tp2Price, tp3Price, leverage, useLeverage, positionType, selectedExchange, accountType, exchangeFees])
 
-  const results = calculatePosition()
+  const results = useMemo(() => calculatePosition(), [calculatePosition])
 
-  const validatePosition = (): string[] => {
-    const warnings: string[] = []
+  const validatePosition = useCallback((): { type: 'error' | 'warning' | 'success'; message: string }[] => {
+    const warnings: { type: 'error' | 'warning' | 'success'; message: string }[] = []
     const entry = parseFloat(entryPrice)
     const stop = parseFloat(stopPrice)
     const takeProfit = parseFloat(takeProfitPrice)
@@ -258,486 +229,576 @@ const PositionCalculator = () => {
 
     if (positionType === 'long') {
       if (stop >= entry) {
-        warnings.push('⚠️ For LONG positions, stop loss should be below entry price')
+        warnings.push({ type: 'error', message: 'Stop loss must be below entry for LONG' })
       }
       if (!isNaN(takeProfit) && takeProfit <= entry) {
-        warnings.push('⚠️ For LONG positions, take profit should be above entry price')
+        warnings.push({ type: 'error', message: 'Take profit must be above entry for LONG' })
       }
     } else {
       if (stop <= entry) {
-        warnings.push('⚠️ For SHORT positions, stop loss should be above entry price')
+        warnings.push({ type: 'error', message: 'Stop loss must be above entry for SHORT' })
       }
       if (!isNaN(takeProfit) && takeProfit >= entry) {
-        warnings.push('⚠️ For SHORT positions, take profit should be below entry price')
+        warnings.push({ type: 'error', message: 'Take profit must be below entry for SHORT' })
       }
     }
 
     if (risk > 2) {
-      warnings.push('⚠️ Risk per trade > 2% is considered aggressive')
+      warnings.push({ type: 'warning', message: `Risk ${risk}% is above recommended 2%` })
+    } else if (risk <= 1) {
+      warnings.push({ type: 'success', message: 'Conservative risk management' })
     }
 
-    if (results && results.riskRewardRatio < 2 && results.riskRewardRatio > 0) {
-      warnings.push('⚠️ Risk/Reward ratio below 2:1 - consider better entry/exit')
+    if (results && results.riskRewardRatio >= 2) {
+      warnings.push({ type: 'success', message: `Good R:R ratio (1:${results.riskRewardRatio.toFixed(1)})` })
+    } else if (results && results.riskRewardRatio < 1.5 && results.riskRewardRatio > 0) {
+      warnings.push({ type: 'warning', message: 'Consider better R:R ratio (< 1:1.5)' })
     }
 
-    if (results && results.riskRewardRatio < 1.5 && results.riskRewardRatio > 0) {
-      warnings.push('⚠️ LOW R:R: Risk/reward ratio below 1:1.5. Consider better TP target or tighter stop-loss')
-    }
-
-    if (results && results.positionSize > parseFloat(accountBalance) * 0.5) {
-      warnings.push(`⚠️ LARGE POSITION: This is ${((results.positionSize / parseFloat(accountBalance)) * 100).toFixed(1)}% of your account`)
-    }
-
-    // Leverage warnings
     if (useLeverage && lev > 1) {
-      // Check exchange leverage limit
       if (lev > maxLeverageAllowed) {
-        warnings.push(`🚨 INVALID: ${selectedExchange} ${accountType} max leverage is ${maxLeverageAllowed}x`)
+        warnings.push({ type: 'error', message: `Max leverage is ${maxLeverageAllowed}x` })
       }
-
-      // Warn about actual risk multiplier
-      if (results && results.actualRiskWithLeverage > results.riskAmount) {
-        const actualRiskPercent = (results.actualRiskWithLeverage / parseFloat(accountBalance)) * 100
-        warnings.push(`⚠️ LEVERAGE RISK: With ${lev}x leverage, your actual risk at stop loss is $${results.actualRiskWithLeverage.toFixed(2)} (${actualRiskPercent.toFixed(2)}% of account)`)
-      }
-
       if (lev >= 20) {
-        warnings.push('🚨 EXTREME RISK: Leverage ≥20x can lead to instant liquidation')
+        warnings.push({ type: 'error', message: 'Extreme leverage risk!' })
       } else if (lev >= 10) {
-        warnings.push('⚠️ HIGH RISK: Leverage ≥10x is extremely dangerous')
-      } else if (lev >= 5) {
-        warnings.push('⚠️ Leverage ≥5x increases liquidation risk significantly')
+        warnings.push({ type: 'warning', message: 'High leverage risk' })
       }
 
-      // Check if stop loss is beyond liquidation price
-      if (results && results.liquidationPrice > 0) {
-        if (positionType === 'long' && stop < results.liquidationPrice) {
-          warnings.push('🚨 CRITICAL: Stop loss is beyond liquidation price - you\'ll be liquidated first!')
-        } else if (positionType === 'short' && stop > results.liquidationPrice) {
-          warnings.push('🚨 CRITICAL: Stop loss is beyond liquidation price - you\'ll be liquidated first!')
-        }
-      }
-
-      // Distance to liquidation warnings
       if (results && results.distanceToLiquidation < 5 && results.distanceToLiquidation > 0) {
-        warnings.push('🚨 DANGER: Liquidation price is within 5% of entry - very risky!')
+        warnings.push({ type: 'error', message: 'Liquidation within 5%!' })
       }
     }
 
     return warnings
-  }
+  }, [entryPrice, stopPrice, takeProfitPrice, riskPercentage, leverage, useLeverage, positionType, maxLeverageAllowed, results])
 
-  const warnings = validatePosition()
+  const warnings = useMemo(() => validatePosition(), [validatePosition])
 
   const handleUseCurrentPrice = (price: number) => {
     setEntryPrice(price.toString())
   }
 
-  return (
-    <div className="position-calculator">
-      <TradingBackground variant="calculator" />
-      <h1>Position Calculator</h1>
-      <p>Calculate optimal position sizes based on your risk tolerance and trading strategy</p>
+  const getRiskLevel = () => {
+    const risk = parseFloat(riskPercentage)
+    if (risk <= 0.5) return { level: 'low', color: '#10b981', label: 'Low Risk' }
+    if (risk <= 1) return { level: 'moderate', color: '#f59e0b', label: 'Moderate' }
+    if (risk <= 2) return { level: 'high', color: '#f97316', label: 'High Risk' }
+    return { level: 'extreme', color: '#ef4444', label: 'Extreme' }
+  }
 
+  const riskLevel = getRiskLevel()
+
+  return (
+    <div className="calculator-page">
+      <TradingBackground variant="calculator" />
+
+      {/* Hero Section */}
+      <div className="calculator-hero">
+        <div className="hero-icon">
+          <Calculator size={40} />
+        </div>
+        <h1>Position Calculator</h1>
+        <p>Professional position sizing for smart risk management</p>
+      </div>
+
+      {/* Exchange Selector */}
       <FloatingExchangeSelector
         selectedExchange={selectedExchange}
         onSelectExchange={setSelectedExchange}
       />
 
-      <div className="calculator-grid">
-        <div className="input-section">
-          <h2>Trading Setup</h2>
-
-          {/* Account Type Selector */}
-          <div className="form-group">
-            <label>Account Type</label>
-            <select value={accountType} onChange={(e) => setAccountType(e.target.value as AccountType)}>
-              {EXCHANGES[selectedExchange].accountTypes.spot && <option value="spot">Spot Trading</option>}
-              {EXCHANGES[selectedExchange].accountTypes.futures && <option value="futures">Futures Trading</option>}
-              {EXCHANGES[selectedExchange].accountTypes.margin && <option value="margin">Margin Trading</option>}
-            </select>
+      <div className="calculator-container">
+        {/* Quick Stats Bar */}
+        <div className="quick-stats-bar">
+          <div className="stat-chip">
+            <Wallet size={16} />
+            <span>${parseFloat(accountBalance || '0').toLocaleString()}</span>
           </div>
-
-          {/* Basic Setup - Always Visible */}
-          <div className="form-group">
-            <label>Crypto Pair</label>
-            <select value={cryptoPair} onChange={(e) => setCryptoPair(e.target.value)}>
-              <option>BTC/USDT</option>
-              <option>ETH/USDT</option>
-              <option>BNB/USDT</option>
-              <option>SOL/USDT</option>
-              <option>XRP/USDT</option>
-              <option>ADA/USDT</option>
-              <option>DOGE/USDT</option>
-              <option>MATIC/USDT</option>
-              <option>DOT/USDT</option>
-              <option>AVAX/USDT</option>
-            </select>
+          <div className="stat-chip" style={{ borderColor: riskLevel.color }}>
+            <Shield size={16} style={{ color: riskLevel.color }} />
+            <span style={{ color: riskLevel.color }}>{riskLevel.label}</span>
           </div>
-
-          <LivePriceCard pair={cryptoPair} exchange={selectedExchange} onUsePrice={handleUseCurrentPrice} />
-
-          <div className="form-group">
-            <label>Position Type</label>
-            <div className="radio-group">
-              <label className={positionType === 'long' ? 'active' : ''}>
-                <input
-                  type="radio"
-                  checked={positionType === 'long'}
-                  onChange={() => setPositionType('long')}
-                />
-                Long (Buy)
-              </label>
-              <label className={positionType === 'short' ? 'active' : ''}>
-                <input
-                  type="radio"
-                  checked={positionType === 'short'}
-                  onChange={() => setPositionType('short')}
-                />
-                Short (Sell)
-              </label>
-            </div>
+          <div className="stat-chip">
+            <Activity size={16} />
+            <span>{cryptoPair}</span>
           </div>
-
-          {/* Risk Management Section - Collapsible, Default Open */}
-          <CollapsibleSection title="Risk Management" defaultOpen={true} badge="Essential">
-            <div className="form-group">
-              <label>Account Balance (USDT)</label>
-              <input
-                type="number"
-                value={accountBalance}
-                onChange={(e) => setAccountBalance(e.target.value)}
-                placeholder="10000"
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Risk Per Trade (%)</label>
-              <input
-                type="number"
-                value={riskPercentage}
-                onChange={(e) => setRiskPercentage(e.target.value)}
-                placeholder="1"
-                step="0.1"
-              />
-              <small>Recommended: 1-2% per trade</small>
-            </div>
-
-            <div className="form-group">
-              <label>Entry Price (USDT)</label>
-              <input
-                type="number"
-                value={entryPrice}
-                onChange={(e) => setEntryPrice(e.target.value)}
-                placeholder="3500"
-                step="0.01"
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Stop Loss Price (USDT)</label>
-              <input
-                type="number"
-                value={stopPrice}
-                onChange={(e) => setStopPrice(e.target.value)}
-                placeholder="3400"
-                step="0.01"
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Take Profit 1 (USDT)</label>
-              <input
-                type="number"
-                value={takeProfitPrice}
-                onChange={(e) => setTakeProfitPrice(e.target.value)}
-                placeholder="3800"
-                step="0.01"
-              />
-            </div>
-          </CollapsibleSection>
-
-          {/* Leverage Settings - Collapsible */}
-          <CollapsibleSection title="Leverage Settings" defaultOpen={useLeverage} badge={useLeverage ? `${leverage}x` : 'Optional'}>
-            <div className="form-group leverage-toggle">
-              <label className="checkbox-label">
-                <input
-                  type="checkbox"
-                  checked={useLeverage}
-                  onChange={(e) => setUseLeverage(e.target.checked)}
-                />
-                <span>Use Leverage Trading</span>
-              </label>
-              <small>⚠️ Leverage increases both profit potential and risk of liquidation</small>
-            </div>
-
-            {useLeverage && (
-              <>
-                <div className="form-group leverage-section">
-                  <label>
-                    Leverage Multiplier
-                    <span className="leverage-max-badge">{selectedExchange.charAt(0).toUpperCase() + selectedExchange.slice(1)} Max: {maxLeverageAllowed}x</span>
-                  </label>
-                  <select value={leverage} onChange={(e) => setLeverage(e.target.value)}>
-                    <option value="1">1x (No Leverage)</option>
-                    {[2, 3, 5, 10, 20, 25, 50, 75, 100, 125].map((lev) =>
-                      lev <= maxLeverageAllowed ? (
-                        <option key={lev} value={lev}>{lev}x</option>
-                      ) : null
-                    )}
-                  </select>
-                  <small className="leverage-warning">
-                    <span className="warning-icon">⚠️</span>
-                    <strong>Important:</strong> Higher leverage multiplies both potential profits and liquidation risk. Maximum allowed on {selectedExchange.charAt(0).toUpperCase() + selectedExchange.slice(1)}: <strong>{maxLeverageAllowed}x</strong>
-                  </small>
-                </div>
-              </>
-            )}
-          </CollapsibleSection>
-
-          {/* Advanced Options - Collapsible */}
-          <CollapsibleSection title="Advanced Options" defaultOpen={false} badge="Optional">
-            <div className="form-group">
-              <label>Take Profit 2 (USDT) - Optional</label>
-              <input
-                type="number"
-                value={tp2Price}
-                onChange={(e) => setTp2Price(e.target.value)}
-                placeholder="4000"
-                step="0.01"
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Take Profit 3 (USDT) - Optional</label>
-              <input
-                type="number"
-                value={tp3Price}
-                onChange={(e) => setTp3Price(e.target.value)}
-                placeholder="4200"
-                step="0.01"
-              />
-            </div>
-          </CollapsibleSection>
-        </div>
-
-        <div className="results-section">
-          <h2>Position Details</h2>
-
-          {results ? (
-            <>
-              <div className="result-card highlight">
-                <h3>Position Size</h3>
-                <div className="result-value">${results.positionSize.toFixed(2)}</div>
-                <div className="result-subtext">Total position value</div>
-              </div>
-
-              <div className="result-card">
-                <h3>Quantity to Trade</h3>
-                <div className="result-value">{results.quantity.toFixed(6)}</div>
-                <div className="result-subtext">{cryptoPair.split('/')[0]} to {positionType === 'long' ? 'buy' : 'sell'}</div>
-              </div>
-
-              <div className="result-card">
-                <h3>{useLeverage && parseFloat(leverage) > 1 ? 'Initial Margin' : 'Risk Amount'}</h3>
-                <div className="result-value">${results.riskAmount.toFixed(2)}</div>
-                <div className="result-subtext">{riskPercentage}% of account</div>
-              </div>
-
-              {useLeverage && parseFloat(leverage) > 1 && (
-                <div className="result-card danger">
-                  <h3>Actual Risk at Stop Loss</h3>
-                  <div className="result-value">${results.actualRiskWithLeverage.toFixed(2)}</div>
-                  <div className="result-subtext">
-                    {((results.actualRiskWithLeverage / parseFloat(accountBalance)) * 100).toFixed(2)}% of account ({leverage}x multiplier)
-                  </div>
-                </div>
-              )}
-
-              <div className="result-card">
-                <h3>Stop Loss Distance</h3>
-                <div className="result-value">{results.stopLossDistance.toFixed(2)}%</div>
-                <div className="result-subtext">${Math.abs(parseFloat(entryPrice) - parseFloat(stopPrice)).toFixed(2)} per unit</div>
-              </div>
-
-              {useLeverage && parseFloat(leverage) > 1 && (
-                <>
-                  <div className="liquidation-risk-overview">
-                    <h3>Liquidation Risk Overview</h3>
-                    <div className="risk-meter">
-                      <div className="risk-labels">
-                        <span>Entry: ${parseFloat(entryPrice).toFixed(2)}</span>
-                        <span className="liq-label">Liquidation: ${results.liquidationPrice.toFixed(2)}</span>
-                      </div>
-                      <div className="risk-bar-container">
-                        <div
-                          className={`risk-bar ${
-                            results.distanceToLiquidation < 5 ? 'critical' :
-                            results.distanceToLiquidation < 10 ? 'high' :
-                            results.distanceToLiquidation < 20 ? 'medium' : 'low'
-                          }`}
-                          style={{ width: `${Math.min(results.distanceToLiquidation * 5, 100)}%` }}
-                        >
-                          <span className="risk-percentage">{results.distanceToLiquidation.toFixed(1)}%</span>
-                        </div>
-                      </div>
-                      <div className="risk-status">
-                        {results.distanceToLiquidation < 5 ? '🚨 CRITICAL RISK - Position may liquidate quickly' :
-                         results.distanceToLiquidation < 10 ? '⚠️ HIGH RISK - Very close to liquidation' :
-                         results.distanceToLiquidation < 20 ? '⚠️ MEDIUM RISK - Monitor position closely' :
-                         '✓ Safer distance from liquidation'}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="result-card leverage-info">
-                    <h3>Leverage Position</h3>
-                    <div className="result-value">{leverage}x</div>
-                    <div className="result-subtext">Notional value: ${results.notionalValue.toFixed(2)}</div>
-                  </div>
-
-                  {results.roiOnMargin > 0 && (
-                    <div className="result-card success">
-                      <h3>ROI on Margin</h3>
-                      <div className="result-value">{results.roiOnMargin.toFixed(2)}%</div>
-                      <div className="result-subtext">
-                        ${results.potentialProfit.toFixed(2)} profit on ${results.marginRequired.toFixed(2)} margin
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="result-card">
-                    <h3>Margin Required</h3>
-                    <div className="result-value">${results.marginRequired.toFixed(2)}</div>
-                    <div className="result-subtext">Collateral needed</div>
-                  </div>
-
-                  <div className="result-card">
-                    <h3>Maintenance Margin</h3>
-                    <div className="result-value">${results.maintenanceMargin.toFixed(2)}</div>
-                    <div className="result-subtext">{results.maintenanceMarginRate.toFixed(2)}% of position</div>
-                  </div>
-
-                  <div className={`result-card danger ${results.distanceToLiquidation < 10 ? 'critical-risk' : ''}`}>
-                    <h3>Liquidation Price ({selectedExchange.toUpperCase()})</h3>
-                    <div className="result-value">${results.liquidationPrice.toFixed(2)}</div>
-                    <div className="result-subtext">
-                      {results.distanceToLiquidation.toFixed(2)}% from entry
-                      {results.distanceToLiquidation < 5 ? ' 🚨 CRITICAL!' : results.distanceToLiquidation < 10 ? ' ⚠️ VERY CLOSE!' : ''}
-                    </div>
-                    <div className="liquidation-details">
-                      <small>
-                        {positionType === 'long'
-                          ? `Price must stay above $${results.liquidationPrice.toFixed(2)}`
-                          : `Price must stay below $${results.liquidationPrice.toFixed(2)}`
-                        }
-                      </small>
-                    </div>
-                  </div>
-
-                  {accountType === 'futures' && results.fundingCost > 0 && (
-                    <div className="result-card">
-                      <h3>Funding Cost (24h)</h3>
-                      <div className="result-value">${results.fundingCost.toFixed(2)}</div>
-                      <div className="result-subtext">{exchangeFees.funding}% per funding</div>
-                    </div>
-                  )}
-                </>
-              )}
-
-              <div className="result-card">
-                <h3>Total Trading Fees</h3>
-                <div className="result-value">${results.totalFees.toFixed(2)}</div>
-                <div className="result-subtext">Entry + Exit ({exchangeFees.taker}% each)</div>
-              </div>
-
-              <div className="result-card">
-                <h3>Breakeven Price</h3>
-                <div className="result-value">${results.breakevenPrice.toFixed(2)}</div>
-                <div className="result-subtext">Including {exchangeFees.taker}% fees</div>
-              </div>
-
-              {results.takeProfitResults.length > 0 && (
-                <>
-                  <div className="result-card">
-                    <h3>Win Rate Needed</h3>
-                    <div className="result-value">{results.winRateNeeded.toFixed(1)}%</div>
-                    <div className="result-subtext">To break even with this R:R ratio</div>
-                  </div>
-
-                  <div className="tp-targets-section">
-                    <h3 className="tp-section-title">Take Profit Targets</h3>
-                    {results.takeProfitResults.map((tp, index) => (
-                      <div key={index} className="result-card success tp-target">
-                        <h3>{tp.name} - ${tp.price.toFixed(2)}</h3>
-                        <div className="result-value">${tp.profit.toFixed(2)}</div>
-                        <div className="result-subtext">
-                          +{tp.percentGain.toFixed(2)}% gain | R:R = 1:{tp.rrRatio.toFixed(2)}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </>
-              )}
-
-              {warnings.length > 0 && (
-                <div className="warnings">
-                  <h3>⚠️ Warnings</h3>
-                  {warnings.map((warning, index) => (
-                    <p key={index}>{warning}</p>
-                  ))}
-                </div>
-              )}
-
-              <div className="quick-stats">
-                <h3>Quick Stats</h3>
-                <ul>
-                  <li>
-                    <strong>Pair:</strong> {cryptoPair} - {positionType.toUpperCase()}
-                  </li>
-                  <li>
-                    <strong>Entry:</strong> ${parseFloat(entryPrice).toFixed(2)}
-                  </li>
-                  <li>
-                    <strong>Stop Loss:</strong> ${parseFloat(stopPrice).toFixed(2)}
-                  </li>
-                  <li>
-                    <strong>Breakeven:</strong> ${results.breakevenPrice.toFixed(2)}
-                  </li>
-                  {results.takeProfitResults.map((tp, index) => (
-                    <li key={index}>
-                      <strong>{tp.name}:</strong> ${tp.price.toFixed(2)} (+{tp.percentGain.toFixed(2)}%)
-                    </li>
-                  ))}
-                  {useLeverage && parseFloat(leverage) > 1 && (
-                    <li className="liquidation-stat">
-                      <strong>Liquidation:</strong> ${results.liquidationPrice.toFixed(2)}
-                    </li>
-                  )}
-                  <li>
-                    <strong>Quantity:</strong> {results.quantity.toFixed(6)} {cryptoPair.split('/')[0]}
-                  </li>
-                  <li>
-                    <strong>Max Loss:</strong> ${results.riskAmount.toFixed(2)} ({riskPercentage}%)
-                  </li>
-                  {useLeverage && parseFloat(leverage) > 1 && (
-                    <li>
-                      <strong>Leverage:</strong> {leverage}x
-                    </li>
-                  )}
-                  {results.takeProfitResults.length > 0 && (
-                    <li>
-                      <strong>Win Rate Needed:</strong> {results.winRateNeeded.toFixed(1)}%
-                    </li>
-                  )}
-                </ul>
-              </div>
-            </>
-          ) : (
-            <div className="no-results">
-              <p>Enter valid values to calculate position size</p>
+          {useLeverage && parseFloat(leverage) > 1 && (
+            <div className="stat-chip leverage-chip">
+              <Zap size={16} />
+              <span>{leverage}x</span>
             </div>
           )}
+        </div>
+
+        <div className="calculator-main">
+          {/* Input Panel */}
+          <div className="input-panel glass-card">
+            <div className="panel-header">
+              <h2>
+                <Scale size={20} />
+                Trade Setup
+              </h2>
+            </div>
+
+            {/* Account Type Toggle */}
+            <div className="account-type-toggle">
+              {EXCHANGES[selectedExchange].accountTypes.spot && (
+                <button
+                  className={`type-btn ${accountType === 'spot' ? 'active' : ''}`}
+                  onClick={() => setAccountType('spot')}
+                >
+                  Spot
+                </button>
+              )}
+              {EXCHANGES[selectedExchange].accountTypes.futures && (
+                <button
+                  className={`type-btn ${accountType === 'futures' ? 'active' : ''}`}
+                  onClick={() => setAccountType('futures')}
+                >
+                  Futures
+                </button>
+              )}
+              {EXCHANGES[selectedExchange].accountTypes.margin && (
+                <button
+                  className={`type-btn ${accountType === 'margin' ? 'active' : ''}`}
+                  onClick={() => setAccountType('margin')}
+                >
+                  Margin
+                </button>
+              )}
+            </div>
+
+            {/* Position Type */}
+            <div className="position-type-selector">
+              <button
+                className={`position-btn long ${positionType === 'long' ? 'active' : ''}`}
+                onClick={() => setPositionType('long')}
+              >
+                <TrendingUp size={20} />
+                <span>Long</span>
+              </button>
+              <button
+                className={`position-btn short ${positionType === 'short' ? 'active' : ''}`}
+                onClick={() => setPositionType('short')}
+              >
+                <TrendingDown size={20} />
+                <span>Short</span>
+              </button>
+            </div>
+
+            {/* Crypto Pair */}
+            <div className="input-group">
+              <label>
+                <BarChart3 size={16} />
+                Trading Pair
+              </label>
+              <select value={cryptoPair} onChange={(e) => setCryptoPair(e.target.value)}>
+                <option>BTC/USDT</option>
+                <option>ETH/USDT</option>
+                <option>BNB/USDT</option>
+                <option>SOL/USDT</option>
+                <option>XRP/USDT</option>
+                <option>ADA/USDT</option>
+                <option>DOGE/USDT</option>
+                <option>MATIC/USDT</option>
+                <option>DOT/USDT</option>
+                <option>AVAX/USDT</option>
+              </select>
+            </div>
+
+            {/* Live Price Card */}
+            <LivePriceCard pair={cryptoPair} exchange={selectedExchange} onUsePrice={handleUseCurrentPrice} />
+
+            {/* Account Balance */}
+            <div className="input-group">
+              <label>
+                <Wallet size={16} />
+                Account Balance
+              </label>
+              <div className="input-with-unit">
+                <span className="unit">$</span>
+                <input
+                  type="number"
+                  value={accountBalance}
+                  onChange={(e) => setAccountBalance(e.target.value)}
+                  placeholder="10000"
+                />
+              </div>
+            </div>
+
+            {/* Risk Percentage with Presets */}
+            <div className="input-group">
+              <label>
+                <Percent size={16} />
+                Risk Per Trade
+              </label>
+              <div className="risk-presets">
+                {RISK_PRESETS.map(preset => (
+                  <button
+                    key={preset.label}
+                    className={`preset-btn ${parseFloat(riskPercentage) === preset.risk ? 'active' : ''}`}
+                    style={{ '--preset-color': preset.color } as React.CSSProperties}
+                    onClick={() => setRiskPercentage(preset.risk.toString())}
+                  >
+                    {preset.label}
+                  </button>
+                ))}
+              </div>
+              <div className="input-with-unit">
+                <input
+                  type="number"
+                  value={riskPercentage}
+                  onChange={(e) => setRiskPercentage(e.target.value)}
+                  placeholder="1"
+                  step="0.1"
+                />
+                <span className="unit">%</span>
+              </div>
+              <div className="risk-indicator">
+                <div
+                  className="risk-fill"
+                  style={{
+                    width: `${Math.min(parseFloat(riskPercentage) * 20, 100)}%`,
+                    background: riskLevel.color
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Price Inputs */}
+            <div className="price-inputs-grid">
+              <div className="input-group">
+                <label>Entry Price</label>
+                <div className="input-with-unit">
+                  <span className="unit">$</span>
+                  <input
+                    type="number"
+                    value={entryPrice}
+                    onChange={(e) => setEntryPrice(e.target.value)}
+                    placeholder="3500"
+                    step="0.01"
+                  />
+                </div>
+              </div>
+
+              <div className="input-group">
+                <label>Stop Loss</label>
+                <div className="input-with-unit stop-loss">
+                  <span className="unit">$</span>
+                  <input
+                    type="number"
+                    value={stopPrice}
+                    onChange={(e) => setStopPrice(e.target.value)}
+                    placeholder="3400"
+                    step="0.01"
+                  />
+                </div>
+              </div>
+
+              <div className="input-group">
+                <label>Take Profit</label>
+                <div className="input-with-unit take-profit">
+                  <span className="unit">$</span>
+                  <input
+                    type="number"
+                    value={takeProfitPrice}
+                    onChange={(e) => setTakeProfitPrice(e.target.value)}
+                    placeholder="3800"
+                    step="0.01"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Leverage Section */}
+            <div className="section-toggle" onClick={() => setShowLeverage(!showLeverage)}>
+              <div className="toggle-header">
+                <Zap size={18} />
+                <span>Leverage Settings</span>
+                {useLeverage && <span className="active-badge">{leverage}x Active</span>}
+              </div>
+              {showLeverage ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+            </div>
+
+            {showLeverage && (
+              <div className="leverage-section animated-section">
+                <label className="toggle-switch">
+                  <input
+                    type="checkbox"
+                    checked={useLeverage}
+                    onChange={(e) => setUseLeverage(e.target.checked)}
+                  />
+                  <span className="slider"></span>
+                  <span className="toggle-label">Enable Leverage</span>
+                </label>
+
+                {useLeverage && (
+                  <>
+                    <div className="leverage-presets">
+                      {LEVERAGE_PRESETS.filter(l => l <= maxLeverageAllowed).map(lev => (
+                        <button
+                          key={lev}
+                          className={`leverage-preset ${parseFloat(leverage) === lev ? 'active' : ''}`}
+                          onClick={() => setLeverage(lev.toString())}
+                        >
+                          {lev}x
+                        </button>
+                      ))}
+                    </div>
+                    <div className="leverage-slider-container">
+                      <input
+                        type="range"
+                        min="1"
+                        max={maxLeverageAllowed}
+                        value={leverage}
+                        onChange={(e) => setLeverage(e.target.value)}
+                        className="leverage-slider"
+                      />
+                      <div className="leverage-display">{leverage}x</div>
+                    </div>
+                    <div className="leverage-warning">
+                      <AlertTriangle size={16} />
+                      <span>Leverage multiplies both profits and losses</span>
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+
+            {/* Advanced Section */}
+            <div className="section-toggle" onClick={() => setShowAdvanced(!showAdvanced)}>
+              <div className="toggle-header">
+                <Target size={18} />
+                <span>Multiple Take Profits</span>
+              </div>
+              {showAdvanced ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+            </div>
+
+            {showAdvanced && (
+              <div className="advanced-section animated-section">
+                <div className="tp-grid">
+                  <div className="input-group">
+                    <label>Take Profit 2</label>
+                    <div className="input-with-unit take-profit">
+                      <span className="unit">$</span>
+                      <input
+                        type="number"
+                        value={tp2Price}
+                        onChange={(e) => setTp2Price(e.target.value)}
+                        placeholder="Optional"
+                        step="0.01"
+                      />
+                    </div>
+                  </div>
+                  <div className="input-group">
+                    <label>Take Profit 3</label>
+                    <div className="input-with-unit take-profit">
+                      <span className="unit">$</span>
+                      <input
+                        type="number"
+                        value={tp3Price}
+                        onChange={(e) => setTp3Price(e.target.value)}
+                        placeholder="Optional"
+                        step="0.01"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Results Panel */}
+          <div className="results-panel">
+            {results ? (
+              <>
+                {/* Main Result Card */}
+                <div className="result-hero glass-card">
+                  <div className="result-hero-header">
+                    <span>Position Size</span>
+                    <span className="exchange-badge">{selectedExchange}</span>
+                  </div>
+                  <div className="result-hero-value">
+                    <DollarSign size={32} />
+                    <span>{results.positionSize.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  </div>
+                  <div className="result-hero-sub">
+                    {results.quantity.toFixed(6)} {cryptoPair.split('/')[0]}
+                  </div>
+                </div>
+
+                {/* Key Metrics Grid */}
+                <div className="metrics-grid">
+                  <div className="metric-card glass-card">
+                    <div className="metric-icon risk">
+                      <Shield size={20} />
+                    </div>
+                    <div className="metric-content">
+                      <span className="metric-label">Risk Amount</span>
+                      <span className="metric-value">${results.riskAmount.toFixed(2)}</span>
+                      <span className="metric-sub">{riskPercentage}% of account</span>
+                    </div>
+                  </div>
+
+                  <div className="metric-card glass-card">
+                    <div className="metric-icon profit">
+                      <TrendingUp size={20} />
+                    </div>
+                    <div className="metric-content">
+                      <span className="metric-label">Potential Profit</span>
+                      <span className="metric-value profit-text">${results.potentialProfit.toFixed(2)}</span>
+                      <span className="metric-sub">R:R 1:{results.riskRewardRatio.toFixed(2)}</span>
+                    </div>
+                  </div>
+
+                  <div className="metric-card glass-card">
+                    <div className="metric-icon neutral">
+                      <Scale size={20} />
+                    </div>
+                    <div className="metric-content">
+                      <span className="metric-label">Stop Distance</span>
+                      <span className="metric-value">{results.stopLossDistance.toFixed(2)}%</span>
+                      <span className="metric-sub">${Math.abs(parseFloat(entryPrice) - parseFloat(stopPrice)).toFixed(2)}</span>
+                    </div>
+                  </div>
+
+                  <div className="metric-card glass-card">
+                    <div className="metric-icon info">
+                      <Target size={20} />
+                    </div>
+                    <div className="metric-content">
+                      <span className="metric-label">Breakeven</span>
+                      <span className="metric-value">${results.breakevenPrice.toFixed(2)}</span>
+                      <span className="metric-sub">Inc. {exchangeFees.taker}% fees</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Leverage Info */}
+                {useLeverage && parseFloat(leverage) > 1 && (
+                  <div className="leverage-results glass-card">
+                    <h3>
+                      <Zap size={20} />
+                      Leverage Analysis ({leverage}x)
+                    </h3>
+
+                    <div className="liquidation-visual">
+                      <div className="price-ladder">
+                        <div className="price-point entry">
+                          <span className="price-label">Entry</span>
+                          <span className="price-value">${parseFloat(entryPrice).toFixed(2)}</span>
+                        </div>
+                        <div className="price-line">
+                          <div
+                            className="distance-indicator"
+                            style={{ height: `${Math.min(results.distanceToLiquidation * 5, 100)}%` }}
+                          />
+                        </div>
+                        <div className={`price-point liquidation ${results.distanceToLiquidation < 10 ? 'danger' : ''}`}>
+                          <span className="price-label">Liquidation</span>
+                          <span className="price-value">${results.liquidationPrice.toFixed(2)}</span>
+                        </div>
+                      </div>
+                      <div className="distance-info">
+                        <span className={`distance-badge ${
+                          results.distanceToLiquidation < 5 ? 'critical' :
+                          results.distanceToLiquidation < 10 ? 'danger' :
+                          results.distanceToLiquidation < 20 ? 'warning' : 'safe'
+                        }`}>
+                          {results.distanceToLiquidation.toFixed(1)}% to liquidation
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="leverage-metrics">
+                      <div className="leverage-metric">
+                        <span>Margin Required</span>
+                        <strong>${results.marginRequired.toFixed(2)}</strong>
+                      </div>
+                      <div className="leverage-metric">
+                        <span>Actual Risk</span>
+                        <strong className="danger-text">${results.actualRiskWithLeverage.toFixed(2)}</strong>
+                      </div>
+                      <div className="leverage-metric">
+                        <span>ROI on Margin</span>
+                        <strong className="profit-text">{results.roiOnMargin.toFixed(1)}%</strong>
+                      </div>
+                      {results.fundingCost > 0 && (
+                        <div className="leverage-metric">
+                          <span>Funding (24h)</span>
+                          <strong>${results.fundingCost.toFixed(2)}</strong>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Take Profit Targets */}
+                {results.takeProfitResults.length > 0 && (
+                  <div className="tp-results glass-card">
+                    <h3>
+                      <Target size={20} />
+                      Take Profit Targets
+                    </h3>
+                    <div className="tp-list">
+                      {results.takeProfitResults.map((tp, index) => (
+                        <div key={index} className="tp-item">
+                          <div className="tp-header">
+                            <span className="tp-name">{tp.name}</span>
+                            <span className="tp-price">${tp.price.toFixed(2)}</span>
+                          </div>
+                          <div className="tp-details">
+                            <span className="tp-profit">+${tp.profit.toFixed(2)}</span>
+                            <span className="tp-percent">+{tp.percentGain.toFixed(2)}%</span>
+                            <span className="tp-rr">R:R 1:{tp.rrRatio.toFixed(2)}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="win-rate-needed">
+                      <Info size={16} />
+                      <span>Win rate needed: <strong>{results.winRateNeeded.toFixed(1)}%</strong></span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Warnings & Validations */}
+                {warnings.length > 0 && (
+                  <div className="validations glass-card">
+                    <h3>Trade Analysis</h3>
+                    <div className="validation-list">
+                      {warnings.map((w, index) => (
+                        <div key={index} className={`validation-item ${w.type}`}>
+                          {w.type === 'success' && <CheckCircle2 size={18} />}
+                          {w.type === 'warning' && <AlertTriangle size={18} />}
+                          {w.type === 'error' && <XCircle size={18} />}
+                          <span>{w.message}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Fee Summary */}
+                <div className="fee-summary glass-card">
+                  <div className="fee-item">
+                    <span>Total Fees</span>
+                    <span>${results.totalFees.toFixed(2)}</span>
+                  </div>
+                  <div className="fee-item">
+                    <span>Fee Rate</span>
+                    <span>{exchangeFees.taker}% × 2</span>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="no-results glass-card">
+                <Calculator size={48} />
+                <p>Enter trade parameters to calculate position size</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
