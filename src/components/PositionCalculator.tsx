@@ -88,32 +88,41 @@ const PositionCalculator = () => {
       return null
     }
 
+    // Position Sizing Calculation (Professional Risk Management)
+    // Stop Loss Distance = |Entry - Stop| / Entry (as decimal)
+    // Risk Amount = Account Balance × Risk Percentage
+    // Base Position Size = Risk Amount / Stop Loss Distance (position size without leverage)
+    // Position Size = Base Position Size × Leverage (notional value of the position)
+    // Margin Required = Base Position Size (initial margin needed)
+    // Quantity = Position Size / Entry Price (amount of asset to buy/sell)
     const stopLossDistance = Math.abs(entry - stop) / entry
     const riskAmount = balance * (risk / 100)
     const basePositionSize = riskAmount / stopLossDistance
     const positionSize = basePositionSize * lev
-    const marginRequired = basePositionSize
-    const notionalValue = positionSize
-    const positionValue = positionSize / entry
-    const quantity = positionValue
+    const marginRequired = basePositionSize // Initial Margin = Position Value / Leverage
+    const notionalValue = positionSize // Total position value
+    const quantity = positionSize / entry // Quantity of the asset
+    const positionValue = quantity // Legacy: same as quantity for compatibility
 
+    // Liquidation Price Calculation (Bybit Isolated Margin Formula)
+    // For Long: Liq Price = Entry × (1 - Initial Margin Rate + Maintenance Margin Rate)
+    // For Short: Liq Price = Entry × (1 + Initial Margin Rate - Maintenance Margin Rate)
+    // Where: Initial Margin Rate = 1 / Leverage
     let liquidationPrice = 0
     if (useLeverage && lev > 1) {
-      const maintenanceMarginRate = getMaintenanceMargin(selectedExchange, lev)
-      const positionValueInUsdt = entry * quantity
-      const minimumMargin = positionValueInUsdt / lev
-      const maintenanceMargin = (positionValueInUsdt * maintenanceMarginRate) / 100
-      const remainingBalance = balance - marginRequired
-      const marginBuffer = Math.max(0, remainingBalance * 0.3)
-      const totalMargin = minimumMargin + marginBuffer
-      const closeFee = positionValueInUsdt * (exchangeFees.taker / 100)
-      const availableMargin = totalMargin - maintenanceMargin - closeFee
+      const maintenanceMarginRate = getMaintenanceMargin(selectedExchange, lev) / 100 // Convert from percentage
+      const initialMarginRate = 1 / lev
 
       if (positionType === 'long') {
-        liquidationPrice = entry - (availableMargin / quantity)
+        // Bybit Long Liquidation Formula
+        liquidationPrice = entry * (1 - initialMarginRate + maintenanceMarginRate)
       } else {
-        liquidationPrice = entry + (availableMargin / quantity)
+        // Bybit Short Liquidation Formula
+        liquidationPrice = entry * (1 + initialMarginRate - maintenanceMarginRate)
       }
+
+      // Ensure liquidation price is valid (positive and within reasonable bounds)
+      liquidationPrice = Math.max(0, liquidationPrice)
     }
 
     const distanceToLiquidation = liquidationPrice > 0
@@ -125,6 +134,11 @@ const PositionCalculator = () => {
       ? entry + breakevenDistance
       : entry - breakevenDistance
 
+    // Take Profit & P&L Calculations (Bybit Formula)
+    // P&L (Long) = Quantity × (Exit Price - Entry Price)
+    // P&L (Short) = Quantity × (Entry Price - Exit Price)
+    // Percent Gain = (Price Distance / Entry Price) × 100
+    // Risk:Reward = Take Profit Distance / Stop Loss Distance
     const takeProfitResults: TakeProfitResult[] = []
 
     if (!isNaN(takeProfit)) {
@@ -176,21 +190,33 @@ const PositionCalculator = () => {
     const riskRewardRatio = takeProfitResults.length > 0 ? takeProfitResults[0].rrRatio : 0
     const winRateNeeded = riskRewardRatio > 0 ? (1 / (1 + riskRewardRatio)) * 100 : 0
 
+    // Maintenance Margin Calculation (Bybit Formula)
+    // Maintenance Margin = Position Value × Maintenance Margin Rate
     const maintenanceMarginRate = getMaintenanceMargin(selectedExchange, lev)
     const maintenanceMargin = (notionalValue * maintenanceMarginRate) / 100
 
+    // Trading Fees Calculation
+    // Entry Fee = Position Size × Taker Fee Rate
+    // Exit Fee = Position Size × Taker Fee Rate
+    // Total Fees = Entry Fee + Exit Fee
     const entryFee = positionSize * (exchangeFees.taker / 100)
     const exitFee = positionSize * (exchangeFees.taker / 100)
     const totalFees = entryFee + exitFee
 
+    // Funding Cost Calculation (for perpetual futures)
+    // Funding Cost = Position Size × Funding Rate × Number of Funding Periods
     const fundingCost = accountType === 'futures'
       ? calculateFundingCost(selectedExchange, accountType, notionalValue, 24)
       : 0
 
+    // ROI on Margin (Bybit Formula)
+    // ROI = (P&L / Initial Margin) × 100%
     const roiOnMargin = marginRequired > 0 && potentialProfit > 0
       ? (potentialProfit / marginRequired) * 100
       : 0
 
+    // Actual Risk with Leverage
+    // This represents the maximum loss if stop loss is hit
     const actualRiskWithLeverage = positionSize * stopLossDistance
 
     return {
