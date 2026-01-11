@@ -8,14 +8,15 @@ import {
   ArrowRight,
   BarChart3,
   Shield,
-  Zap,
   LineChart,
   Activity,
   Layers,
   PieChart,
   ArrowUpRight,
   ArrowDownRight,
-  Sparkles
+  Sparkles,
+  Play,
+  Rocket
 } from 'lucide-react'
 import TradingBackground from './TradingBackground'
 import LiveTradingChart from './LiveTradingChart'
@@ -58,6 +59,14 @@ const LandingPage = () => {
       gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
     },
     {
+      icon: <Play size={24} />,
+      title: 'Paper Trading',
+      description: 'Practice with live Bybit charts, place demo trades, and test strategies risk-free before going live.',
+      link: '/paper-trading',
+      tag: 'Practice Mode',
+      gradient: 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
+    },
+    {
       icon: <TrendingUp size={24} />,
       title: 'Market Structure',
       description: 'Identify trends, support/resistance levels, and break of structure signals.',
@@ -84,9 +93,9 @@ const LandingPage = () => {
   ]
 
   const metrics = [
-    { label: 'Trading Tools', value: '4', icon: <Layers size={20} /> },
+    { label: 'Trading Tools', value: '5', icon: <Layers size={20} /> },
     { label: 'Pattern Types', value: '23+', icon: <Activity size={20} /> },
-    { label: 'Uptime', value: '99.9%', icon: <Zap size={20} /> },
+    { label: 'Paper Trading', value: 'Live', icon: <Play size={20} /> },
     { label: 'Free Forever', value: '$0', icon: <Sparkles size={20} /> }
   ]
 
@@ -95,6 +104,11 @@ const LandingPage = () => {
       icon: <Shield size={28} />,
       title: 'Risk-First Approach',
       description: 'Never risk more than you can afford. Our tools help you calculate precise position sizes based on your risk tolerance.'
+    },
+    {
+      icon: <Rocket size={28} />,
+      title: 'Practice Risk-Free',
+      description: 'Test strategies with paper trading on live Bybit data. Perfect your approach before risking real capital.'
     },
     {
       icon: <LineChart size={28} />,
@@ -242,18 +256,18 @@ const LandingPage = () => {
       <section id="tools" className="tools-section">
         <div className="section-container">
           <div className="section-header">
-            <span className="section-tag">Trading Arsenal</span>
-            <h2 className="section-title">Four Essential Tools</h2>
+            <span className="section-tag">Complete Trading Arsenal</span>
+            <h2 className="section-title">Five Professional Tools</h2>
             <p className="section-subtitle">
               Everything you need to trade with discipline and precision,
-              from position sizing to performance tracking.
+              from position sizing to practice trading and performance tracking.
             </p>
           </div>
 
-          <div className="tools-bento">
-            {/* Main Featured Tool */}
+          <div className="tools-bento tools-bento-5">
+            {/* Position Calculator - Featured Left */}
             <div
-              className={`tool-card tool-featured ${activeTool === 0 ? 'active' : ''}`}
+              className={`tool-card tool-featured-left ${activeTool === 0 ? 'active' : ''}`}
               onMouseEnter={() => setActiveTool(0)}
             >
               <div className="tool-card-bg" style={{ background: tools[0].gradient }}></div>
@@ -284,12 +298,49 @@ const LandingPage = () => {
               </div>
             </div>
 
-            {/* Secondary Tools */}
-            {tools.slice(1).map((tool, index) => (
+            {/* Paper Trading - Featured Right */}
+            <div
+              className={`tool-card tool-featured-right ${activeTool === 1 ? 'active' : ''}`}
+              onMouseEnter={() => setActiveTool(1)}
+            >
+              <div className="tool-card-bg" style={{ background: tools[1].gradient }}></div>
+              <div className="tool-card-content">
+                <div className="tool-tag">{tools[1].tag}</div>
+                <div className="tool-icon">{tools[1].icon}</div>
+                <h3 className="tool-title">{tools[1].title}</h3>
+                <p className="tool-description">{tools[1].description}</p>
+                <Link to={tools[1].link} className="tool-link">
+                  Start Practicing <ArrowRight size={16} />
+                </Link>
+              </div>
+              <div className="tool-preview paper-preview">
+                <div className="preview-trade">
+                  <div className="trade-header">
+                    <span className="trade-pair">BTC/USDT</span>
+                    <span className="trade-badge long">LONG</span>
+                  </div>
+                  <div className="trade-row">
+                    <span>Entry</span>
+                    <span>$67,450</span>
+                  </div>
+                  <div className="trade-row">
+                    <span>PnL</span>
+                    <span className="profit">+$342.50</span>
+                  </div>
+                  <div className="trade-status">
+                    <span className="status-dot"></span>
+                    Live Practice
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Three Bottom Tools */}
+            {tools.slice(2).map((tool, index) => (
               <div
                 key={index}
-                className={`tool-card ${activeTool === index + 1 ? 'active' : ''}`}
-                onMouseEnter={() => setActiveTool(index + 1)}
+                className={`tool-card tool-bottom ${activeTool === index + 2 ? 'active' : ''}`}
+                onMouseEnter={() => setActiveTool(index + 2)}
               >
                 <div className="tool-card-bg" style={{ background: tool.gradient }}></div>
                 <div className="tool-card-content">
@@ -350,13 +401,17 @@ const LandingPage = () => {
           </div>
 
           <div className="chart-cta">
-            <Link to="/calculator" className="chart-btn-primary">
-              <Zap size={20} />
-              <span>Start Your Analysis</span>
+            <Link to="/paper-trading" className="chart-btn-primary">
+              <Play size={20} />
+              <span>Practice Trading</span>
+            </Link>
+            <Link to="/calculator" className="chart-btn-secondary">
+              <Calculator size={20} />
+              <span>Calculate Position</span>
             </Link>
             <Link to="/journal" className="chart-btn-secondary">
               <BookOpen size={20} />
-              <span>Track Your Trades</span>
+              <span>Track Trades</span>
             </Link>
           </div>
         </div>
