@@ -5,12 +5,15 @@ import { useAuth } from '../context/AuthContext'
 import { apiKeyService } from '../services/apiKeyService'
 import { bybitService } from '../services/bybitService'
 import type { BybitTicker, BybitPosition, BybitOrder, BybitBalance } from '../services/bybitService'
+import { createChart, ColorType, CrosshairMode, CandlestickSeries, HistogramSeries } from 'lightweight-charts'
+import type { IChartApi, ISeriesApi, Time, CandlestickData } from 'lightweight-charts'
 import {
   Play, Settings, TrendingUp, TrendingDown, Wallet, Key, Eye, EyeOff,
   RefreshCw, AlertCircle, CheckCircle, X, ChevronDown, ChevronUp,
   Target, Shield, Zap, Clock, BarChart3, DollarSign,
   ArrowUpRight, ArrowDownRight, Layers, Activity, Lock, Unlock,
-  LineChart, CandlestickChart, Info, ExternalLink
+  LineChart, Info, ExternalLink, Minus, TrendingUp as TrendLine,
+  Circle, Square, MousePointer, Crosshair, Trash, ZoomIn, ZoomOut
 } from 'lucide-react'
 
 interface PaperTrade {
@@ -28,19 +31,28 @@ interface PaperTrade {
   pnl?: number
 }
 
+interface DrawingTool {
+  id: string
+  type: 'line' | 'horizontalLine' | 'rectangle' | 'circle'
+  color: string
+  points: { price: number; time: number }[]
+}
+
 const POPULAR_PAIRS = [
   'BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'SOLUSDT', 'XRPUSDT',
   'ADAUSDT', 'DOGEUSDT', 'MATICUSDT', 'DOTUSDT', 'AVAXUSDT'
 ]
 
 const TIMEFRAMES = [
-  { value: '1', label: '1m' },
-  { value: '5', label: '5m' },
-  { value: '15', label: '15m' },
-  { value: '60', label: '1H' },
-  { value: '240', label: '4H' },
-  { value: 'D', label: '1D' }
+  { value: '1', label: '1m', seconds: 60 },
+  { value: '5', label: '5m', seconds: 300 },
+  { value: '15', label: '15m', seconds: 900 },
+  { value: '60', label: '1H', seconds: 3600 },
+  { value: '240', label: '4H', seconds: 14400 },
+  { value: 'D', label: '1D', seconds: 86400 }
 ]
+
+const DRAWING_COLORS = ['#f59e0b', '#10b981', '#ef4444', '#8b5cf6', '#3b82f6', '#ec4899']
 
 const PaperTrading = () => {
   const { user } = useAuth()
@@ -80,13 +92,26 @@ const PaperTrading = () => {
   const [paperTrades, setPaperTrades] = useState<PaperTrade[]>([])
   const [usePaperMode, setUsePaperMode] = useState(true)
 
+  // Chart State
+  const chartContainerRef = useRef<HTMLDivElement>(null)
+  const chartRef = useRef<IChartApi | null>(null)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const candleSeriesRef = useRef<ISeriesApi<any> | null>(null)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const volumeSeriesRef = useRef<ISeriesApi<any> | null>(null)
+  const [isChartLoading, setIsChartLoading] = useState(true)
+  const [chartError, setChartError] = useState('')
+
+  // Drawing Tools State
+  const [selectedDrawingTool, setSelectedDrawingTool] = useState<string | null>(null)
+  const [selectedColor, setSelectedColor] = useState('#f59e0b')
+  const [drawings, setDrawings] = useState<DrawingTool[]>([])
+  const [showDrawingTools, setShowDrawingTools] = useState(false)
+
   // UI State
   const [activeTab, setActiveTab] = useState<'positions' | 'orders' | 'history'>('positions')
   const [isLoading, setIsLoading] = useState(false)
   const [showOrderPanel, setShowOrderPanel] = useState(true)
-
-  // Chart container ref
-  const chartContainerRef = useRef<HTMLDivElement>(null)
 
   // Check for existing credentials on mount
   useEffect(() => {
@@ -95,6 +120,154 @@ const PaperTrading = () => {
       testConnection()
     }
   }, [userId])
+
+  // Initialize chart
+  useEffect(() => {
+    if (!chartContainerRef.current) return
+
+    // Create chart
+    const chart = createChart(chartContainerRef.current, {
+      layout: {
+        background: { type: ColorType.Solid, color: 'transparent' },
+        textColor: '#94a3b8'
+      },
+      grid: {
+        vertLines: { color: 'rgba(255, 255, 255, 0.05)' },
+        horzLines: { color: 'rgba(255, 255, 255, 0.05)' }
+      },
+      crosshair: {
+        mode: CrosshairMode.Normal,
+        vertLine: {
+          color: 'rgba(139, 92, 246, 0.5)',
+          width: 1,
+          style: 2,
+          labelBackgroundColor: '#8b5cf6'
+        },
+        horzLine: {
+          color: 'rgba(139, 92, 246, 0.5)',
+          width: 1,
+          style: 2,
+          labelBackgroundColor: '#8b5cf6'
+        }
+      },
+      rightPriceScale: {
+        borderColor: 'rgba(255, 255, 255, 0.1)',
+        scaleMargins: { top: 0.1, bottom: 0.2 }
+      },
+      timeScale: {
+        borderColor: 'rgba(255, 255, 255, 0.1)',
+        timeVisible: true,
+        secondsVisible: false
+      },
+      handleScroll: { vertTouchDrag: true },
+      handleScale: { axisPressedMouseMove: true }
+    })
+
+    // Create candlestick series (lightweight-charts v5 API)
+    const candleSeries = chart.addSeries(CandlestickSeries, {
+      upColor: '#10b981',
+      downColor: '#ef4444',
+      borderUpColor: '#10b981',
+      borderDownColor: '#ef4444',
+      wickUpColor: '#10b981',
+      wickDownColor: '#ef4444'
+    })
+
+    // Create volume series (lightweight-charts v5 API)
+    const volumeSeries = chart.addSeries(HistogramSeries, {
+      color: '#8b5cf6',
+      priceFormat: { type: 'volume' },
+      priceScaleId: 'volume'
+    })
+
+    chartRef.current = chart
+    candleSeriesRef.current = candleSeries
+    volumeSeriesRef.current = volumeSeries
+
+    // Handle resize
+    const handleResize = () => {
+      if (chartContainerRef.current && chartRef.current) {
+        chartRef.current.applyOptions({
+          width: chartContainerRef.current.clientWidth,
+          height: chartContainerRef.current.clientHeight
+        })
+      }
+    }
+
+    window.addEventListener('resize', handleResize)
+    handleResize()
+
+    return () => {
+      window.removeEventListener('resize', handleResize)
+      chart.remove()
+    }
+  }, [])
+
+  // Fetch kline data and update chart
+  const fetchKlineData = useCallback(async () => {
+    setIsChartLoading(true)
+    setChartError('')
+
+    try {
+      const klines = await bybitService.getKlines(selectedPair, selectedTimeframe, 500)
+
+      if (candleSeriesRef.current && volumeSeriesRef.current && klines.length > 0) {
+        const candleData: CandlestickData[] = klines.map(k => ({
+          time: (k.openTime / 1000) as Time,
+          open: parseFloat(k.open),
+          high: parseFloat(k.high),
+          low: parseFloat(k.low),
+          close: parseFloat(k.close)
+        }))
+
+        const volumeData = klines.map(k => ({
+          time: (k.openTime / 1000) as Time,
+          value: parseFloat(k.volume),
+          color: parseFloat(k.close) >= parseFloat(k.open)
+            ? 'rgba(16, 185, 129, 0.5)'
+            : 'rgba(239, 68, 68, 0.5)'
+        }))
+
+        candleSeriesRef.current.setData(candleData)
+        volumeSeriesRef.current.setData(volumeData)
+
+        // Fit content
+        if (chartRef.current) {
+          chartRef.current.timeScale().fitContent()
+        }
+      }
+    } catch (error) {
+      setChartError(error instanceof Error ? error.message : 'Failed to load chart data')
+    } finally {
+      setIsChartLoading(false)
+    }
+  }, [selectedPair, selectedTimeframe])
+
+  // Initial fetch and periodic updates
+  useEffect(() => {
+    fetchKlineData()
+
+    // Update chart every 5 seconds
+    const interval = setInterval(async () => {
+      try {
+        const klines = await bybitService.getKlines(selectedPair, selectedTimeframe, 2)
+        if (klines.length > 0 && candleSeriesRef.current) {
+          const lastKline = klines[klines.length - 1]
+          candleSeriesRef.current.update({
+            time: (lastKline.openTime / 1000) as Time,
+            open: parseFloat(lastKline.open),
+            high: parseFloat(lastKline.high),
+            low: parseFloat(lastKline.low),
+            close: parseFloat(lastKline.close)
+          })
+        }
+      } catch {
+        // Silent fail for updates
+      }
+    }, 5000)
+
+    return () => clearInterval(interval)
+  }, [selectedPair, selectedTimeframe, fetchKlineData])
 
   // Fetch ticker data periodically
   useEffect(() => {
@@ -108,55 +281,9 @@ const PaperTrading = () => {
     }
 
     fetchTicker()
-    const interval = setInterval(fetchTicker, 5000)
+    const interval = setInterval(fetchTicker, 2000)
     return () => clearInterval(interval)
   }, [selectedPair])
-
-  // Load TradingView widget
-  useEffect(() => {
-    if (chartContainerRef.current) {
-      // Clear previous widget
-      chartContainerRef.current.innerHTML = ''
-
-      // Create TradingView widget
-      const script = document.createElement('script')
-      script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js'
-      script.type = 'text/javascript'
-      script.async = true
-      script.innerHTML = JSON.stringify({
-        autosize: true,
-        symbol: `BYBIT:${selectedPair}.P`,
-        interval: selectedTimeframe,
-        timezone: 'Etc/UTC',
-        theme: 'dark',
-        style: '1',
-        locale: 'en',
-        enable_publishing: false,
-        backgroundColor: 'rgba(10, 10, 15, 0.95)',
-        gridColor: 'rgba(255, 255, 255, 0.05)',
-        hide_top_toolbar: false,
-        hide_legend: false,
-        save_image: false,
-        calendar: false,
-        hide_volume: false,
-        support_host: 'https://www.tradingview.com'
-      })
-
-      const container = document.createElement('div')
-      container.className = 'tradingview-widget-container'
-      container.style.height = '100%'
-      container.style.width = '100%'
-
-      const widgetContainer = document.createElement('div')
-      widgetContainer.className = 'tradingview-widget-container__widget'
-      widgetContainer.style.height = 'calc(100% - 32px)'
-      widgetContainer.style.width = '100%'
-
-      container.appendChild(widgetContainer)
-      container.appendChild(script)
-      chartContainerRef.current.appendChild(container)
-    }
-  }, [selectedPair, selectedTimeframe])
 
   const testConnection = async () => {
     setIsConnecting(true)
@@ -272,7 +399,7 @@ const PaperTrading = () => {
       try {
         await bybitService.setLeverage(userId, selectedPair, orderLeverage)
 
-        await bybitService.placeOrder(userId, {
+        const result = await bybitService.placeOrder(userId, {
           symbol: selectedPair,
           side: orderSide,
           orderType,
@@ -282,7 +409,7 @@ const PaperTrading = () => {
           stopLoss: orderStopLoss || undefined
         })
 
-        setOrderSuccess(`${orderSide} order placed successfully!`)
+        setOrderSuccess(`Order placed! ID: ${result.orderId.slice(0, 8)}...`)
         await fetchAccountData()
         setOrderQty('')
         setOrderPrice('')
@@ -316,6 +443,16 @@ const PaperTrading = () => {
     }))
   }
 
+  const closeRealPosition = async (position: BybitPosition) => {
+    try {
+      await bybitService.closePosition(userId, position.symbol, position.side, position.size)
+      setOrderSuccess('Position closed successfully!')
+      await fetchAccountData()
+    } catch (error) {
+      setOrderError(error instanceof Error ? error.message : 'Failed to close position')
+    }
+  }
+
   const calculatePnL = useCallback((trade: PaperTrade): number => {
     if (!ticker) return 0
     const currentPrice = parseFloat(ticker.lastPrice)
@@ -324,6 +461,75 @@ const PaperTrading = () => {
       : trade.entryPrice - currentPrice
     return priceDiff * trade.quantity * trade.leverage
   }, [ticker])
+
+  // Drawing tools functions
+  const addHorizontalLine = () => {
+    if (!ticker || !chartRef.current || !candleSeriesRef.current) return
+
+    const price = parseFloat(ticker.lastPrice)
+    candleSeriesRef.current.createPriceLine({
+      price,
+      color: selectedColor,
+      lineWidth: 2,
+      lineStyle: 0,
+      axisLabelVisible: true,
+      title: `Line ${drawings.length + 1}`
+    })
+
+    const newDrawing: DrawingTool = {
+      id: Date.now().toString(),
+      type: 'horizontalLine',
+      color: selectedColor,
+      points: [{ price, time: Date.now() }]
+    }
+
+    setDrawings(prev => [...prev, newDrawing])
+    setSelectedDrawingTool(null)
+  }
+
+  const clearAllDrawings = () => {
+    if (candleSeriesRef.current) {
+      // Remove all price lines by recreating the series data
+      // This is a workaround since lightweight-charts doesn't have a direct method
+      const currentData = candleSeriesRef.current.data()
+      candleSeriesRef.current.setData(currentData as CandlestickData[])
+    }
+    setDrawings([])
+  }
+
+  const zoomIn = () => {
+    if (chartRef.current) {
+      const timeScale = chartRef.current.timeScale()
+      const currentRange = timeScale.getVisibleLogicalRange()
+      if (currentRange) {
+        const newRange = {
+          from: currentRange.from + (currentRange.to - currentRange.from) * 0.1,
+          to: currentRange.to - (currentRange.to - currentRange.from) * 0.1
+        }
+        timeScale.setVisibleLogicalRange(newRange)
+      }
+    }
+  }
+
+  const zoomOut = () => {
+    if (chartRef.current) {
+      const timeScale = chartRef.current.timeScale()
+      const currentRange = timeScale.getVisibleLogicalRange()
+      if (currentRange) {
+        const newRange = {
+          from: currentRange.from - (currentRange.to - currentRange.from) * 0.1,
+          to: currentRange.to + (currentRange.to - currentRange.from) * 0.1
+        }
+        timeScale.setVisibleLogicalRange(newRange)
+      }
+    }
+  }
+
+  const resetChart = () => {
+    if (chartRef.current) {
+      chartRef.current.timeScale().fitContent()
+    }
+  }
 
   const totalUsdtBalance = balance.find(b => b.coin === 'USDT')
 
@@ -338,7 +544,7 @@ const PaperTrading = () => {
             <Play size={28} />
             <h1>Paper Trading</h1>
           </div>
-          <p>Practice strategies risk-free on Bybit Testnet</p>
+          <p>Practice strategies with live Bybit data</p>
         </div>
         <div className="pt-header-right">
           <div className={`connection-status ${isConnected ? 'connected' : usePaperMode ? 'paper' : 'disconnected'}`}>
@@ -389,6 +595,7 @@ const PaperTrading = () => {
                 testnet.bybit.com
                 <ExternalLink size={12} />
               </a>
+              {' '}(Create account, go to API Management)
             </p>
           </div>
 
@@ -398,7 +605,7 @@ const PaperTrading = () => {
                 <CheckCircle size={20} />
                 <span>API Connected</span>
               </div>
-              <p>Your Bybit testnet is connected and ready for paper trading.</p>
+              <p>Your Bybit testnet is connected. Place real orders with demo funds!</p>
               <button className="disconnect-btn" onClick={disconnectApi}>
                 <Unlock size={16} />
                 Disconnect & Remove Keys
@@ -489,7 +696,7 @@ const PaperTrading = () => {
 
             {ticker && (
               <div className="ticker-display">
-                <span className="ticker-price">${parseFloat(ticker.lastPrice).toLocaleString()}</span>
+                <span className="ticker-price">${parseFloat(ticker.lastPrice).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                 <span className={`ticker-change ${parseFloat(ticker.price24hPcnt) >= 0 ? 'positive' : 'negative'}`}>
                   {parseFloat(ticker.price24hPcnt) >= 0 ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
                   {(parseFloat(ticker.price24hPcnt) * 100).toFixed(2)}%
@@ -510,24 +717,118 @@ const PaperTrading = () => {
             </div>
           </div>
 
-          {/* TradingView Chart */}
-          <div className="chart-container glass-card" ref={chartContainerRef}>
-            <div className="chart-loading">
-              <CandlestickChart size={48} />
-              <p>Loading chart...</p>
+          {/* Chart Toolbar */}
+          <div className="chart-toolbar glass-card">
+            <div className="toolbar-section">
+              <button
+                className={`toolbar-btn ${showDrawingTools ? 'active' : ''}`}
+                onClick={() => setShowDrawingTools(!showDrawingTools)}
+                title="Drawing Tools"
+              >
+                <MousePointer size={16} />
+              </button>
+              <button className="toolbar-btn" onClick={zoomIn} title="Zoom In">
+                <ZoomIn size={16} />
+              </button>
+              <button className="toolbar-btn" onClick={zoomOut} title="Zoom Out">
+                <ZoomOut size={16} />
+              </button>
+              <button className="toolbar-btn" onClick={resetChart} title="Reset View">
+                <Crosshair size={16} />
+              </button>
             </div>
+
+            {showDrawingTools && (
+              <div className="drawing-tools">
+                <div className="tool-buttons">
+                  <button
+                    className={`tool-btn ${selectedDrawingTool === 'horizontalLine' ? 'active' : ''}`}
+                    onClick={addHorizontalLine}
+                    title="Horizontal Line"
+                  >
+                    <Minus size={16} />
+                  </button>
+                  <button
+                    className={`tool-btn ${selectedDrawingTool === 'trendLine' ? 'active' : ''}`}
+                    onClick={() => setSelectedDrawingTool('trendLine')}
+                    title="Trend Line"
+                  >
+                    <TrendLine size={16} />
+                  </button>
+                  <button
+                    className={`tool-btn ${selectedDrawingTool === 'rectangle' ? 'active' : ''}`}
+                    onClick={() => setSelectedDrawingTool('rectangle')}
+                    title="Rectangle"
+                  >
+                    <Square size={16} />
+                  </button>
+                  <button
+                    className={`tool-btn ${selectedDrawingTool === 'circle' ? 'active' : ''}`}
+                    onClick={() => setSelectedDrawingTool('circle')}
+                    title="Circle"
+                  >
+                    <Circle size={16} />
+                  </button>
+                  <button
+                    className="tool-btn delete"
+                    onClick={clearAllDrawings}
+                    title="Clear All"
+                  >
+                    <Trash size={16} />
+                  </button>
+                </div>
+                <div className="color-picker">
+                  {DRAWING_COLORS.map(color => (
+                    <button
+                      key={color}
+                      className={`color-btn ${selectedColor === color ? 'active' : ''}`}
+                      style={{ background: color }}
+                      onClick={() => setSelectedColor(color)}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="toolbar-section">
+              <button className="toolbar-btn" onClick={fetchKlineData} title="Refresh Data">
+                <RefreshCw size={16} className={isChartLoading ? 'spin' : ''} />
+              </button>
+            </div>
+          </div>
+
+          {/* Chart Container */}
+          <div className="chart-container glass-card">
+            {isChartLoading && (
+              <div className="chart-overlay">
+                <RefreshCw size={32} className="spin" />
+                <p>Loading chart data...</p>
+              </div>
+            )}
+            {chartError && (
+              <div className="chart-overlay error">
+                <AlertCircle size={32} />
+                <p>{chartError}</p>
+                <button onClick={fetchKlineData}>Retry</button>
+              </div>
+            )}
+            <div ref={chartContainerRef} className="chart-inner" />
           </div>
 
           {/* Market Info */}
           {ticker && (
             <div className="market-info glass-card">
               <div className="market-stat">
+                <span className="stat-label">Mark Price</span>
+                <span className="stat-value">${parseFloat(ticker.markPrice).toLocaleString()}</span>
+              </div>
+              <div className="market-stat">
                 <span className="stat-label">24h High</span>
-                <span className="stat-value">${parseFloat(ticker.highPrice24h).toLocaleString()}</span>
+                <span className="stat-value positive">${parseFloat(ticker.highPrice24h).toLocaleString()}</span>
               </div>
               <div className="market-stat">
                 <span className="stat-label">24h Low</span>
-                <span className="stat-value">${parseFloat(ticker.lowPrice24h).toLocaleString()}</span>
+                <span className="stat-value negative">${parseFloat(ticker.lowPrice24h).toLocaleString()}</span>
               </div>
               <div className="market-stat">
                 <span className="stat-label">24h Volume</span>
@@ -654,7 +955,7 @@ const PaperTrading = () => {
                         type="number"
                         value={orderPrice}
                         onChange={(e) => setOrderPrice(e.target.value)}
-                        placeholder="0.00"
+                        placeholder={ticker ? parseFloat(ticker.lastPrice).toFixed(2) : '0.00'}
                         step="0.01"
                       />
                     </div>
@@ -663,7 +964,7 @@ const PaperTrading = () => {
                   <div className="input-group">
                     <label>
                       <Layers size={14} />
-                      Quantity
+                      Quantity ({selectedPair.replace('USDT', '')})
                     </label>
                     <input
                       type="number"
@@ -767,6 +1068,13 @@ const PaperTrading = () => {
                     </>
                   )}
                 </button>
+
+                {usePaperMode && (
+                  <div className="paper-mode-note">
+                    <Info size={12} />
+                    <span>Paper mode - orders are simulated locally</span>
+                  </div>
+                )}
               </>
             )}
           </div>
@@ -786,7 +1094,7 @@ const PaperTrading = () => {
                 onClick={() => setActiveTab('orders')}
               >
                 <Clock size={14} />
-                Open Orders
+                Orders
               </button>
               <button
                 className={activeTab === 'history' ? 'active' : ''}
@@ -864,6 +1172,13 @@ const PaperTrading = () => {
                             </span>
                           </div>
                         </div>
+                        <button
+                          className="close-position-btn"
+                          onClick={() => closeRealPosition(pos)}
+                        >
+                          <X size={14} />
+                          Close
+                        </button>
                       </div>
                     ))
                   ) : (
