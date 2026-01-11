@@ -5,15 +5,12 @@ import { useAuth } from '../context/AuthContext'
 import { apiKeyService } from '../services/apiKeyService'
 import { bybitService } from '../services/bybitService'
 import type { BybitTicker, BybitPosition, BybitOrder, BybitBalance } from '../services/bybitService'
-import { createChart, ColorType, CrosshairMode, CandlestickSeries, HistogramSeries } from 'lightweight-charts'
-import type { IChartApi, ISeriesApi, Time, CandlestickData } from 'lightweight-charts'
 import {
   Play, Settings, TrendingUp, TrendingDown, Wallet, Key, Eye, EyeOff,
   RefreshCw, AlertCircle, CheckCircle, X, ChevronDown, ChevronUp,
   Target, Shield, Zap, Clock, BarChart3, DollarSign,
   ArrowUpRight, ArrowDownRight, Layers, Activity, Lock, Unlock,
-  LineChart, Info, ExternalLink, Minus, TrendingUp as TrendLine,
-  Circle, Square, MousePointer, Crosshair, Trash, ZoomIn, ZoomOut
+  LineChart, Info, ExternalLink
 } from 'lucide-react'
 
 interface PaperTrade {
@@ -31,28 +28,20 @@ interface PaperTrade {
   pnl?: number
 }
 
-interface DrawingTool {
-  id: string
-  type: 'line' | 'horizontalLine' | 'rectangle' | 'circle'
-  color: string
-  points: { price: number; time: number }[]
-}
-
 const POPULAR_PAIRS = [
   'BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'SOLUSDT', 'XRPUSDT',
   'ADAUSDT', 'DOGEUSDT', 'MATICUSDT', 'DOTUSDT', 'AVAXUSDT'
 ]
 
+// TradingView timeframe format
 const TIMEFRAMES = [
-  { value: '1', label: '1m', seconds: 60 },
-  { value: '5', label: '5m', seconds: 300 },
-  { value: '15', label: '15m', seconds: 900 },
-  { value: '60', label: '1H', seconds: 3600 },
-  { value: '240', label: '4H', seconds: 14400 },
-  { value: 'D', label: '1D', seconds: 86400 }
+  { value: '1', label: '1m' },
+  { value: '5', label: '5m' },
+  { value: '15', label: '15m' },
+  { value: '60', label: '1H' },
+  { value: '240', label: '4H' },
+  { value: 'D', label: '1D' }
 ]
-
-const DRAWING_COLORS = ['#f59e0b', '#10b981', '#ef4444', '#8b5cf6', '#3b82f6', '#ec4899']
 
 const PaperTrading = () => {
   const { user } = useAuth()
@@ -92,21 +81,9 @@ const PaperTrading = () => {
   const [paperTrades, setPaperTrades] = useState<PaperTrade[]>([])
   const [usePaperMode, setUsePaperMode] = useState(true)
 
-  // Chart State
+  // TradingView Chart
   const chartContainerRef = useRef<HTMLDivElement>(null)
-  const chartRef = useRef<IChartApi | null>(null)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const candleSeriesRef = useRef<ISeriesApi<any> | null>(null)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const volumeSeriesRef = useRef<ISeriesApi<any> | null>(null)
-  const [isChartLoading, setIsChartLoading] = useState(true)
-  const [chartError, setChartError] = useState('')
-
-  // Drawing Tools State
-  const [selectedDrawingTool, setSelectedDrawingTool] = useState<string | null>(null)
-  const [selectedColor, setSelectedColor] = useState('#f59e0b')
-  const [drawings, setDrawings] = useState<DrawingTool[]>([])
-  const [showDrawingTools, setShowDrawingTools] = useState(false)
+  const widgetRef = useRef<HTMLDivElement>(null)
 
   // UI State
   const [activeTab, setActiveTab] = useState<'positions' | 'orders' | 'history'>('positions')
@@ -121,153 +98,67 @@ const PaperTrading = () => {
     }
   }, [userId])
 
-  // Initialize chart
+  // Initialize TradingView Advanced Chart Widget
   useEffect(() => {
     if (!chartContainerRef.current) return
 
-    // Create chart
-    const chart = createChart(chartContainerRef.current, {
-      layout: {
-        background: { type: ColorType.Solid, color: 'transparent' },
-        textColor: '#94a3b8'
-      },
-      grid: {
-        vertLines: { color: 'rgba(255, 255, 255, 0.05)' },
-        horzLines: { color: 'rgba(255, 255, 255, 0.05)' }
-      },
-      crosshair: {
-        mode: CrosshairMode.Normal,
-        vertLine: {
-          color: 'rgba(139, 92, 246, 0.5)',
-          width: 1,
-          style: 2,
-          labelBackgroundColor: '#8b5cf6'
-        },
-        horzLine: {
-          color: 'rgba(139, 92, 246, 0.5)',
-          width: 1,
-          style: 2,
-          labelBackgroundColor: '#8b5cf6'
-        }
-      },
-      rightPriceScale: {
-        borderColor: 'rgba(255, 255, 255, 0.1)',
-        scaleMargins: { top: 0.1, bottom: 0.2 }
-      },
-      timeScale: {
-        borderColor: 'rgba(255, 255, 255, 0.1)',
-        timeVisible: true,
-        secondsVisible: false
-      },
-      handleScroll: { vertTouchDrag: true },
-      handleScale: { axisPressedMouseMove: true }
-    })
-
-    // Create candlestick series (lightweight-charts v5 API)
-    const candleSeries = chart.addSeries(CandlestickSeries, {
-      upColor: '#10b981',
-      downColor: '#ef4444',
-      borderUpColor: '#10b981',
-      borderDownColor: '#ef4444',
-      wickUpColor: '#10b981',
-      wickDownColor: '#ef4444'
-    })
-
-    // Create volume series (lightweight-charts v5 API)
-    const volumeSeries = chart.addSeries(HistogramSeries, {
-      color: '#8b5cf6',
-      priceFormat: { type: 'volume' },
-      priceScaleId: 'volume'
-    })
-
-    chartRef.current = chart
-    candleSeriesRef.current = candleSeries
-    volumeSeriesRef.current = volumeSeries
-
-    // Handle resize
-    const handleResize = () => {
-      if (chartContainerRef.current && chartRef.current) {
-        chartRef.current.applyOptions({
-          width: chartContainerRef.current.clientWidth,
-          height: chartContainerRef.current.clientHeight
-        })
-      }
+    // Clear previous widget
+    if (widgetRef.current) {
+      chartContainerRef.current.innerHTML = ''
     }
 
-    window.addEventListener('resize', handleResize)
-    handleResize()
+    // Create widget container
+    const container = document.createElement('div')
+    container.id = 'tradingview_chart'
+    container.style.width = '100%'
+    container.style.height = '100%'
+    chartContainerRef.current.appendChild(container)
+    widgetRef.current = container
+
+    // TradingView symbol format for Bybit perpetual: BYBIT:BTCUSDT.P
+    const tvSymbol = `BYBIT:${selectedPair}.P`
+
+    // Load TradingView widget script
+    const script = document.createElement('script')
+    script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js'
+    script.type = 'text/javascript'
+    script.async = true
+    script.innerHTML = JSON.stringify({
+      autosize: true,
+      symbol: tvSymbol,
+      interval: selectedTimeframe,
+      timezone: 'Etc/UTC',
+      theme: 'dark',
+      style: '1',
+      locale: 'en',
+      enable_publishing: false,
+      backgroundColor: 'rgba(15, 23, 42, 0.95)',
+      gridColor: 'rgba(255, 255, 255, 0.05)',
+      hide_top_toolbar: false,
+      hide_legend: false,
+      save_image: true,
+      hide_volume: false,
+      support_host: 'https://www.tradingview.com',
+      allow_symbol_change: false,
+      details: true,
+      hotlist: false,
+      calendar: false,
+      studies: ['RSI@tv-basicstudies', 'MASimple@tv-basicstudies'],
+      show_popup_button: true,
+      popup_width: '1000',
+      popup_height: '650',
+      withdateranges: true,
+      container_id: 'tradingview_chart'
+    })
+
+    container.appendChild(script)
 
     return () => {
-      window.removeEventListener('resize', handleResize)
-      chart.remove()
-    }
-  }, [])
-
-  // Fetch kline data and update chart
-  const fetchKlineData = useCallback(async () => {
-    setIsChartLoading(true)
-    setChartError('')
-
-    try {
-      const klines = await bybitService.getKlines(selectedPair, selectedTimeframe, 500)
-
-      if (candleSeriesRef.current && volumeSeriesRef.current && klines.length > 0) {
-        const candleData: CandlestickData[] = klines.map(k => ({
-          time: (k.openTime / 1000) as Time,
-          open: parseFloat(k.open),
-          high: parseFloat(k.high),
-          low: parseFloat(k.low),
-          close: parseFloat(k.close)
-        }))
-
-        const volumeData = klines.map(k => ({
-          time: (k.openTime / 1000) as Time,
-          value: parseFloat(k.volume),
-          color: parseFloat(k.close) >= parseFloat(k.open)
-            ? 'rgba(16, 185, 129, 0.5)'
-            : 'rgba(239, 68, 68, 0.5)'
-        }))
-
-        candleSeriesRef.current.setData(candleData)
-        volumeSeriesRef.current.setData(volumeData)
-
-        // Fit content
-        if (chartRef.current) {
-          chartRef.current.timeScale().fitContent()
-        }
+      if (chartContainerRef.current) {
+        chartContainerRef.current.innerHTML = ''
       }
-    } catch (error) {
-      setChartError(error instanceof Error ? error.message : 'Failed to load chart data')
-    } finally {
-      setIsChartLoading(false)
     }
   }, [selectedPair, selectedTimeframe])
-
-  // Initial fetch and periodic updates
-  useEffect(() => {
-    fetchKlineData()
-
-    // Update chart every 5 seconds
-    const interval = setInterval(async () => {
-      try {
-        const klines = await bybitService.getKlines(selectedPair, selectedTimeframe, 2)
-        if (klines.length > 0 && candleSeriesRef.current) {
-          const lastKline = klines[klines.length - 1]
-          candleSeriesRef.current.update({
-            time: (lastKline.openTime / 1000) as Time,
-            open: parseFloat(lastKline.open),
-            high: parseFloat(lastKline.high),
-            low: parseFloat(lastKline.low),
-            close: parseFloat(lastKline.close)
-          })
-        }
-      } catch {
-        // Silent fail for updates
-      }
-    }, 5000)
-
-    return () => clearInterval(interval)
-  }, [selectedPair, selectedTimeframe, fetchKlineData])
 
   // Fetch ticker data periodically
   useEffect(() => {
@@ -462,75 +353,6 @@ const PaperTrading = () => {
     return priceDiff * trade.quantity * trade.leverage
   }, [ticker])
 
-  // Drawing tools functions
-  const addHorizontalLine = () => {
-    if (!ticker || !chartRef.current || !candleSeriesRef.current) return
-
-    const price = parseFloat(ticker.lastPrice)
-    candleSeriesRef.current.createPriceLine({
-      price,
-      color: selectedColor,
-      lineWidth: 2,
-      lineStyle: 0,
-      axisLabelVisible: true,
-      title: `Line ${drawings.length + 1}`
-    })
-
-    const newDrawing: DrawingTool = {
-      id: Date.now().toString(),
-      type: 'horizontalLine',
-      color: selectedColor,
-      points: [{ price, time: Date.now() }]
-    }
-
-    setDrawings(prev => [...prev, newDrawing])
-    setSelectedDrawingTool(null)
-  }
-
-  const clearAllDrawings = () => {
-    if (candleSeriesRef.current) {
-      // Remove all price lines by recreating the series data
-      // This is a workaround since lightweight-charts doesn't have a direct method
-      const currentData = candleSeriesRef.current.data()
-      candleSeriesRef.current.setData(currentData as CandlestickData[])
-    }
-    setDrawings([])
-  }
-
-  const zoomIn = () => {
-    if (chartRef.current) {
-      const timeScale = chartRef.current.timeScale()
-      const currentRange = timeScale.getVisibleLogicalRange()
-      if (currentRange) {
-        const newRange = {
-          from: currentRange.from + (currentRange.to - currentRange.from) * 0.1,
-          to: currentRange.to - (currentRange.to - currentRange.from) * 0.1
-        }
-        timeScale.setVisibleLogicalRange(newRange)
-      }
-    }
-  }
-
-  const zoomOut = () => {
-    if (chartRef.current) {
-      const timeScale = chartRef.current.timeScale()
-      const currentRange = timeScale.getVisibleLogicalRange()
-      if (currentRange) {
-        const newRange = {
-          from: currentRange.from - (currentRange.to - currentRange.from) * 0.1,
-          to: currentRange.to + (currentRange.to - currentRange.from) * 0.1
-        }
-        timeScale.setVisibleLogicalRange(newRange)
-      }
-    }
-  }
-
-  const resetChart = () => {
-    if (chartRef.current) {
-      chartRef.current.timeScale().fitContent()
-    }
-  }
-
   const totalUsdtBalance = balance.find(b => b.coin === 'USDT')
 
   return (
@@ -717,102 +539,9 @@ const PaperTrading = () => {
             </div>
           </div>
 
-          {/* Chart Toolbar */}
-          <div className="chart-toolbar glass-card">
-            <div className="toolbar-section">
-              <button
-                className={`toolbar-btn ${showDrawingTools ? 'active' : ''}`}
-                onClick={() => setShowDrawingTools(!showDrawingTools)}
-                title="Drawing Tools"
-              >
-                <MousePointer size={16} />
-              </button>
-              <button className="toolbar-btn" onClick={zoomIn} title="Zoom In">
-                <ZoomIn size={16} />
-              </button>
-              <button className="toolbar-btn" onClick={zoomOut} title="Zoom Out">
-                <ZoomOut size={16} />
-              </button>
-              <button className="toolbar-btn" onClick={resetChart} title="Reset View">
-                <Crosshair size={16} />
-              </button>
-            </div>
-
-            {showDrawingTools && (
-              <div className="drawing-tools">
-                <div className="tool-buttons">
-                  <button
-                    className={`tool-btn ${selectedDrawingTool === 'horizontalLine' ? 'active' : ''}`}
-                    onClick={addHorizontalLine}
-                    title="Horizontal Line"
-                  >
-                    <Minus size={16} />
-                  </button>
-                  <button
-                    className={`tool-btn ${selectedDrawingTool === 'trendLine' ? 'active' : ''}`}
-                    onClick={() => setSelectedDrawingTool('trendLine')}
-                    title="Trend Line"
-                  >
-                    <TrendLine size={16} />
-                  </button>
-                  <button
-                    className={`tool-btn ${selectedDrawingTool === 'rectangle' ? 'active' : ''}`}
-                    onClick={() => setSelectedDrawingTool('rectangle')}
-                    title="Rectangle"
-                  >
-                    <Square size={16} />
-                  </button>
-                  <button
-                    className={`tool-btn ${selectedDrawingTool === 'circle' ? 'active' : ''}`}
-                    onClick={() => setSelectedDrawingTool('circle')}
-                    title="Circle"
-                  >
-                    <Circle size={16} />
-                  </button>
-                  <button
-                    className="tool-btn delete"
-                    onClick={clearAllDrawings}
-                    title="Clear All"
-                  >
-                    <Trash size={16} />
-                  </button>
-                </div>
-                <div className="color-picker">
-                  {DRAWING_COLORS.map(color => (
-                    <button
-                      key={color}
-                      className={`color-btn ${selectedColor === color ? 'active' : ''}`}
-                      style={{ background: color }}
-                      onClick={() => setSelectedColor(color)}
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
-
-            <div className="toolbar-section">
-              <button className="toolbar-btn" onClick={fetchKlineData} title="Refresh Data">
-                <RefreshCw size={16} className={isChartLoading ? 'spin' : ''} />
-              </button>
-            </div>
-          </div>
-
-          {/* Chart Container */}
-          <div className="chart-container glass-card">
-            {isChartLoading && (
-              <div className="chart-overlay">
-                <RefreshCw size={32} className="spin" />
-                <p>Loading chart data...</p>
-              </div>
-            )}
-            {chartError && (
-              <div className="chart-overlay error">
-                <AlertCircle size={32} />
-                <p>{chartError}</p>
-                <button onClick={fetchKlineData}>Retry</button>
-              </div>
-            )}
-            <div ref={chartContainerRef} className="chart-inner" />
+          {/* TradingView Chart Container */}
+          <div className="chart-container glass-card tradingview-chart">
+            <div ref={chartContainerRef} className="chart-inner tradingview-widget-container" />
           </div>
 
           {/* Market Info */}
