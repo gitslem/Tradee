@@ -1,12 +1,12 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  User, Download, TrendingUp, TrendingDown, BookOpen,
+  Download, TrendingUp, TrendingDown, BookOpen,
   Calendar, DollarSign, X, Pin, List, Grid, Plus,
   FileText, FileJson, FileSpreadsheet, File,
-  Target, Activity, Award, Flame, BarChart3,
+  Target, Activity, Flame, BarChart3,
   ArrowUpRight, ArrowDownRight, Clock, Zap,
-  PieChart, LineChart, Trophy, AlertCircle
+  PieChart, Trophy, AlertCircle
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { firestoreService } from '../services/firestoreService'
@@ -592,7 +592,7 @@ const JournalHome = () => {
   if (loading) {
     return (
       <div className="journal-home">
-        <TradingBackground variant="journal" />
+        <TradingBackground variant="home" />
         <div className="loading-container">
           <div className="loading-spinner"></div>
           <span>Loading your journal...</span>
@@ -626,7 +626,7 @@ const JournalHome = () => {
 
   return (
     <div className="journal-home">
-      <TradingBackground variant="journal" />
+      <TradingBackground variant="home" />
 
       {/* Hero Section */}
       <div className="journal-hero">
