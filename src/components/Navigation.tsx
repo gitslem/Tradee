@@ -1,7 +1,8 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { Home, Calculator, TrendingUp, Target, Menu, X, BookOpen, LogIn, LogOut, User, Play } from 'lucide-react'
+import { Home, Calculator, TrendingUp, Target, Menu, X, BookOpen, LogIn, LogOut, User, Play, Sun, Moon } from 'lucide-react'
 import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
+import { useTheme } from '../context/ThemeContext'
 import Logo from './Logo'
 import './Navigation.css'
 
@@ -9,6 +10,8 @@ const Navigation = () => {
   const location = useLocation()
   const navigate = useNavigate()
   const { isAuthenticated, user, logout } = useAuth()
+  const { theme, toggleTheme } = useTheme()
+  const nextThemeLabel = theme === 'day' ? 'Switch to night mode' : 'Switch to day mode'
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   const navItems = [
@@ -84,6 +87,20 @@ const Navigation = () => {
             </Link>
           )}
         </div>
+
+        <button
+          type="button"
+          className={`theme-toggle ${theme}`}
+          onClick={toggleTheme}
+          aria-label={nextThemeLabel}
+          title={nextThemeLabel}
+        >
+          <span className="theme-toggle-track">
+            <span className="theme-toggle-thumb">
+              {theme === 'day' ? <Sun size={14} strokeWidth={2.5} /> : <Moon size={14} strokeWidth={2.5} />}
+            </span>
+          </span>
+        </button>
 
         <button
           className="mobile-menu-btn"

@@ -30,17 +30,17 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/journal" element={<JournalHome />} />
             <Route path="/calculator" element={
-              <main className="main-content">
+              <main className="tool-main">
                 <PositionCalculator />
               </main>
             } />
             <Route path="/market-structure" element={
-              <main className="main-content">
+              <main className="tool-main">
                 <MarketStructure />
               </main>
             } />
             <Route path="/price-action" element={
-              <main className="main-content">
+              <main className="tool-main">
                 <PriceActionAnalysis />
               </main>
             } />

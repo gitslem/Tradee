@@ -77,12 +77,44 @@ const isDayTime = (lat: number, lon: number): boolean => {
   return hour >= 6 && hour < 18;
 };
 
+const readStorage = (key: string): string | null => {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+};
+
+const writeStorage = (key: string, value: string) => {
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    // Storage unavailable (private mode etc.) - preference just won't persist
+  }
+};
+
+const timeBasedTheme = (): 'day' | 'night' => {
+  const hour = new Date().getHours();
+  return hour >= 6 && hour < 18 ? 'day' : 'night';
+};
+
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
-  const [theme, setTheme] = useState<'day' | 'night'>('day');
-  const [isAuto, setIsAuto] = useState(true);
+  const [isAuto, setIsAuto] = useState(() => readStorage('theme-auto') !== 'false');
+  const [theme, setTheme] = useState<'day' | 'night'>(() => {
+    const saved = readStorage('theme');
+    if (readStorage('theme-auto') === 'false' && (saved === 'day' || saved === 'night')) {
+      return saved;
+    }
+    return timeBasedTheme();
+  });
   const [location, setLocation] = useState<{ lat: number; lon: number } | null>(null);
 
-  // Get user's geolocation
+  // Keep the <html data-theme> attribute in sync so CSS tokens switch
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+  }, [theme]);
+
+  // Get user's geolocation (auto mode only)
   useEffect(() => {
     if (isAuto && navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -92,11 +124,9 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
             lon: position.coords.longitude,
           });
         },
-        (error) => {
-          console.warn('Geolocation error:', error);
-          // Fallback to time-based detection
-          const hour = new Date().getHours();
-          setTheme(hour >= 6 && hour < 18 ? 'day' : 'night');
+        () => {
+          // Fall back to time-based detection
+          setTheme(timeBasedTheme());
         }
       );
     }
@@ -108,16 +138,9 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
 
     const updateTheme = () => {
       if (location) {
-        const isDay = isDayTime(location.lat, location.lon);
-        const newTheme = isDay ? 'day' : 'night';
-        setTheme(newTheme);
-        document.documentElement.setAttribute('data-theme', newTheme);
+        setTheme(isDayTime(location.lat, location.lon) ? 'day' : 'night');
       } else {
-        // Fallback to simple time-based check
-        const hour = new Date().getHours();
-        const newTheme = hour >= 6 && hour < 18 ? 'day' : 'night';
-        setTheme(newTheme);
-        document.documentElement.setAttribute('data-theme', newTheme);
+        setTheme(timeBasedTheme());
       }
     };
 
@@ -131,40 +154,17 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
 
   // Manual theme toggle
   const toggleTheme = () => {
-    setIsAuto(false);
     const newTheme = theme === 'day' ? 'night' : 'day';
+    setIsAuto(false);
     setTheme(newTheme);
-    document.documentElement.setAttribute('data-theme', newTheme);
-    localStorage.setItem('theme', newTheme);
-    localStorage.setItem('theme-auto', 'false');
+    writeStorage('theme', newTheme);
+    writeStorage('theme-auto', 'false');
   };
 
   const setAutoMode = (auto: boolean) => {
     setIsAuto(auto);
-    localStorage.setItem('theme-auto', String(auto));
-    if (!auto) {
-      const savedTheme = localStorage.getItem('theme') as 'day' | 'night' | null;
-      if (savedTheme) {
-        setTheme(savedTheme);
-        document.documentElement.setAttribute('data-theme', savedTheme);
-      }
-    }
+    writeStorage('theme-auto', String(auto));
   };
-
-  // Load saved preferences on mount
-  useEffect(() => {
-    const savedAuto = localStorage.getItem('theme-auto');
-    const savedTheme = localStorage.getItem('theme');
-
-    if (savedAuto !== null) {
-      setIsAuto(savedAuto === 'true');
-    }
-
-    if (savedAuto === 'false' && savedTheme) {
-      setTheme(savedTheme as 'day' | 'night');
-      document.documentElement.setAttribute('data-theme', savedTheme);
-    }
-  }, []);
 
   const value = {
     theme,

@@ -1,9 +1,13 @@
 .floating-exchange-selector {
   width: 100%;
   padding: 2rem;
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(168, 85, 247, 0.05) 100%);
+  background: var(--card-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-radius: 24px;
-  border: 2px solid rgba(99, 102, 241, 0.1);
+  border: 1px solid var(--card-border);
+  box-shadow: var(--card-shadow);
+  margin-bottom: 2rem;
   position: relative;
   overflow: hidden;
 }
@@ -15,7 +19,7 @@
   left: -50%;
   width: 200%;
   height: 200%;
-  background: radial-gradient(circle, rgba(99, 102, 241, 0.05) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(212, 175, 55, 0.06) 0%, transparent 60%);
   animation: rotate 20s linear infinite;
 }
 
@@ -39,8 +43,10 @@
 
 .exchange-header h3 {
   margin: 0;
-  font-size: 1.5rem;
-  background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+  font-size: 1.375rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  background: var(--gold-gradient);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -48,20 +54,22 @@
 
 .toggle-view-btn {
   padding: 0.5rem 1rem;
-  background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
-  color: white;
+  background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
+  color: #1a1a1a;
   border: none;
-  border-radius: 12px;
+  border-radius: 999px;
   cursor: pointer;
   font-size: 0.875rem;
   font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+  box-shadow: 0 4px 14px rgba(212, 175, 55, 0.3);
 }
 
 .toggle-view-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
+  box-shadow: 0 6px 18px rgba(212, 175, 55, 0.45);
 }
 
 .selected-exchange-display {
@@ -69,13 +77,12 @@
   align-items: center;
   gap: 1rem;
   padding: 1.5rem;
-  background: white;
+  background: rgb(var(--ink) / 0.03);
   border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  margin-bottom: 2rem;
+  margin-bottom: 0.5rem;
   position: relative;
   z-index: 2;
-  border: 2px solid rgba(99, 102, 241, 0.1);
+  border: 1px solid var(--card-border);
 }
 
 .selected-exchange-logo {
@@ -89,7 +96,6 @@
   font-weight: bold;
   color: white;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  animation: float 3s ease-in-out infinite;
 }
 
 @keyframes float {
@@ -104,12 +110,12 @@
 .selected-exchange-info h4 {
   margin: 0;
   font-size: 1.25rem;
-  color: #1f2937;
+  color: var(--heading);
 }
 
 .exchange-tagline {
   margin: 0.25rem 0 0 0;
-  color: #6b7280;
+  color: var(--text-faint);
   font-size: 0.875rem;
 }
 
@@ -134,14 +140,14 @@
 }
 
 .exchange-card {
-  background: white;
+  background: var(--surface-solid);
   border-radius: 20px;
   padding: 1.5rem;
   text-align: center;
   cursor: pointer;
   transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-  border: 3px solid transparent;
+  box-shadow: var(--card-shadow);
+  border: 2px solid var(--card-border);
   position: relative;
   min-width: 200px;
 }
@@ -158,12 +164,12 @@
 
 .exchange-card:hover {
   transform: translateY(-8px) scale(1.05) !important;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--card-shadow-hover);
 }
 
 .exchange-card.selected {
   border-color: #10b981;
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(5, 150, 105, 0.05) 100%);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, var(--surface-solid) 100%);
 }
 
 .exchange-card.current {
@@ -176,10 +182,10 @@
 
 @keyframes pulse {
   0%, 100% {
-    box-shadow: 0 8px 24px rgba(99, 102, 241, 0.2);
+    box-shadow: 0 8px 24px rgba(212, 175, 55, 0.15);
   }
   50% {
-    box-shadow: 0 12px 32px rgba(99, 102, 241, 0.4);
+    box-shadow: 0 12px 32px rgba(212, 175, 55, 0.35);
   }
 }
 
@@ -234,7 +240,7 @@
 .exchange-name {
   font-size: 1.125rem;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--heading);
   margin-bottom: 0.75rem;
 }
 
@@ -270,8 +276,8 @@
 }
 
 .feature-tag {
-  background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
-  color: white;
+  background: rgba(212, 175, 55, 0.14);
+  color: var(--gold-ink);
   padding: 0.25rem 0.75rem;
   border-radius: 12px;
   font-size: 0.75rem;
@@ -280,7 +286,7 @@
 
 .exchange-leverage {
   font-size: 0.875rem;
-  color: #6b7280;
+  color: var(--text-faint);
   font-weight: 500;
 }
 
@@ -294,25 +300,24 @@
 }
 
 .quick-stat {
-  background: white;
+  background: rgb(var(--ink) / 0.03);
   padding: 1rem;
   border-radius: 12px;
   text-align: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  border: 1px solid rgba(99, 102, 241, 0.1);
+  border: 1px solid var(--card-border);
   transition: all 0.3s ease;
 }
 
 .quick-stat:hover {
   transform: translateY(-4px);
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
-  border-color: rgba(99, 102, 241, 0.3);
+  box-shadow: var(--card-shadow);
+  border-color: rgba(212, 175, 55, 0.35);
 }
 
 .stat-label {
   display: block;
   font-size: 0.75rem;
-  color: #6b7280;
+  color: var(--text-faint);
   margin-bottom: 0.5rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -322,7 +327,7 @@
   display: block;
   font-size: 1.25rem;
   font-weight: 700;
-  background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+  background: var(--gold-gradient);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

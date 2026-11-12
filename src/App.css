@@ -46,6 +46,13 @@ body {
   flex: 1;
 }
 
+/* Full-width wrapper for the calculator, market and price action tools */
+.tool-main {
+  flex: 1;
+  width: 100%;
+  position: relative;
+}
+
 @media (max-width: 768px) {
   .main-content {
     padding: 30px 16px;

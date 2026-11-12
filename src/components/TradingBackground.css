@@ -10,6 +10,26 @@
   background: linear-gradient(135deg, #fafbfc 0%, #f8f9fa 50%, #f5f6f8 100%);
 }
 
+/* Tool pages follow the day/night theme */
+.trading-background-calculator,
+.trading-background-market,
+.trading-background-price-action {
+  background: var(--page-bg);
+}
+
+.trading-background-calculator .price-tag,
+.trading-background-market .price-tag,
+.trading-background-price-action .price-tag {
+  background: var(--surface-solid);
+}
+
+/* Keep decorations subtle behind the light cards in day mode */
+[data-theme='day'] .trading-background-calculator .floating-element,
+[data-theme='day'] .trading-background-market .floating-element,
+[data-theme='day'] .trading-background-price-action .floating-element {
+  filter: opacity(0.4);
+}
+
 .floating-element {
   position: absolute;
   animation-timing-function: ease-in-out;
@@ -477,19 +497,7 @@
   }
 }
 
-/* Variant-specific styles */
-.trading-background-calculator {
-  background: linear-gradient(135deg, #fffbf0 0%, #fffaf5 50%, #fff9f0 100%);
-}
-
-.trading-background-market {
-  background: linear-gradient(135deg, #f8fbff 0%, #f5f9ff 50%, #f0f6ff 100%);
-}
-
-.trading-background-price-action {
-  background: linear-gradient(135deg, #fffafc 0%, #fff8fb 50%, #fff5f9 100%);
-}
-
+/* Variant-specific styles (tool page variants are themed at the top of this file) */
 .trading-background-home {
   background: linear-gradient(135deg, #fafbfc 0%, #f8f9fa 50%, #f5f6f8 100%);
 }
