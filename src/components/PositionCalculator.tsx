@@ -88,7 +88,7 @@ const PositionCalculator = () => {
       return null
     }
 
-    // Position Sizing Calculation (Professional Risk Management)
+    // Position sizing
     // Stop Loss Distance = |Entry - Stop| / Entry (as decimal)
     // Risk Amount = Account Balance × Risk Percentage
     // Base Position Size = Risk Amount / Stop Loss Distance (position size without leverage)

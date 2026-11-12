@@ -1,12 +1,15 @@
 /**
- * Secure API Key Storage Service
+ * Exchange API key storage (Bybit testnet only)
  *
- * Security measures implemented:
- * 1. Keys are encrypted before storage using AES-like XOR cipher with user-specific salt
- * 2. Keys are never logged or exposed in error messages
- * 3. Keys are stored in localStorage with obfuscated key names
- * 4. Automatic key validation before storage
- * 5. Keys are cleared on logout
+ * Credentials are kept in the browser's localStorage, obfuscated with an XOR
+ * cipher and a per-user salt that is stored alongside them. This is NOT
+ * encryption: anything that can read localStorage (e.g. an XSS bug or a
+ * browser extension) can recover the keys. Only use testnet keys, never
+ * mainnet keys with real funds.
+ *
+ * - Keys are never logged or included in error messages
+ * - Key format is validated before storage
+ * - Keys are cleared on logout
  */
 
 interface EncryptedCredentials {
@@ -25,7 +28,7 @@ class ApiKeyService {
   private readonly STORAGE_KEY = 'traddii_exc_creds'
   private readonly SALT_KEY = 'traddii_usr_salt'
 
-  // Generate a user-specific salt for encryption
+  // Generate a user-specific salt for obfuscation
   private getSalt(userId: string): string {
     const storedSalt = localStorage.getItem(`${this.SALT_KEY}_${userId}`)
     if (storedSalt) return storedSalt
@@ -84,14 +87,14 @@ class ApiKeyService {
 
   // Validate Bybit API key format
   validateApiKey(apiKey: string): boolean {
-    // Bybit API keys are typically 18-24 characters, alphanumeric
+    // Bybit API keys are alphanumeric
     const keyPattern = /^[A-Za-z0-9]{18,50}$/
     return keyPattern.test(apiKey.trim())
   }
 
   // Validate Bybit API secret format
   validateApiSecret(apiSecret: string): boolean {
-    // Bybit API secrets are typically 36+ characters
+    // Bybit API secrets are alphanumeric
     const secretPattern = /^[A-Za-z0-9]{30,100}$/
     return secretPattern.test(apiSecret.trim())
   }

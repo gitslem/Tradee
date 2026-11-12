@@ -46,25 +46,6 @@ const Support = () => {
                 </a>
               </div>
             </div>
-
-            <div className="contact-card">
-              <div className="contact-card-icon">
-                <MessageCircle size={40} />
-              </div>
-              <h3>WhatsApp Support</h3>
-              <p className="contact-description">
-                Chat with us directly on WhatsApp for quick assistance and real-time support.
-              </p>
-              <a href="https://wa.me/" className="email-link" target="_blank" rel="noopener noreferrer">
-                
-              </a>
-              <div className="contact-actions">
-                <a href="https://wa.me/" target="_blank" rel="noopener noreferrer" className="btn-contact-primary" style={{ background: '#25D366' }}>
-                  <MessageCircle size={20} />
-                  Chat on WhatsApp
-                </a>
-              </div>
-            </div>
           </div>
 
           <div className="support-info-grid">
@@ -138,7 +119,7 @@ const Support = () => {
             <div className="faq-item">
               <h3>How do I report a bug or request a feature?</h3>
               <p>
-                Send us an email at traddii.web.app@gmail.com or contact us on WhatsApp at  with details about the bug or your feature request.
+                Send us an email at traddii.web.app@gmail.com with details about the bug or your feature request.
                 We value your feedback and continuously improve based on user suggestions.
               </p>
             </div>

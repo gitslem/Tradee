@@ -10,9 +10,14 @@ service cloud.firestore {
       allow create: if request.auth != null
                     && request.resource.data.userId == request.auth.uid;
 
-      // Allow read, update, delete if authenticated and userId matches
-      allow read, update, delete: if request.auth != null
-                                   && resource.data.userId == request.auth.uid;
+      // Allow read and delete if authenticated and userId matches
+      allow read, delete: if request.auth != null
+                          && resource.data.userId == request.auth.uid;
+
+      // Allow update only by the owner, and the owner cannot be changed
+      allow update: if request.auth != null
+                    && resource.data.userId == request.auth.uid
+                    && request.resource.data.userId == request.auth.uid;
     }
 
     // ===========================================
@@ -23,9 +28,14 @@ service cloud.firestore {
       allow create: if request.auth != null
                     && request.resource.data.userId == request.auth.uid;
 
-      // Allow read, update, delete if authenticated and userId matches
-      allow read, update, delete: if request.auth != null
-                                   && resource.data.userId == request.auth.uid;
+      // Allow read and delete if authenticated and userId matches
+      allow read, delete: if request.auth != null
+                          && resource.data.userId == request.auth.uid;
+
+      // Allow update only by the owner, and the owner cannot be changed
+      allow update: if request.auth != null
+                    && resource.data.userId == request.auth.uid
+                    && request.resource.data.userId == request.auth.uid;
     }
 
     match /users/{userId} {
@@ -37,20 +47,20 @@ service cloud.firestore {
     // EMAIL SUBSCRIPTIONS - PUBLIC FORM
     // ===========================================
     match /emailSubscriptions/{subscriptionId} {
-      // Anyone can create subscriptions (authenticated or not)
-      allow create: if request.resource.data.keys().hasAll(['email', 'subscribedAt', 'status', 'source'])
+      // Anyone can subscribe. The document ID is the lowercased email, so a
+      // second signup for the same address is an update and gets rejected.
+      allow create: if request.resource.data.keys().hasOnly(['email', 'subscribedAt', 'status', 'source'])
                     && request.resource.data.email is string
+                    && request.resource.data.email.size() <= 254
                     && request.resource.data.email.matches('^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$')
+                    && subscriptionId == request.resource.data.email
                     && request.resource.data.status == 'active'
-                    && request.resource.data.subscribedAt is timestamp;
+                    && request.resource.data.source is string
+                    && request.resource.data.source.size() <= 50
+                    && request.resource.data.subscribedAt == request.time;
 
-      // Anyone can read (needed for duplicate email check)
-      allow read: if true;
-
-      // Only authenticated users can update/delete
-      allow update, delete: if request.auth != null;
-      // Change to this later when you set up admin claims:
-      // allow update, delete: if request.auth != null && request.auth.token.admin == true;
+      // Subscriber list is only accessible from the Firebase console / Admin SDK
+      allow read, update, delete: if request.auth != null && request.auth.token.admin == true;
     }
   }
 }

@@ -64,13 +64,12 @@ const PriceActionAnalysis = () => {
     setPrevVolume(ohlcv.previous.volume.toString())
   }
 
-  // Candlestick Structure Analysis (Industry Standard Formulas)
+  // Candlestick structure
   // Body = |Close - Open| (absolute difference)
   // Range = High - Low (total candle range)
   // Upper Wick = High - max(Open, Close)
   // Lower Wick = min(Open, Close) - Low
   // Body % = (Body / Range) × 100
-  // These formulas are used by all major exchanges including Bybit, Binance, TradingView
   const candleAnalysis = useMemo(() => {
     const open = parseFloat(candle.open)
     const high = parseFloat(candle.high)
@@ -157,9 +156,8 @@ const PriceActionAnalysis = () => {
     return { patterns, bodyPercent, upperWickPercent, lowerWickPercent, isBullish, range }
   }, [candle])
 
-  // Volume Analysis (Industry Standard Formula)
+  // Volume analysis
   // Volume Change % = ((Current Volume - Previous Volume) / Previous Volume) × 100
-  // This formula is used by all trading platforms
   const volumeAnalysis = useMemo(() => {
     const currentVol = parseFloat(volume)
     const prevVol = parseFloat(prevVolume)

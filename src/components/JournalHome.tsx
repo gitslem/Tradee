@@ -766,7 +766,7 @@ const JournalHome = () => {
         </div>
       </div>
 
-      {/* AI-Powered Crypto Recommendations */}
+      {/* Crypto Recommendations */}
       <CryptoRecommendations />
 
       {/* Recent Activity */}

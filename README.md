@@ -36,7 +36,7 @@ A comprehensive web-based trading tool for cryptocurrency traders to calculate p
 - **Position Validation**: Smart warnings for improper stop loss and take profit levels
 - **Real-time Calculations**: Instant updates as you adjust parameters
 
-### 2. Market Structure Analysis
+### 3. Market Structure Analysis
 - **Trend Detection**:
   - Higher Highs & Higher Lows (Uptrend)
   - Lower Highs & Lower Lows (Downtrend)
@@ -78,13 +78,13 @@ A comprehensive web-based trading tool for cryptocurrency traders to calculate p
 
 ```bash
 # Clone the repository
-git clone <repository-url>
-cd traddii
+git clone https://github.com/gitslem/Tradee.git
+cd Tradee
 
 # Install dependencies
 npm install
 
-# Configure Firebase (see FIREBASE_SETUP.md for detailed guide)
+# Configure Firebase
 cp .env.example .env
 # Edit .env with your Firebase credentials
 
@@ -97,14 +97,12 @@ npm run build
 
 ### Firebase Setup
 
-For detailed Firebase configuration instructions, see [FIREBASE_SETUP.md](./FIREBASE_SETUP.md).
-
-Quick steps:
+Steps:
 1. Create a Firebase project at https://console.firebase.google.com/
 2. Enable Google Authentication
 3. Create a Firestore database
 4. Copy Firebase config to `.env` file
-5. Deploy using `npm run firebase:deploy`
+5. Deploy the security rules and site with `npm run firebase:deploy`
 
 ## Usage
 
@@ -121,7 +119,7 @@ Quick steps:
    - Input entry price, stop loss, and take profit
    - View calculated position size and risk details
 
-2. **Market Structure Tab**:
+3. **Market Structure Tab**:
    - Input current price and recent highs/lows
    - Add support and resistance levels
    - Analyze trend direction and Fibonacci levels
@@ -222,7 +220,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
-MIT License - feel free to use this tool for your trading analysis.
+MIT License. See [LICENSE](./LICENSE).
 
 ## Disclaimer
 

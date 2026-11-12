@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Mail, CheckCircle, AlertCircle } from 'lucide-react'
-import { collection, addDoc, query, where, getDocs, serverTimestamp } from 'firebase/firestore'
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
 import { db } from '../config/firebase'
 import './EmailSubscription.css'
 
@@ -32,21 +32,13 @@ const EmailSubscription = () => {
     setStatus('loading')
     setMessage('')
 
+    const normalizedEmail = email.trim().toLowerCase()
+
     try {
-      // Check if email already exists
-      const emailsRef = collection(db, 'emailSubscriptions')
-      const q = query(emailsRef, where('email', '==', email.toLowerCase()))
-      const querySnapshot = await getDocs(q)
-
-      if (!querySnapshot.empty) {
-        setStatus('error')
-        setMessage('This email is already subscribed!')
-        return
-      }
-
-      // Add new subscription
-      await addDoc(collection(db, 'emailSubscriptions'), {
-        email: email.toLowerCase(),
+      // The email is the document ID; the security rules reject writes to an
+      // existing document, which is how duplicates are detected.
+      await setDoc(doc(db, 'emailSubscriptions', normalizedEmail), {
+        email: normalizedEmail,
         subscribedAt: serverTimestamp(),
         status: 'active',
         source: 'landing_page'
@@ -63,9 +55,12 @@ const EmailSubscription = () => {
       }, 5000)
 
     } catch (error) {
-      console.error('Error subscribing email:', error)
       setStatus('error')
-      setMessage('Something went wrong. Please try again.')
+      if ((error as { code?: string })?.code === 'permission-denied') {
+        setMessage('This email is already subscribed!')
+      } else {
+        setMessage('Something went wrong. Please try again.')
+      }
     }
   }
 

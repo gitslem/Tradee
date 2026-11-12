@@ -62,9 +62,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const signInWithGoogle = async () => {
     try {
-      const result = await signInWithPopup(auth, googleProvider)
+      await signInWithPopup(auth, googleProvider)
       // User is automatically set by onAuthStateChanged listener
-      console.log('Successfully signed in:', result.user.email)
     } catch (error) {
       console.error('Error signing in with Google:', error)
       throw error
