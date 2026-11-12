@@ -6,7 +6,7 @@ import {
   Percent, Activity, ArrowUpRight, ArrowDownRight, Zap, Filter,
   ChevronLeft, ChevronRight, Search
 } from 'lucide-react'
-import { useAuth } from '../context/AuthContext'
+import { useAuth } from '../context/auth'
 import { firestoreService } from '../services/firestoreService'
 import { EXCHANGES } from '../config/exchanges'
 import type { Trade, TradeStats } from '../services/firestoreService'
@@ -137,10 +137,6 @@ const TradingJournal = ({ onTradesUpdate, compact = false }: TradingJournalProps
   const indexOfFirstTrade = indexOfLastTrade - itemsPerPage
   const currentTrades = filteredTrades.slice(indexOfFirstTrade, indexOfLastTrade)
 
-  useEffect(() => {
-    setCurrentPage(1)
-  }, [filter, searchTerm])
-
   if (loading) {
     return (
       <div className="trading-journal">
@@ -270,10 +266,10 @@ const TradingJournal = ({ onTradesUpdate, compact = false }: TradingJournalProps
                 type="text"
                 placeholder="Search trades..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1) }}
               />
               {searchTerm && (
-                <button onClick={() => setSearchTerm('')} className="clear-search">
+                <button onClick={() => { setSearchTerm(''); setCurrentPage(1) }} className="clear-search">
                   <X size={16} />
                 </button>
               )}
@@ -291,7 +287,7 @@ const TradingJournal = ({ onTradesUpdate, compact = false }: TradingJournalProps
                 <button
                   key={f.key}
                   className={`filter-btn ${filter === f.key ? 'active' : ''}`}
-                  onClick={() => setFilter(f.key as typeof filter)}
+                  onClick={() => { setFilter(f.key as typeof filter); setCurrentPage(1) }}
                 >
                   {f.label}
                   <span className="filter-count">{f.count}</span>

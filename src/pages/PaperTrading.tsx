@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import './PaperTrading.css'
 import TradingBackground from '../components/TradingBackground'
-import { useAuth } from '../context/AuthContext'
+import { useAuth } from '../context/auth'
 import { apiKeyService } from '../services/apiKeyService'
 import { bybitService } from '../services/bybitService'
 import { paperTradingService, BYBIT_FEES } from '../services/paperTradingService'
@@ -48,6 +48,8 @@ const PaperTrading = () => {
   const [selectedTimeframe, setSelectedTimeframe] = useState('15')
   const [ticker, setTicker] = useState<BybitTicker | null>(null)
   const [allTickers, setAllTickers] = useState<Map<string, number>>(new Map())
+  // Latest prices for the polling loop, without restarting it on every update
+  const allTickersRef = useRef(allTickers)
   const [balance, setBalance] = useState<BybitBalance[]>([])
   const [positions, setPositions] = useState<BybitPosition[]>([])
   const [openOrders, setOpenOrders] = useState<BybitOrder[]>([])
@@ -88,10 +90,80 @@ const PaperTrading = () => {
   const [showOrderPanel, setShowOrderPanel] = useState(true)
   const [notifications, setNotifications] = useState<{ id: string; message: string; type: 'success' | 'error' | 'warning' }[]>([])
 
+  const loadPaperTradingData = useCallback(() => {
+    const account = paperTradingService.getAccount(userId)
+    setPaperBalance(account.balance)
+    setPaperTrades(account.trades)
+    const stats = paperTradingService.getAccountStats(userId)
+    setPaperStats({
+      totalPnl: stats.totalPnl,
+      totalFees: stats.totalFees,
+      winCount: stats.winCount,
+      lossCount: stats.lossCount,
+      winRate: stats.winRate
+    })
+  }, [userId])
+
+  const addNotification = useCallback((message: string, type: 'success' | 'error' | 'warning') => {
+    const id = Date.now().toString()
+    setNotifications(prev => [...prev, { id, message, type }])
+    setTimeout(() => {
+      setNotifications(prev => prev.filter(n => n.id !== id))
+    }, 5000)
+  }, [])
+
+  const fetchAccountData = useCallback(async (skipConnectionCheck = false) => {
+    if (!isConnected && !skipConnectionCheck) return
+
+    setIsLoading(true)
+    try {
+      const [balanceData, positionsData, ordersData, historyData] = await Promise.all([
+        bybitService.getWalletBalance(userId),
+        bybitService.getPositions(userId),
+        bybitService.getOpenOrders(userId),
+        bybitService.getOrderHistory(userId)
+      ])
+
+      setBalance(balanceData)
+      setPositions(positionsData.filter(p => parseFloat(p.size) > 0))
+      setOpenOrders(ordersData)
+      setOrderHistory(historyData)
+    } catch (error) {
+      console.error('Failed to fetch account data:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [isConnected, userId])
+
+  const testConnection = useCallback(async () => {
+    setIsConnecting(true)
+    setConnectionError('')
+
+    try {
+      const connected = await bybitService.testConnection(userId)
+      setIsConnected(connected)
+
+      if (connected) {
+        // isConnected state hasn't updated yet in this closure, so skip the check
+        await fetchAccountData(true)
+        setUsePaperMode(false)
+      }
+    } catch (error) {
+      setConnectionError(error instanceof Error ? error.message : 'Connection failed')
+      setIsConnected(false)
+    } finally {
+      setIsConnecting(false)
+    }
+  }, [userId, fetchAccountData])
+
+  useEffect(() => {
+    allTickersRef.current = allTickers
+  }, [allTickers])
+
   // Load paper trading data on mount
   useEffect(() => {
     loadPaperTradingData()
-  }, [userId])
+  }, [loadPaperTradingData])
 
   // Check for existing API credentials on mount
   useEffect(() => {
@@ -99,15 +171,17 @@ const PaperTrading = () => {
     if (hasCredentials) {
       testConnection()
     }
-  }, [userId])
+  }, [userId, testConnection])
+
 
   // Initialize TradingView Advanced Chart Widget
   useEffect(() => {
-    if (!chartContainerRef.current) return
+    const chartContainer = chartContainerRef.current
+    if (!chartContainer) return
 
     // Clear previous widget
     if (widgetRef.current) {
-      chartContainerRef.current.innerHTML = ''
+      chartContainer.innerHTML = ''
     }
 
     // Create widget container
@@ -115,7 +189,7 @@ const PaperTrading = () => {
     container.id = 'tradingview_chart'
     container.style.width = '100%'
     container.style.height = '100%'
-    chartContainerRef.current.appendChild(container)
+    chartContainer.appendChild(container)
     widgetRef.current = container
 
     // TradingView symbol format for Bybit perpetual: BYBIT:BTCUSDT.P
@@ -159,9 +233,7 @@ const PaperTrading = () => {
     container.appendChild(script)
 
     return () => {
-      if (chartContainerRef.current) {
-        chartContainerRef.current.innerHTML = ''
-      }
+      chartContainer.innerHTML = ''
     }
   }, [selectedPair, selectedTimeframe])
 
@@ -173,7 +245,7 @@ const PaperTrading = () => {
         setTicker(tickerData)
 
         // Update all tickers map for TP/SL checking
-        const newTickers = new Map(allTickers)
+        const newTickers = new Map(allTickersRef.current)
         newTickers.set(selectedPair, parseFloat(tickerData.lastPrice))
         setAllTickers(newTickers)
 
@@ -202,7 +274,7 @@ const PaperTrading = () => {
     fetchTickerAndCheckTPSL()
     const interval = setInterval(fetchTickerAndCheckTPSL, 2000)
     return () => clearInterval(interval)
-  }, [selectedPair, userId, usePaperMode, allTickers])
+  }, [selectedPair, userId, usePaperMode, loadPaperTradingData, addNotification])
 
   // Fetch prices for all open positions' symbols
   useEffect(() => {
@@ -233,48 +305,6 @@ const PaperTrading = () => {
     }
   }, [userId, usePaperMode, selectedPair])
 
-  const loadPaperTradingData = () => {
-    const account = paperTradingService.getAccount(userId)
-    setPaperBalance(account.balance)
-    setPaperTrades(account.trades)
-    const stats = paperTradingService.getAccountStats(userId)
-    setPaperStats({
-      totalPnl: stats.totalPnl,
-      totalFees: stats.totalFees,
-      winCount: stats.winCount,
-      lossCount: stats.lossCount,
-      winRate: stats.winRate
-    })
-  }
-
-  const addNotification = (message: string, type: 'success' | 'error' | 'warning') => {
-    const id = Date.now().toString()
-    setNotifications(prev => [...prev, { id, message, type }])
-    setTimeout(() => {
-      setNotifications(prev => prev.filter(n => n.id !== id))
-    }, 5000)
-  }
-
-  const testConnection = async () => {
-    setIsConnecting(true)
-    setConnectionError('')
-
-    try {
-      const connected = await bybitService.testConnection(userId)
-      setIsConnected(connected)
-
-      if (connected) {
-        await fetchAccountData()
-        setUsePaperMode(false)
-      }
-    } catch (error) {
-      setConnectionError(error instanceof Error ? error.message : 'Connection failed')
-      setIsConnected(false)
-    } finally {
-      setIsConnecting(false)
-    }
-  }
-
   const saveApiCredentials = async () => {
     if (!apiKey || !apiSecret) {
       setConnectionError('Please enter both API key and secret')
@@ -303,29 +333,6 @@ const PaperTrading = () => {
     setPositions([])
     setOpenOrders([])
     setUsePaperMode(true)
-  }
-
-  const fetchAccountData = async () => {
-    if (!isConnected) return
-
-    setIsLoading(true)
-    try {
-      const [balanceData, positionsData, ordersData, historyData] = await Promise.all([
-        bybitService.getWalletBalance(userId),
-        bybitService.getPositions(userId),
-        bybitService.getOpenOrders(userId),
-        bybitService.getOrderHistory(userId)
-      ])
-
-      setBalance(balanceData)
-      setPositions(positionsData.filter(p => parseFloat(p.size) > 0))
-      setOpenOrders(ordersData)
-      setOrderHistory(historyData)
-    } catch (error) {
-      console.error('Failed to fetch account data:', error)
-    } finally {
-      setIsLoading(false)
-    }
   }
 
   const placeOrder = async () => {
@@ -717,7 +724,7 @@ const PaperTrading = () => {
                   <RotateCcw size={16} />
                 </button>
               ) : isConnected && (
-                <button className="refresh-btn" onClick={fetchAccountData} disabled={isLoading}>
+                <button className="refresh-btn" onClick={() => fetchAccountData()} disabled={isLoading}>
                   <RefreshCw size={16} className={isLoading ? 'spin' : ''} />
                 </button>
               )}

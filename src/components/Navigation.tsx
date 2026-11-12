@@ -1,8 +1,8 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { Home, Calculator, TrendingUp, Target, Menu, X, BookOpen, LogIn, LogOut, User, Play, Sun, Moon } from 'lucide-react'
 import { useState } from 'react'
-import { useAuth } from '../context/AuthContext'
-import { useTheme } from '../context/ThemeContext'
+import { useAuth } from '../context/auth'
+import { useTheme } from '../context/theme'
 import Logo from './Logo'
 import './Navigation.css'
 

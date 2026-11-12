@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Shield, CheckCircle, Database, Download } from 'lucide-react'
-import { useAuth } from '../context/AuthContext'
+import { useAuth } from '../context/auth'
 import TradingBackground from '../components/TradingBackground'
 import './Login.css'
 
@@ -18,11 +18,12 @@ const Login = () => {
       setError('')
       await signInWithGoogle()
       navigate('/journal')
-    } catch (error: any) {
+    } catch (error) {
       console.error('Sign-in error:', error)
-      if (error.code === 'auth/popup-closed-by-user') {
+      const code = (error as { code?: string })?.code
+      if (code === 'auth/popup-closed-by-user') {
         setError('Sign-in cancelled. Please try again.')
-      } else if (error.code === 'auth/popup-blocked') {
+      } else if (code === 'auth/popup-blocked') {
         setError('Pop-up blocked. Please allow pop-ups for this site.')
       } else {
         setError('Failed to sign in with Google. Please try again.')

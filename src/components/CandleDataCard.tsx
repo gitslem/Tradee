@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { RefreshCw, TrendingUp, TrendingDown, Clock } from 'lucide-react'
 import { getOHLCVData, identifyCandlePattern, INTERVALS } from '../services/ohlcvService'
 import type { OHLCVData } from '../services/ohlcvService'
@@ -18,46 +18,62 @@ const CandleDataCard = ({ pair, timeframe, onUseCandleData, autoFill = true }: C
   const [refreshing, setRefreshing] = useState(false)
   const [selectedInterval, setSelectedInterval] = useState(timeframe || '15m')
 
-  // Sync with external timeframe prop
-  useEffect(() => {
-    if (timeframe && timeframe !== selectedInterval) {
-      setSelectedInterval(timeframe)
-    }
-  }, [timeframe])
-
-  const fetchCandleData = async () => {
-    try {
-      setError(null)
-      const data = await getOHLCVData(pair, selectedInterval)
-      if (data) {
-        setCandleData(data)
-        // Auto-fill data if enabled and callback exists
-        if (autoFill && onUseCandleData) {
-          onUseCandleData(data)
-        }
-      } else {
-        setError('Failed to fetch candle data')
-      }
-    } catch (err) {
-      setError('Error fetching candle data')
-      console.error(err)
-    } finally {
-      setLoading(false)
-      setRefreshing(false)
-    }
+  // Follow the parent's timeframe when it changes (adjusting state during render)
+  const [prevTimeframe, setPrevTimeframe] = useState(timeframe)
+  if (timeframe !== prevTimeframe) {
+    setPrevTimeframe(timeframe)
+    if (timeframe) setSelectedInterval(timeframe)
   }
 
+  // Keep the latest callback without restarting the polling effect
+  const onDataRef = useRef<{ autoFill: boolean; onUseCandleData?: (data: OHLCVData) => void }>({ autoFill, onUseCandleData })
   useEffect(() => {
-    setLoading(true)
+    onDataRef.current = { autoFill, onUseCandleData }
+  }, [autoFill, onUseCandleData])
+
+  const [refreshKey, setRefreshKey] = useState(0)
+
+  useEffect(() => {
+    let cancelled = false
+
+    const fetchCandleData = async () => {
+      try {
+        const data = await getOHLCVData(pair, selectedInterval)
+        if (cancelled) return
+        if (data) {
+          setError(null)
+          setCandleData(data)
+          const { autoFill: shouldAutoFill, onUseCandleData: onData } = onDataRef.current
+          if (shouldAutoFill && onData) {
+            onData(data)
+          }
+        } else {
+          setError('Failed to fetch candle data')
+        }
+      } catch (err) {
+        if (cancelled) return
+        setError('Error fetching candle data')
+        console.error(err)
+      } finally {
+        if (!cancelled) {
+          setLoading(false)
+          setRefreshing(false)
+        }
+      }
+    }
+
     fetchCandleData()
     // Auto-refresh every 30 seconds
     const interval = setInterval(fetchCandleData, 30000)
-    return () => clearInterval(interval)
-  }, [pair, selectedInterval])
+    return () => {
+      cancelled = true
+      clearInterval(interval)
+    }
+  }, [pair, selectedInterval, refreshKey])
 
   const handleRefresh = () => {
     setRefreshing(true)
-    fetchCandleData()
+    setRefreshKey(k => k + 1)
   }
 
   const handleUseData = () => {

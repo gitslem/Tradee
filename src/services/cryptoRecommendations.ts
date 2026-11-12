@@ -46,6 +46,15 @@ const TRADING_PAIRS = [
   'HNTUSDT', 'ARUSDT', 'AGIXUSDT', 'PEPEUSDT', 'SHIBUSDT'
 ]
 
+interface BinanceTicker24h {
+  symbol: string
+  lastPrice: string
+  quoteVolume: string
+  priceChangePercent: string
+  highPrice: string
+  lowPrice: string
+}
+
 class CryptoRecommendationService {
   private cache: Map<string, { data: MarketData[], timestamp: number }> = new Map()
   private readonly CACHE_DURATION = 5 * 60 * 1000 // 5 minutes
@@ -64,13 +73,13 @@ class CryptoRecommendationService {
       const tickerResponse = await fetch(`${this.BINANCE_API}/ticker/24hr`)
       if (!tickerResponse.ok) throw new Error('Failed to fetch ticker data')
 
-      const tickerData = await tickerResponse.json()
+      const tickerData: BinanceTicker24h[] = await tickerResponse.json()
 
       // Fetch order book depth to calculate spreads
       const marketData: MarketData[] = []
 
       for (const symbol of symbols) {
-        const ticker = tickerData.find((t: any) => t.symbol === symbol)
+        const ticker = tickerData.find((t) => t.symbol === symbol)
         if (!ticker) continue
 
         try {

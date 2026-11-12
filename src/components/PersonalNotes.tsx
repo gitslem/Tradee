@@ -3,7 +3,7 @@ import {
   Plus, Edit2, Trash2, Pin, Search, Tag, BookOpen,
   Calendar, X, Save
 } from 'lucide-react'
-import { useAuth } from '../context/AuthContext'
+import { useAuth } from '../context/auth'
 import { firestoreService } from '../services/firestoreService'
 import type { JournalNote, Trade } from '../services/firestoreService'
 import './PersonalNotes.css'
@@ -84,11 +84,6 @@ const PersonalNotes = ({ trades = [], compact = false }: PersonalNotesProps) => 
   const indexOfFirstNote = indexOfLastNote - itemsPerPage
   const currentNotes = filteredNotes.slice(indexOfFirstNote, indexOfLastNote)
 
-  // Reset to page 1 when filter or search changes
-  useEffect(() => {
-    setCurrentPage(1)
-  }, [categoryFilter, searchTerm])
-
   const categories = ['all', 'strategy', 'plan', 'idea', 'reflection', 'concept', 'general']
 
   const categoryStats = {
@@ -162,10 +157,10 @@ const PersonalNotes = ({ trades = [], compact = false }: PersonalNotesProps) => 
             type="text"
             placeholder="Search notes by title, content, or tags..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1) }}
           />
           {searchTerm && (
-            <button onClick={() => setSearchTerm('')} className="clear-search">
+            <button onClick={() => { setSearchTerm(''); setCurrentPage(1) }} className="clear-search">
               <X size={18} />
             </button>
           )}
@@ -176,7 +171,7 @@ const PersonalNotes = ({ trades = [], compact = false }: PersonalNotesProps) => 
             <button
               key={cat}
               className={`category-filter ${categoryFilter === cat ? 'active' : ''} ${cat}`}
-              onClick={() => setCategoryFilter(cat)}
+              onClick={() => { setCategoryFilter(cat); setCurrentPage(1) }}
             >
               <span className="category-name">{cat.charAt(0).toUpperCase() + cat.slice(1)}</span>
               <span className="category-count">{categoryStats[cat as keyof typeof categoryStats]}</span>

@@ -126,7 +126,7 @@ class ApiKeyService {
       localStorage.setItem(storageKey, JSON.stringify(encryptedData))
 
       return true
-    } catch (error) {
+    } catch {
       console.error('Failed to save credentials')
       return false
     }
@@ -155,7 +155,7 @@ class ApiKeyService {
       }
 
       return { apiKey, apiSecret }
-    } catch (error) {
+    } catch {
       console.error('Failed to retrieve credentials')
       return null
     }

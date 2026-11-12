@@ -16,34 +16,45 @@ const LivePriceCard = ({ pair, exchange = 'binance', onUsePrice }: LivePriceCard
   const [error, setError] = useState<string | null>(null)
   const [refreshing, setRefreshing] = useState(false)
 
-  const fetchPrice = async () => {
-    try {
-      setError(null)
-      const data = await getCryptoPrice(pair, exchange)
-      if (data) {
-        setPriceData(data)
-      } else {
-        setError('Failed to fetch price')
-      }
-    } catch (err) {
-      setError('Error fetching price')
-      console.error(err)
-    } finally {
-      setLoading(false)
-      setRefreshing(false)
-    }
-  }
+  const [refreshKey, setRefreshKey] = useState(0)
 
   useEffect(() => {
+    let cancelled = false
+
+    const fetchPrice = async () => {
+      try {
+        const data = await getCryptoPrice(pair, exchange)
+        if (cancelled) return
+        if (data) {
+          setError(null)
+          setPriceData(data)
+        } else {
+          setError('Failed to fetch price')
+        }
+      } catch (err) {
+        if (cancelled) return
+        setError('Error fetching price')
+        console.error(err)
+      } finally {
+        if (!cancelled) {
+          setLoading(false)
+          setRefreshing(false)
+        }
+      }
+    }
+
     fetchPrice()
     // Auto-refresh every 30 seconds
     const interval = setInterval(fetchPrice, 30000)
-    return () => clearInterval(interval)
-  }, [pair, exchange])
+    return () => {
+      cancelled = true
+      clearInterval(interval)
+    }
+  }, [pair, exchange, refreshKey])
 
   const handleRefresh = () => {
     setRefreshing(true)
-    fetchPrice()
+    setRefreshKey(k => k + 1)
   }
 
   const handleUsePrice = () => {

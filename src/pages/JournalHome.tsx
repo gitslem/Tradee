@@ -8,7 +8,7 @@ import {
   ArrowUpRight, ArrowDownRight, Clock, Zap,
   PieChart, Trophy, AlertCircle
 } from 'lucide-react'
-import { useAuth } from '../context/AuthContext'
+import { useAuth } from '../context/auth'
 import { firestoreService } from '../services/firestoreService'
 import type { Trade, JournalNote } from '../services/firestoreService'
 import TradingJournal from '../components/TradingJournal'

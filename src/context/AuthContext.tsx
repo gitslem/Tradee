@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import type { ReactNode } from 'react'
 import {
   signInWithPopup,
@@ -7,31 +7,8 @@ import {
   type User as FirebaseUser
 } from 'firebase/auth'
 import { auth, googleProvider } from '../config/firebase'
-
-interface User {
-  uid: string
-  email: string
-  displayName: string | null
-  photoURL: string | null
-}
-
-interface AuthContextType {
-  user: User | null
-  isAuthenticated: boolean
-  loading: boolean
-  signInWithGoogle: () => Promise<void>
-  logout: () => Promise<void>
-}
-
-const AuthContext = createContext<AuthContextType | undefined>(undefined)
-
-export const useAuth = () => {
-  const context = useContext(AuthContext)
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider')
-  }
-  return context
-}
+import { AuthContext } from './auth'
+import type { AuthContextType, User } from './auth'
 
 interface AuthProviderProps {
   children: ReactNode
