@@ -45,7 +45,7 @@ function App() {
               </main>
             } />
             <Route path="/paper-trading" element={
-              <main className="main-content">
+              <main className="tool-main">
                 <PaperTrading />
               </main>
             } />

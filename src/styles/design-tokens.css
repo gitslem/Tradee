@@ -82,6 +82,9 @@
   --danger-ink: #b91c1c;
   --warning-ink: #b45309;
   --violet-ink: #6d28d9;
+  --inset-bg: rgba(15, 23, 42, 0.04);
+  --blue-ink: #1e40af;
+  --pink-ink: #be185d;
   --green-gradient: linear-gradient(135deg, #047857 0%, #10b981 50%, #047857 100%);
   --violet-gradient: linear-gradient(135deg, #6d28d9 0%, #8b5cf6 50%, #6d28d9 100%);
 
@@ -195,6 +198,9 @@
   --danger-ink: #f87171;
   --warning-ink: #fbbf24;
   --violet-ink: #a78bfa;
+  --inset-bg: rgba(0, 0, 0, 0.25);
+  --blue-ink: #93c5fd;
+  --pink-ink: #f9a8d4;
   --green-gradient: linear-gradient(135deg, #10b981 0%, #34d399 50%, #10b981 100%);
   --violet-gradient: linear-gradient(135deg, #8b5cf6 0%, #a855f7 50%, #8b5cf6 100%);
 }
@@ -236,6 +242,9 @@
     --danger-ink: #f87171;
     --warning-ink: #fbbf24;
     --violet-ink: #a78bfa;
+    --inset-bg: rgba(0, 0, 0, 0.25);
+    --blue-ink: #93c5fd;
+    --pink-ink: #f9a8d4;
     --green-gradient: linear-gradient(135deg, #10b981 0%, #34d399 50%, #10b981 100%);
     --violet-gradient: linear-gradient(135deg, #8b5cf6 0%, #a855f7 50%, #8b5cf6 100%);
   }

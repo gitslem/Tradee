@@ -16,8 +16,8 @@
 
 /* Hero Section */
 .about-hero {
-  background: linear-gradient(135deg, var(--about-primary) 0%, var(--about-primary-light) 100%);
-  color: white;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+  color: #1a1a1a;
   text-align: center;
   padding: 6rem 2rem;
   margin-bottom: 4rem;

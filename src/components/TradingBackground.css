@@ -19,14 +19,16 @@
 
 .trading-background-calculator .price-tag,
 .trading-background-market .price-tag,
-.trading-background-price-action .price-tag {
+.trading-background-price-action .price-tag,
+.trading-background-home .price-tag {
   background: var(--surface-solid);
 }
 
 /* Keep decorations subtle behind the light cards in day mode */
 [data-theme='day'] .trading-background-calculator .floating-element,
 [data-theme='day'] .trading-background-market .floating-element,
-[data-theme='day'] .trading-background-price-action .floating-element {
+[data-theme='day'] .trading-background-price-action .floating-element,
+[data-theme='day'] .trading-background-home .floating-element {
   filter: opacity(0.4);
 }
 
@@ -499,7 +501,7 @@
 
 /* Variant-specific styles (tool page variants are themed at the top of this file) */
 .trading-background-home {
-  background: linear-gradient(135deg, #fafbfc 0%, #f8f9fa 50%, #f5f6f8 100%);
+  background: var(--page-bg);
 }
 
 /* Responsive adjustments */

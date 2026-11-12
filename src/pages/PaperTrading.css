@@ -1,19 +1,22 @@
 /* Paper Trading Page Styles */
 .paper-trading-page {
   min-height: 100vh;
-  background: linear-gradient(180deg, #0a0a0f 0%, #0d1117 50%, #0a0a0f 100%);
-  padding: 1rem;
+  background: transparent;
+  padding: 1.5rem clamp(1rem, 3vw, 2.5rem) 4rem;
+  max-width: 1600px;
+  margin: 0 auto;
   position: relative;
   overflow-x: hidden;
 }
 
 /* Glass Card Base */
 .paper-trading-page .glass-card {
-  background: rgba(20, 20, 30, 0.8);
+  background: var(--card-bg);
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--card-border);
+  box-shadow: var(--card-shadow);
   border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
 /* Header */
@@ -23,10 +26,10 @@
   align-items: center;
   padding: 1.5rem 2rem;
   margin-bottom: 1.5rem;
-  background: rgba(20, 20, 30, 0.6);
+  background: var(--card-bg);
   backdrop-filter: blur(20px);
   border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgb(var(--ink) / 0.08);
 }
 
 .pt-header-left {
@@ -42,14 +45,14 @@
 }
 
 .pt-logo svg {
-  color: #10b981;
+  color: var(--success-ink);
   filter: drop-shadow(0 0 10px rgba(16, 185, 129, 0.5));
 }
 
 .pt-logo h1 {
   font-size: 1.75rem;
   font-weight: 700;
-  background: linear-gradient(135deg, #fff 0%, #a0aec0 100%);
+  background: linear-gradient(135deg, var(--heading) 0%, var(--text-faint) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -57,7 +60,7 @@
 }
 
 .pt-header-left p {
-  color: #64748b;
+  color: var(--text-faint);
   font-size: 0.875rem;
   margin: 0;
   margin-left: 2.75rem;
@@ -82,19 +85,19 @@
 .connection-status.connected {
   background: rgba(16, 185, 129, 0.1);
   border: 1px solid rgba(16, 185, 129, 0.3);
-  color: #10b981;
+  color: var(--success-ink);
 }
 
 .connection-status.paper {
   background: rgba(139, 92, 246, 0.1);
   border: 1px solid rgba(139, 92, 246, 0.3);
-  color: #8b5cf6;
+  color: var(--violet-ink);
 }
 
 .connection-status.disconnected {
   background: rgba(239, 68, 68, 0.1);
   border: 1px solid rgba(239, 68, 68, 0.3);
-  color: #ef4444;
+  color: var(--danger-ink);
 }
 
 .settings-btn {
@@ -104,16 +107,16 @@
   width: 40px;
   height: 40px;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #94a3b8;
+  background: rgb(var(--ink) / 0.05);
+  border: 1px solid rgb(var(--ink) / 0.1);
+  color: var(--text-faint);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .settings-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
+  background: rgb(var(--ink) / 0.1);
+  color: var(--heading);
 }
 
 /* API Configuration Panel */
@@ -147,7 +150,7 @@
   gap: 0.5rem;
   font-size: 1.125rem;
   font-weight: 600;
-  color: #fff;
+  color: var(--heading);
   margin: 0;
 }
 
@@ -158,9 +161,9 @@
   width: 32px;
   height: 32px;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #94a3b8;
+  background: rgb(var(--ink) / 0.05);
+  border: 1px solid rgb(var(--ink) / 0.1);
+  color: var(--text-faint);
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -168,7 +171,7 @@
 .api-config-header button:hover {
   background: rgba(239, 68, 68, 0.1);
   border-color: rgba(239, 68, 68, 0.3);
-  color: #ef4444;
+  color: var(--danger-ink);
 }
 
 .api-config-info {
@@ -183,18 +186,18 @@
 }
 
 .api-config-info svg {
-  color: #8b5cf6;
+  color: var(--violet-ink);
   flex-shrink: 0;
 }
 
 .api-config-info p {
   margin: 0;
   font-size: 0.875rem;
-  color: #94a3b8;
+  color: var(--text-faint);
 }
 
 .api-config-info a {
-  color: #8b5cf6;
+  color: var(--violet-ink);
   text-decoration: none;
   display: inline-flex;
   align-items: center;
@@ -213,17 +216,17 @@
   display: block;
   font-size: 0.875rem;
   font-weight: 500;
-  color: #94a3b8;
+  color: var(--text-faint);
   margin-bottom: 0.5rem;
 }
 
 .api-input-group input {
   width: 100%;
   padding: 0.875rem 1rem;
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--inset-bg);
+  border: 1px solid rgb(var(--ink) / 0.1);
   border-radius: 12px;
-  color: #fff;
+  color: var(--heading);
   font-size: 0.9375rem;
   transition: all 0.2s ease;
 }
@@ -235,7 +238,7 @@
 }
 
 .api-input-group input::placeholder {
-  color: #475569;
+  color: var(--text-faint);
 }
 
 .secret-input-wrapper {
@@ -258,13 +261,13 @@
   height: 32px;
   background: transparent;
   border: none;
-  color: #64748b;
+  color: var(--text-faint);
   cursor: pointer;
   transition: color 0.2s ease;
 }
 
 .toggle-secret:hover {
-  color: #fff;
+  color: var(--heading);
 }
 
 .api-error {
@@ -275,7 +278,7 @@
   background: rgba(239, 68, 68, 0.1);
   border: 1px solid rgba(239, 68, 68, 0.2);
   border-radius: 10px;
-  color: #ef4444;
+  color: var(--danger-ink);
   font-size: 0.875rem;
   margin-bottom: 1rem;
 }
@@ -318,11 +321,11 @@
   align-items: center;
   gap: 0.5rem;
   font-size: 0.75rem;
-  color: #64748b;
+  color: var(--text-faint);
 }
 
 .api-security-note svg {
-  color: #10b981;
+  color: var(--success-ink);
 }
 
 .api-connected-state {
@@ -338,13 +341,13 @@
   background: rgba(16, 185, 129, 0.1);
   border: 1px solid rgba(16, 185, 129, 0.3);
   border-radius: 20px;
-  color: #10b981;
+  color: var(--success-ink);
   font-weight: 600;
   margin-bottom: 0.75rem;
 }
 
 .api-connected-state p {
-  color: #94a3b8;
+  color: var(--text-faint);
   font-size: 0.875rem;
   margin-bottom: 1rem;
 }
@@ -357,7 +360,7 @@
   background: rgba(239, 68, 68, 0.1);
   border: 1px solid rgba(239, 68, 68, 0.3);
   border-radius: 10px;
-  color: #ef4444;
+  color: var(--danger-ink);
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
@@ -391,10 +394,10 @@
 
 .symbol-dropdown select {
   padding: 0.625rem 1rem;
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--inset-bg);
+  border: 1px solid rgb(var(--ink) / 0.1);
   border-radius: 10px;
-  color: #fff;
+  color: var(--heading);
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
@@ -420,13 +423,13 @@
 .ticker-price {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #fff;
+  color: var(--heading);
   line-height: 1.2;
 }
 
 .ticker-source {
   font-size: 0.65rem;
-  color: #8b5cf6;
+  color: var(--violet-ink);
   background: rgba(139, 92, 246, 0.15);
   padding: 0.125rem 0.375rem;
   border-radius: 4px;
@@ -447,12 +450,12 @@
 
 .ticker-change.positive {
   background: rgba(16, 185, 129, 0.1);
-  color: #10b981;
+  color: var(--success-ink);
 }
 
 .ticker-change.negative {
   background: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
+  color: var(--danger-ink);
 }
 
 .timeframe-selector {
@@ -466,7 +469,7 @@
   background: transparent;
   border: 1px solid transparent;
   border-radius: 8px;
-  color: #64748b;
+  color: var(--text-faint);
   font-size: 0.8125rem;
   font-weight: 500;
   cursor: pointer;
@@ -474,14 +477,14 @@
 }
 
 .timeframe-selector button:hover {
-  color: #fff;
-  background: rgba(255, 255, 255, 0.05);
+  color: var(--heading);
+  background: rgb(var(--ink) / 0.05);
 }
 
 .timeframe-selector button.active {
   background: rgba(139, 92, 246, 0.2);
   border-color: rgba(139, 92, 246, 0.3);
-  color: #8b5cf6;
+  color: var(--violet-ink);
 }
 
 /* Chart Toolbar */
@@ -505,23 +508,23 @@
   justify-content: center;
   width: 36px;
   height: 36px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgb(var(--ink) / 0.05);
+  border: 1px solid rgb(var(--ink) / 0.1);
   border-radius: 8px;
-  color: #94a3b8;
+  color: var(--text-faint);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .toolbar-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
+  background: rgb(var(--ink) / 0.1);
+  color: var(--heading);
 }
 
 .toolbar-btn.active {
   background: rgba(139, 92, 246, 0.2);
   border-color: rgba(139, 92, 246, 0.3);
-  color: #8b5cf6;
+  color: var(--violet-ink);
 }
 
 .drawing-tools {
@@ -529,8 +532,8 @@
   align-items: center;
   gap: 1rem;
   padding: 0 1rem;
-  border-left: 1px solid rgba(255, 255, 255, 0.1);
-  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  border-left: 1px solid rgb(var(--ink) / 0.1);
+  border-right: 1px solid rgb(var(--ink) / 0.1);
 }
 
 .tool-buttons {
@@ -544,27 +547,27 @@
   justify-content: center;
   width: 32px;
   height: 32px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgb(var(--ink) / 0.05);
+  border: 1px solid rgb(var(--ink) / 0.1);
   border-radius: 6px;
-  color: #94a3b8;
+  color: var(--text-faint);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .tool-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
+  background: rgb(var(--ink) / 0.1);
+  color: var(--heading);
 }
 
 .tool-btn.active {
   background: rgba(139, 92, 246, 0.2);
   border-color: rgba(139, 92, 246, 0.3);
-  color: #8b5cf6;
+  color: var(--violet-ink);
 }
 
 .tool-btn.delete {
-  color: #ef4444;
+  color: var(--danger-ink);
 }
 
 .tool-btn.delete:hover {
@@ -592,7 +595,7 @@
 
 .color-btn.active {
   border-color: #fff;
-  box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 8px rgb(var(--ink) / 0.3);
 }
 
 /* Chart Container */
@@ -648,7 +651,7 @@
 
 .market-stat .stat-label {
   font-size: 0.75rem;
-  color: #64748b;
+  color: var(--text-faint);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -656,15 +659,15 @@
 .market-stat .stat-value {
   font-size: 0.9375rem;
   font-weight: 600;
-  color: #fff;
+  color: var(--heading);
 }
 
 .market-stat .stat-value.positive {
-  color: #10b981;
+  color: var(--success-ink);
 }
 
 .market-stat .stat-value.negative {
-  color: #ef4444;
+  color: var(--danger-ink);
 }
 
 /* Trading Panel */
@@ -692,7 +695,7 @@
   gap: 0.5rem;
   font-size: 0.9375rem;
   font-weight: 600;
-  color: #fff;
+  color: var(--heading);
   margin: 0;
 }
 
@@ -702,17 +705,17 @@
   justify-content: center;
   width: 32px;
   height: 32px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgb(var(--ink) / 0.05);
+  border: 1px solid rgb(var(--ink) / 0.1);
   border-radius: 8px;
-  color: #94a3b8;
+  color: var(--text-faint);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .refresh-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
+  background: rgb(var(--ink) / 0.1);
+  color: var(--heading);
 }
 
 .refresh-btn:disabled {
@@ -734,18 +737,18 @@
 
 .balance-item .coin {
   font-size: 0.875rem;
-  color: #94a3b8;
+  color: var(--text-faint);
 }
 
 .balance-item .amount {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #fff;
+  color: var(--heading);
 }
 
 .balance-item .label {
   font-size: 0.75rem;
-  color: #8b5cf6;
+  color: var(--violet-ink);
   margin-top: 0.25rem;
 }
 
@@ -754,7 +757,7 @@
   justify-content: space-between;
   padding: 0.5rem 0;
   font-size: 0.875rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgb(var(--ink) / 0.05);
 }
 
 .balance-row:last-child {
@@ -762,26 +765,26 @@
 }
 
 .balance-row span:first-child {
-  color: #64748b;
+  color: var(--text-faint);
 }
 
 .balance-row span:last-child {
-  color: #fff;
+  color: var(--heading);
   font-weight: 500;
 }
 
 .balance-row .positive {
-  color: #10b981;
+  color: var(--success-ink);
 }
 
 .balance-row .negative {
-  color: #ef4444;
+  color: var(--danger-ink);
 }
 
 .no-balance {
   text-align: center;
   padding: 1rem;
-  color: #64748b;
+  color: var(--text-faint);
   font-size: 0.875rem;
 }
 
@@ -803,7 +806,7 @@
   gap: 0.5rem;
   font-size: 0.9375rem;
   font-weight: 600;
-  color: #fff;
+  color: var(--heading);
   margin: 0;
 }
 
@@ -814,14 +817,14 @@
   width: 28px;
   height: 28px;
   background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgb(var(--ink) / 0.1);
   border-radius: 6px;
-  color: #64748b;
+  color: var(--text-faint);
   cursor: pointer;
 }
 
 .toggle-panel:hover {
-  color: #fff;
+  color: var(--heading);
 }
 
 /* Side Toggle */
@@ -848,7 +851,7 @@
 .side-btn.buy {
   background: rgba(16, 185, 129, 0.1);
   border: 1px solid rgba(16, 185, 129, 0.2);
-  color: #10b981;
+  color: var(--success-ink);
 }
 
 .side-btn.buy.active {
@@ -860,7 +863,7 @@
 .side-btn.sell {
   background: rgba(239, 68, 68, 0.1);
   border: 1px solid rgba(239, 68, 68, 0.2);
-  color: #ef4444;
+  color: var(--danger-ink);
 }
 
 .side-btn.sell.active {
@@ -872,7 +875,7 @@
 /* Order Type Toggle */
 .order-type-toggle {
   display: flex;
-  background: rgba(0, 0, 0, 0.3);
+  background: var(--inset-bg);
   border-radius: 10px;
   padding: 0.25rem;
   margin-bottom: 1rem;
@@ -884,7 +887,7 @@
   background: transparent;
   border: none;
   border-radius: 8px;
-  color: #64748b;
+  color: var(--text-faint);
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
@@ -892,8 +895,8 @@
 }
 
 .order-type-toggle button.active {
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
+  background: rgb(var(--ink) / 0.1);
+  color: var(--heading);
 }
 
 /* Order Inputs */
@@ -914,7 +917,7 @@
   align-items: center;
   gap: 0.375rem;
   font-size: 0.8125rem;
-  color: #94a3b8;
+  color: var(--text-faint);
 }
 
 .order-inputs .input-group label svg {
@@ -923,10 +926,10 @@
 
 .order-inputs .input-group input[type="number"] {
   padding: 0.75rem 1rem;
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--inset-bg);
+  border: 1px solid rgb(var(--ink) / 0.1);
   border-radius: 10px;
-  color: #fff;
+  color: var(--heading);
   font-size: 0.9375rem;
   transition: all 0.2s ease;
 }
@@ -937,7 +940,7 @@
 }
 
 .order-inputs .input-group input::placeholder {
-  color: #475569;
+  color: var(--text-faint);
 }
 
 /* Leverage Input */
@@ -951,7 +954,7 @@
   flex: 1;
   height: 6px;
   border-radius: 3px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgb(var(--ink) / 0.1);
   appearance: none;
   cursor: pointer;
 }
@@ -972,15 +975,21 @@
   border-radius: 6px;
   font-size: 0.875rem;
   font-weight: 600;
-  color: #8b5cf6;
+  color: var(--violet-ink);
   text-align: center;
 }
 
 /* TP/SL Inputs */
 .tp-sl-inputs {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 0.75rem;
+}
+
+.tp-sl-inputs input {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .tp-sl-inputs .input-group.half {
@@ -990,7 +999,7 @@
 /* Order Summary */
 .order-summary {
   padding: 0.75rem;
-  background: rgba(0, 0, 0, 0.2);
+  background: var(--inset-bg);
   border-radius: 10px;
   margin-top: 0.75rem;
 }
@@ -1003,11 +1012,11 @@
 }
 
 .summary-row span:first-child {
-  color: #64748b;
+  color: var(--text-faint);
 }
 
 .summary-row span:last-child {
-  color: #fff;
+  color: var(--heading);
   font-weight: 500;
 }
 
@@ -1025,13 +1034,13 @@
 .order-message.error {
   background: rgba(239, 68, 68, 0.1);
   border: 1px solid rgba(239, 68, 68, 0.2);
-  color: #ef4444;
+  color: var(--danger-ink);
 }
 
 .order-message.success {
   background: rgba(16, 185, 129, 0.1);
   border: 1px solid rgba(16, 185, 129, 0.2);
-  color: #10b981;
+  color: var(--success-ink);
 }
 
 /* Place Order Button */
@@ -1079,7 +1088,7 @@
   gap: 0.375rem;
   margin-top: 0.5rem;
   font-size: 0.75rem;
-  color: #64748b;
+  color: var(--text-faint);
 }
 
 .paper-mode-note svg {
@@ -1094,7 +1103,7 @@
 
 .tabs-header {
   display: flex;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgb(var(--ink) / 0.08);
 }
 
 .tabs-header button {
@@ -1107,7 +1116,7 @@
   background: transparent;
   border: none;
   border-bottom: 2px solid transparent;
-  color: #64748b;
+  color: var(--text-faint);
   font-size: 0.8125rem;
   font-weight: 500;
   cursor: pointer;
@@ -1115,11 +1124,11 @@
 }
 
 .tabs-header button:hover {
-  color: #94a3b8;
+  color: var(--text-faint);
 }
 
 .tabs-header button.active {
-  color: #8b5cf6;
+  color: var(--violet-ink);
   border-bottom-color: #8b5cf6;
 }
 
@@ -1138,7 +1147,7 @@
 }
 
 .tab-content::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgb(var(--ink) / 0.1);
   border-radius: 2px;
 }
 
@@ -1149,7 +1158,7 @@
   align-items: center;
   justify-content: center;
   padding: 2rem;
-  color: #475569;
+  color: var(--text-faint);
 }
 
 .empty-state svg {
@@ -1165,7 +1174,7 @@
 /* Position Item */
 .position-item {
   padding: 0.875rem;
-  background: rgba(0, 0, 0, 0.2);
+  background: var(--inset-bg);
   border-radius: 10px;
   margin-bottom: 0.75rem;
 }
@@ -1183,7 +1192,7 @@
 
 .position-header .symbol {
   font-weight: 600;
-  color: #fff;
+  color: var(--heading);
 }
 
 .position-header .side {
@@ -1197,13 +1206,13 @@
 .position-header .side.long,
 .position-header .side.buy {
   background: rgba(16, 185, 129, 0.2);
-  color: #10b981;
+  color: var(--success-ink);
 }
 
 .position-header .side.short,
 .position-header .side.sell {
   background: rgba(239, 68, 68, 0.2);
-  color: #ef4444;
+  color: var(--danger-ink);
 }
 
 .position-header .leverage {
@@ -1212,7 +1221,7 @@
   border-radius: 4px;
   font-size: 0.75rem;
   font-weight: 600;
-  color: #8b5cf6;
+  color: var(--violet-ink);
 }
 
 .position-details {
@@ -1229,22 +1238,22 @@
 
 .position-details .label {
   font-size: 0.6875rem;
-  color: #64748b;
+  color: var(--text-faint);
   text-transform: uppercase;
 }
 
 .position-details .value {
   font-size: 0.8125rem;
   font-weight: 500;
-  color: #fff;
+  color: var(--heading);
 }
 
 .position-details .value.positive {
-  color: #10b981;
+  color: var(--success-ink);
 }
 
 .position-details .value.negative {
-  color: #ef4444;
+  color: var(--danger-ink);
 }
 
 .close-position-btn {
@@ -1258,7 +1267,7 @@
   background: rgba(239, 68, 68, 0.1);
   border: 1px solid rgba(239, 68, 68, 0.2);
   border-radius: 8px;
-  color: #ef4444;
+  color: var(--danger-ink);
   font-size: 0.8125rem;
   font-weight: 500;
   cursor: pointer;
@@ -1273,7 +1282,7 @@
 .order-item,
 .history-item {
   padding: 0.75rem;
-  background: rgba(0, 0, 0, 0.2);
+  background: var(--inset-bg);
   border-radius: 8px;
   margin-bottom: 0.5rem;
 }
@@ -1291,7 +1300,7 @@
   display: flex;
   gap: 0.75rem;
   font-size: 0.75rem;
-  color: #64748b;
+  color: var(--text-faint);
 }
 
 .history-header .pnl {
@@ -1300,11 +1309,11 @@
 }
 
 .history-header .pnl.positive {
-  color: #10b981;
+  color: var(--success-ink);
 }
 
 .history-header .pnl.negative {
-  color: #ef4444;
+  color: var(--danger-ink);
 }
 
 /* Spin Animation */
@@ -1416,7 +1425,7 @@
   .ticker-display {
     justify-content: space-between;
     padding: 0.75rem;
-    background: rgba(0, 0, 0, 0.2);
+    background: var(--inset-bg);
     border-radius: 10px;
   }
 
@@ -1476,7 +1485,7 @@
 
   .market-stat {
     padding: 0.5rem;
-    background: rgba(255, 255, 255, 0.02);
+    background: rgb(var(--ink) / 0.02);
     border-radius: 8px;
   }
 
@@ -1807,19 +1816,19 @@
 .notification.success {
   background: rgba(16, 185, 129, 0.15);
   border: 1px solid rgba(16, 185, 129, 0.4);
-  color: #10b981;
+  color: var(--success-ink);
 }
 
 .notification.error {
   background: rgba(239, 68, 68, 0.15);
   border: 1px solid rgba(239, 68, 68, 0.4);
-  color: #ef4444;
+  color: var(--danger-ink);
 }
 
 .notification.warning {
   background: rgba(245, 158, 11, 0.15);
   border: 1px solid rgba(245, 158, 11, 0.4);
-  color: #f59e0b;
+  color: var(--warning-ink);
 }
 
 @keyframes slideIn {
@@ -1855,7 +1864,7 @@
   background: rgba(239, 68, 68, 0.1);
   border: 1px solid rgba(239, 68, 68, 0.3);
   border-radius: 8px;
-  color: #ef4444;
+  color: var(--danger-ink);
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -1887,13 +1896,13 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  color: #f59e0b;
+  color: var(--warning-ink);
   margin: 0 0 1rem 0;
   font-size: 1.25rem;
 }
 
 .modal-content p {
-  color: #94a3b8;
+  color: var(--text-faint);
   margin: 0 0 1.5rem 0;
   font-size: 0.9rem;
   line-height: 1.6;
@@ -1917,7 +1926,7 @@
 .btn-cancel {
   background: rgba(100, 116, 139, 0.2);
   border: 1px solid rgba(100, 116, 139, 0.3);
-  color: #94a3b8;
+  color: var(--text-faint);
 }
 
 .btn-cancel:hover {
@@ -1927,7 +1936,7 @@
 .btn-confirm {
   background: rgba(239, 68, 68, 0.2);
   border: 1px solid rgba(239, 68, 68, 0.4);
-  color: #ef4444;
+  color: var(--danger-ink);
 }
 
 .btn-confirm:hover {
@@ -1941,7 +1950,7 @@
 .balance-stats {
   margin-top: 1rem;
   padding-top: 1rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid rgb(var(--ink) / 0.08);
 }
 
 .balance-stats .balance-row {
@@ -1978,13 +1987,13 @@
   flex-direction: column;
   gap: 0.125rem;
   padding: 0.5rem;
-  background: rgba(255, 255, 255, 0.02);
+  background: rgb(var(--ink) / 0.02);
   border-radius: 8px;
 }
 
 .position-details-grid .detail .label {
   font-size: 0.7rem;
-  color: #64748b;
+  color: var(--text-faint);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -1992,19 +2001,19 @@
 .position-details-grid .detail .value {
   font-size: 0.875rem;
   font-weight: 600;
-  color: #e2e8f0;
+  color: var(--heading);
 }
 
 .position-details-grid .detail .value.positive {
-  color: #10b981;
+  color: var(--success-ink);
 }
 
 .position-details-grid .detail .value.negative {
-  color: #ef4444;
+  color: var(--danger-ink);
 }
 
 .position-details-grid .detail .value.warning {
-  color: #f59e0b;
+  color: var(--warning-ink);
 }
 
 .close-position-btn {
@@ -2017,7 +2026,7 @@
   background: rgba(239, 68, 68, 0.1);
   border: 1px solid rgba(239, 68, 68, 0.3);
   border-radius: 10px;
-  color: #ef4444;
+  color: var(--danger-ink);
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -2057,22 +2066,22 @@
 
 .close-reason.takeProfit {
   background: rgba(16, 185, 129, 0.15);
-  color: #10b981;
+  color: var(--success-ink);
 }
 
 .close-reason.stopLoss {
   background: rgba(239, 68, 68, 0.15);
-  color: #ef4444;
+  color: var(--danger-ink);
 }
 
 .close-reason.liquidation {
   background: rgba(245, 158, 11, 0.15);
-  color: #f59e0b;
+  color: var(--warning-ink);
 }
 
 .close-reason.manual {
   background: rgba(100, 116, 139, 0.15);
-  color: #94a3b8;
+  color: var(--text-faint);
 }
 
 .history-item.detailed .history-details {
@@ -2080,17 +2089,17 @@
   flex-wrap: wrap;
   gap: 0.75rem;
   font-size: 0.8rem;
-  color: #94a3b8;
+  color: var(--text-faint);
   margin-bottom: 0.5rem;
 }
 
 .history-time {
   font-size: 0.7rem;
-  color: #64748b;
+  color: var(--text-faint);
 }
 
 .empty-note {
   font-size: 0.75rem;
-  color: #64748b;
+  color: var(--text-faint);
   margin-top: 0.25rem;
 }

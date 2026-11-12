@@ -55,7 +55,7 @@
 .legal-section h2 {
   font-size: var(--font-size-2xl);
   font-weight: var(--font-weight-bold);
-  color: var(--color-primary);
+  color: var(--gold-ink);
   margin-bottom: var(--space-4);
 }
 
@@ -88,7 +88,7 @@
 }
 
 .legal-section a {
-  color: var(--color-primary);
+  color: var(--gold-ink);
   text-decoration: underline;
   transition: color var(--transition-fast);
 }
@@ -107,7 +107,7 @@
 }
 
 .legal-warning p {
-  color: var(--color-warning-dark);
+  color: var(--warning-ink);
   margin-bottom: 0;
   font-weight: var(--font-weight-medium);
 }

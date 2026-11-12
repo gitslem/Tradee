@@ -418,7 +418,7 @@
 
 .note-card-category.strategy { 
   background: rgba(59, 130, 246, 0.15); 
-  color: #1e40af; 
+  color: var(--blue-ink); 
   border: 1px solid rgba(59, 130, 246, 0.3);
 }
 
@@ -430,25 +430,25 @@
 
 .note-card-category.idea { 
   background: rgba(251, 191, 36, 0.15); 
-  color: #d97706; 
+  color: var(--warning-ink); 
   border: 1px solid rgba(251, 191, 36, 0.3);
 }
 
 .note-card-category.reflection { 
   background: rgba(139, 92, 246, 0.15); 
-  color: #7c3aed; 
+  color: var(--violet-ink); 
   border: 1px solid rgba(139, 92, 246, 0.3);
 }
 
 .note-card-category.concept { 
   background: rgba(236, 72, 153, 0.15); 
-  color: #db2777; 
+  color: var(--pink-ink); 
   border: 1px solid rgba(236, 72, 153, 0.3);
 }
 
 .note-card-category.general { 
   background: rgba(107, 114, 128, 0.15); 
-  color: #4b5563; 
+  color: var(--text-muted); 
   border: 1px solid rgba(107, 114, 128, 0.3);
 }
 

@@ -6,7 +6,7 @@
   margin-bottom: 32px;
 }
 
-.recommendations-header {
+.crypto-recommendations .recommendations-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -15,44 +15,44 @@
   flex-wrap: wrap;
 }
 
-.header-left {
+.crypto-recommendations .header-left {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-.header-icon {
-  color: #8b5cf6;
+.crypto-recommendations .header-icon {
+  color: var(--violet-ink);
   flex-shrink: 0;
 }
 
-.recommendations-header h2 {
+.crypto-recommendations .recommendations-header h2 {
   font-size: 24px;
   font-weight: 700;
-  color: #f1f5f9;
+  color: var(--heading);
   margin: 0;
 }
 
-.header-subtitle {
+.crypto-recommendations .header-subtitle {
   font-size: 14px;
-  color: #94a3b8;
+  color: var(--text-faint);
   margin: 4px 0 0 0;
 }
 
-.header-right {
+.crypto-recommendations .header-right {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-.last-update {
+.crypto-recommendations .last-update {
   font-size: 13px;
-  color: #94a3b8;
+  color: var(--text-faint);
 }
 
-.refresh-btn {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+.crypto-recommendations .refresh-btn {
+  background: rgb(var(--ink) / 0.05);
+  border: 1px solid rgb(var(--ink) / 0.1);
   border-radius: 8px;
   padding: 8px 12px;
   display: flex;
@@ -60,22 +60,22 @@
   gap: 6px;
   cursor: pointer;
   transition: all 0.2s;
-  color: #94a3b8;
+  color: var(--text-faint);
 }
 
-.refresh-btn:hover:not(:disabled) {
+.crypto-recommendations .refresh-btn:hover:not(:disabled) {
   border-color: #8b5cf6;
-  color: #8b5cf6;
+  color: var(--violet-ink);
   background: rgba(139, 92, 246, 0.1);
   transform: translateY(-1px);
 }
 
-.refresh-btn:disabled {
+.crypto-recommendations .refresh-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.refresh-btn.spinning svg {
+.crypto-recommendations .refresh-btn.spinning svg {
   animation: spin 1s linear infinite;
 }
 
@@ -88,29 +88,29 @@
   }
 }
 
-.loading-recs {
+.crypto-recommendations .loading-recs {
   text-align: center;
   padding: 60px 20px;
-  color: #94a3b8;
+  color: var(--text-faint);
 }
 
-.loading-recs .spinner {
+.crypto-recommendations .loading-recs .spinner {
   animation: spin 1s linear infinite;
   margin-bottom: 16px;
 }
 
-.no-recommendations {
+.crypto-recommendations .no-recommendations {
   text-align: center;
   padding: 60px 20px;
-  color: #94a3b8;
+  color: var(--text-faint);
 }
 
-.no-recommendations svg {
+.crypto-recommendations .no-recommendations svg {
   margin-bottom: 16px;
   opacity: 0.5;
 }
 
-.retry-btn {
+.crypto-recommendations .retry-btn {
   margin-top: 16px;
   background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
   color: white;
@@ -122,21 +122,21 @@
   font-weight: 600;
 }
 
-.retry-btn:hover {
+.crypto-recommendations .retry-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3);
 }
 
-.recommendations-grid {
+.crypto-recommendations .recommendations-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 16px;
   margin-bottom: 20px;
 }
 
-.recommendation-card {
-  background: rgba(30, 41, 59, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+.crypto-recommendations .recommendation-card {
+  background: var(--surface-solid);
+  border: 1px solid rgb(var(--ink) / 0.1);
   border-radius: 12px;
   padding: 20px;
   position: relative;
@@ -144,40 +144,40 @@
   backdrop-filter: blur(10px);
 }
 
-.recommendation-card:hover {
+.crypto-recommendations .recommendation-card:hover {
   border-color: #8b5cf6;
   transform: translateY(-4px);
   box-shadow: 0 12px 24px rgba(139, 92, 246, 0.2);
 }
 
-.recommendation-card.rank-1 {
+.crypto-recommendations .recommendation-card.rank-1 {
   border-color: rgba(251, 191, 36, 0.5);
-  background: linear-gradient(135deg, rgba(251, 191, 36, 0.1) 0%, rgba(30, 41, 59, 0.9) 100%);
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.1) 0%, var(--surface-solid) 100%);
 }
 
-.recommendation-card.rank-1:hover {
+.crypto-recommendations .recommendation-card.rank-1:hover {
   border-color: #fbbf24;
   box-shadow: 0 12px 24px rgba(251, 191, 36, 0.2);
 }
 
-.card-rank {
+.crypto-recommendations .card-rank {
   position: absolute;
   top: 12px;
   right: 12px;
-  background: rgba(255, 255, 255, 0.1);
-  color: #94a3b8;
+  background: rgb(var(--ink) / 0.1);
+  color: var(--text-faint);
   font-weight: 700;
   font-size: 12px;
   padding: 4px 8px;
   border-radius: 6px;
 }
 
-.rank-1 .card-rank {
+.crypto-recommendations .rank-1 .card-rank {
   background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
   color: #0f172a;
 }
 
-.card-header {
+.crypto-recommendations .card-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -185,21 +185,21 @@
   gap: 12px;
 }
 
-.pair-info {
+.crypto-recommendations .pair-info {
   flex: 1;
 }
 
-.pair-name {
+.crypto-recommendations .pair-name {
   font-size: 20px;
   font-weight: 700;
-  color: #f1f5f9;
+  color: var(--heading);
   margin: 0 0 6px 0;
 }
 
-.narrative-badge {
+.crypto-recommendations .narrative-badge {
   display: inline-block;
   background: rgba(139, 92, 246, 0.2);
-  color: #a78bfa;
+  color: var(--violet-ink);
   font-size: 11px;
   font-weight: 600;
   padding: 4px 8px;
@@ -208,43 +208,43 @@
   letter-spacing: 0.5px;
 }
 
-.score-badge {
+.crypto-recommendations .score-badge {
   display: flex;
   flex-direction: column;
   align-items: center;
   min-width: 60px;
   padding: 8px;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgb(var(--ink) / 0.1);
 }
 
-.score-badge.excellent {
+.crypto-recommendations .score-badge.excellent {
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: white;
 }
 
-.score-badge.good {
+.crypto-recommendations .score-badge.good {
   background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   color: white;
 }
 
-.score-badge.fair {
+.crypto-recommendations .score-badge.fair {
   background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
   color: white;
 }
 
-.score-badge.poor {
+.crypto-recommendations .score-badge.poor {
   background: linear-gradient(135deg, #64748b 0%, #475569 100%);
   color: white;
 }
 
-.score-value {
+.crypto-recommendations .score-value {
   font-size: 24px;
   font-weight: 700;
   line-height: 1;
 }
 
-.score-label {
+.crypto-recommendations .score-label {
   font-size: 10px;
   opacity: 0.9;
   text-transform: uppercase;
@@ -252,66 +252,66 @@
   margin-top: 2px;
 }
 
-.card-body {
+.crypto-recommendations .card-body {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-.reason-text {
+.crypto-recommendations .reason-text {
   font-size: 14px;
-  color: #cbd5e1;
+  color: var(--text-muted);
   line-height: 1.5;
   padding: 10px;
-  background: rgba(15, 23, 42, 0.6);
+  background: var(--inset-bg);
   border-radius: 6px;
   border-left: 3px solid #8b5cf6;
 }
 
-.metrics-row {
+.crypto-recommendations .metrics-row {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 8px;
 }
 
-.metric {
+.crypto-recommendations .metric {
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 8px;
-  background: rgba(15, 23, 42, 0.6);
+  background: var(--inset-bg);
   border-radius: 6px;
   gap: 4px;
 }
 
-.metric svg {
-  color: #94a3b8;
+.crypto-recommendations .metric svg {
+  color: var(--text-faint);
 }
 
-.metric-label {
+.crypto-recommendations .metric-label {
   font-size: 10px;
-  color: #64748b;
+  color: var(--text-faint);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
-.metric-value {
+.crypto-recommendations .metric-value {
   font-size: 13px;
   font-weight: 600;
-  color: #e2e8f0;
+  color: var(--heading);
 }
 
-.price-change {
+.crypto-recommendations .price-change {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 10px;
-  background: rgba(15, 23, 42, 0.6);
+  background: var(--inset-bg);
   border-radius: 6px;
 }
 
-.change-positive,
-.change-negative {
+.crypto-recommendations .change-positive,
+.crypto-recommendations .change-negative {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -319,28 +319,28 @@
   font-size: 14px;
 }
 
-.change-positive {
-  color: #10b981;
+.crypto-recommendations .change-positive {
+  color: var(--success-ink);
 }
 
-.change-negative {
-  color: #ef4444;
+.crypto-recommendations .change-negative {
+  color: var(--danger-ink);
 }
 
-.change-label {
+.crypto-recommendations .change-label {
   font-size: 12px;
-  color: #64748b;
+  color: var(--text-faint);
 }
 
-.recommendations-footer {
+.crypto-recommendations .recommendations-footer {
   margin-top: 16px;
   padding-top: 16px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid rgb(var(--ink) / 0.1);
 }
 
-.disclaimer {
+.crypto-recommendations .disclaimer {
   font-size: 12px;
-  color: #64748b;
+  color: var(--text-faint);
   text-align: center;
   margin: 0;
   line-height: 1.5;
@@ -352,59 +352,59 @@
     padding: 16px;
   }
 
-  .recommendations-header {
+  .crypto-recommendations .recommendations-header {
     flex-direction: column;
     align-items: flex-start;
   }
 
-  .recommendations-header h2 {
+  .crypto-recommendations .recommendations-header h2 {
     font-size: 1.25rem;
   }
 
-  .header-subtitle {
+  .crypto-recommendations .header-subtitle {
     font-size: 0.8rem;
   }
 
-  .header-right {
+  .crypto-recommendations .header-right {
     width: 100%;
     justify-content: space-between;
   }
 
-  .recommendations-grid {
+  .crypto-recommendations .recommendations-grid {
     grid-template-columns: 1fr;
   }
 
-  .recommendation-card {
+  .crypto-recommendations .recommendation-card {
     padding: 16px;
   }
 
-  .pair-name {
+  .crypto-recommendations .pair-name {
     font-size: 1.125rem;
   }
 
-  .score-value {
+  .crypto-recommendations .score-value {
     font-size: 20px;
   }
 
-  .reason-text {
+  .crypto-recommendations .reason-text {
     font-size: 0.8125rem;
     padding: 8px;
   }
 
-  .metrics-row {
+  .crypto-recommendations .metrics-row {
     grid-template-columns: repeat(3, 1fr);
     gap: 6px;
   }
 
-  .metric {
+  .crypto-recommendations .metric {
     padding: 6px;
   }
 
-  .metric-label {
+  .crypto-recommendations .metric-label {
     font-size: 9px;
   }
 
-  .metric-value {
+  .crypto-recommendations .metric-value {
     font-size: 11px;
   }
 }
@@ -414,15 +414,15 @@
     padding: 12px;
   }
 
-  .recommendations-header h2 {
+  .crypto-recommendations .recommendations-header h2 {
     font-size: 1.125rem;
   }
 
-  .recommendation-card {
+  .crypto-recommendations .recommendation-card {
     padding: 14px;
   }
 
-  .metrics-row {
+  .crypto-recommendations .metrics-row {
     grid-template-columns: 1fr;
   }
 }

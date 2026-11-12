@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import './PaperTrading.css'
 import TradingBackground from '../components/TradingBackground'
 import { useAuth } from '../context/auth'
+import { useTheme } from '../context/theme'
 import { apiKeyService } from '../services/apiKeyService'
 import { bybitService } from '../services/bybitService'
 import { paperTradingService, BYBIT_FEES } from '../services/paperTradingService'
@@ -32,6 +33,7 @@ const TIMEFRAMES = [
 
 const PaperTrading = () => {
   const { user } = useAuth()
+  const { theme } = useTheme()
   const userId = user?.uid || 'anonymous'
 
   // API Configuration State
@@ -205,12 +207,12 @@ const PaperTrading = () => {
       symbol: tvSymbol,
       interval: selectedTimeframe,
       timezone: 'Etc/UTC',
-      theme: 'dark',
+      theme: theme === 'night' ? 'dark' : 'light',
       style: '1',
       locale: 'en',
       enable_publishing: false,
-      backgroundColor: 'rgba(15, 23, 42, 0.95)',
-      gridColor: 'rgba(255, 255, 255, 0.05)',
+      backgroundColor: theme === 'night' ? 'rgba(15, 23, 42, 0.95)' : 'rgba(255, 255, 255, 1)',
+      gridColor: theme === 'night' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(15, 23, 42, 0.06)',
       hide_top_toolbar: false,
       hide_legend: false,
       hide_side_toolbar: false,
@@ -235,7 +237,7 @@ const PaperTrading = () => {
     return () => {
       chartContainer.innerHTML = ''
     }
-  }, [selectedPair, selectedTimeframe])
+  }, [selectedPair, selectedTimeframe, theme])
 
   // Fetch ticker data periodically and check TP/SL
   useEffect(() => {

@@ -1052,3 +1052,8 @@
     padding: 0.625rem;
   }
 }
+
+/* Darken the bright Fibonacci level colours enough to read on light cards */
+[data-theme='day'] .market-structure-page .fib-label {
+  color: color-mix(in srgb, var(--fib-color) 62%, #000);
+}

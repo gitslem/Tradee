@@ -90,7 +90,7 @@
 }
 
 .login-form input:disabled {
-  background: #f9fafb;
+  background: rgb(var(--ink) / 0.04);
   cursor: not-allowed;
 }
 
@@ -105,7 +105,7 @@
 .input-hint {
   margin-top: 8px;
   font-size: 0.875rem;
-  color: #6b7280;
+  color: var(--text-faint);
   text-align: center;
 }
 
@@ -114,7 +114,7 @@
   align-items: center;
   gap: 12px;
   padding: 14px 16px;
-  background: #f3f4f6;
+  background: rgb(var(--ink) / 0.06);
   border-radius: 12px;
   border: 2px solid #e5e7eb;
 }
@@ -122,23 +122,23 @@
 .email-display span {
   flex: 1;
   font-weight: 500;
-  color: #374151;
+  color: var(--heading);
 }
 
 .change-email-btn {
   padding: 6px 12px;
-  background: white;
+  background: var(--surface-solid);
   border: 1px solid #d1d5db;
   border-radius: 8px;
   font-size: 0.875rem;
   font-weight: 500;
-  color: #6366f1;
+  color: var(--violet-ink);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .change-email-btn:hover {
-  background: #f9fafb;
+  background: rgb(var(--ink) / 0.04);
   border-color: #6366f1;
 }
 
@@ -173,7 +173,7 @@
 .resend-button {
   padding: 12px 24px;
   background: transparent;
-  color: #6366f1;
+  color: var(--violet-ink);
   border: 2px solid #e5e7eb;
   border-radius: 12px;
   font-size: 0.95rem;
@@ -183,7 +183,7 @@
 }
 
 .resend-button:hover:not(:disabled) {
-  background: #f9fafb;
+  background: rgb(var(--ink) / 0.04);
   border-color: #6366f1;
 }
 
@@ -194,10 +194,10 @@
 
 .error-message {
   padding: 12px 16px;
-  background: #fef2f2;
+  background: rgba(239, 68, 68, 0.1);
   border: 1px solid #fecaca;
   border-radius: 8px;
-  color: #dc2626;
+  color: var(--danger-ink);
   font-size: 0.9rem;
   font-weight: 500;
   text-align: center;
@@ -216,11 +216,11 @@
   align-items: center;
   gap: 8px;
   font-size: 0.875rem;
-  color: #6b7280;
+  color: var(--text-faint);
 }
 
 .login-features .feature svg {
-  color: #10b981;
+  color: var(--success-ink);
 }
 
 .login-info {
@@ -236,7 +236,7 @@
 .login-info h3 {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #1f2937;
+  color: var(--heading);
   margin-bottom: 24px;
   background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
   -webkit-background-clip: text;
@@ -257,7 +257,7 @@
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  color: #4b5563;
+  color: var(--text-muted);
   font-size: 1rem;
   line-height: 1.6;
 }
@@ -326,12 +326,12 @@
 .google-sign-in-button {
   width: 100%;
   padding: 16px 24px;
-  background: white;
+  background: var(--surface-solid);
   border: 2px solid #e5e7eb;
   border-radius: 12px;
   font-size: 1rem;
   font-weight: 600;
-  color: #374151;
+  color: var(--heading);
   cursor: pointer;
   transition: all 0.3s ease;
   display: flex;
@@ -342,7 +342,7 @@
 }
 
 .google-sign-in-button:hover:not(:disabled) {
-  background: #f9fafb;
+  background: rgb(var(--ink) / 0.04);
   border-color: #d1d5db;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -366,15 +366,15 @@
 .login-benefits {
   margin: 32px 0;
   padding: 24px;
-  background: linear-gradient(135deg, #f0f9ff 0%, #f5f3ff 100%);
+  background: rgb(var(--ink) / 0.03);
   border-radius: 12px;
-  border: 1px solid #e0e7ff;
+  border: 1px solid var(--card-border);
 }
 
 .login-benefits h3 {
   font-size: 1.1rem;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--heading);
   margin-bottom: 16px;
 }
 
@@ -389,12 +389,12 @@
   align-items: center;
   gap: 12px;
   padding: 8px 0;
-  color: #4b5563;
+  color: var(--text-muted);
   font-size: 0.95rem;
 }
 
 .login-benefits li svg {
-  color: #6366f1;
+  color: var(--violet-ink);
   flex-shrink: 0;
 }
 
@@ -410,9 +410,9 @@
   justify-content: center;
   gap: 8px;
   font-size: 0.875rem;
-  color: #6b7280;
+  color: var(--text-faint);
 }
 
 .privacy-note svg {
-  color: #10b981;
+  color: var(--success-ink);
 }

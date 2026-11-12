@@ -259,7 +259,7 @@
 .input-with-unit .unit {
   position: absolute;
   left: 1rem;
-  color: rgb(var(--ink) / 0.4);
+  color: rgb(var(--ink) / 0.6);
   font-weight: 600;
   z-index: 1;
 }
@@ -349,7 +349,7 @@
 .preset-btn.active {
   background: var(--preset-color);
   border-color: var(--preset-color);
-  color: #fff;
+  color: #0f172a;
   box-shadow: 0 4px 15px color-mix(in srgb, var(--preset-color) 40%, transparent);
 }
 
@@ -1395,3 +1395,9 @@
 }
 
 /* Dark mode is default - no additional styles needed */
+
+/* Risk colours are set inline; darken them for light backgrounds */
+[data-theme='day'] .calculator-page .stat-chip > span,
+[data-theme='day'] .calculator-page .stat-chip > svg {
+  filter: brightness(0.7);
+}
