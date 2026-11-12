@@ -1,5 +1,5 @@
 import { Mail, MessageCircle, HelpCircle, Clock, Shield } from 'lucide-react'
-import TradingBackground from './TradingBackground'
+import TradingBackground from '../components/TradingBackground'
 import './Support.css'
 
 const Support = () => {

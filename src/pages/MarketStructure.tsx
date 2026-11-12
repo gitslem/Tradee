@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 import './MarketStructure.css'
-import CandleDataCard from './CandleDataCard'
-import TradingBackground from './TradingBackground'
+import CandleDataCard from '../components/CandleDataCard'
+import TradingBackground from '../components/TradingBackground'
 import { calculateSupportResistance } from '../services/ohlcvService'
 import type { OHLCVData } from '../services/ohlcvService'
 import {

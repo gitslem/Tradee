@@ -11,10 +11,10 @@ import {
 import { useAuth } from '../context/AuthContext'
 import { firestoreService } from '../services/firestoreService'
 import type { Trade, JournalNote } from '../services/firestoreService'
-import TradingJournal from './TradingJournal'
-import PersonalNotes from './PersonalNotes'
-import CryptoRecommendations from './CryptoRecommendations'
-import TradingBackground from './TradingBackground'
+import TradingJournal from '../components/TradingJournal'
+import PersonalNotes from '../components/PersonalNotes'
+import CryptoRecommendations from '../components/CryptoRecommendations'
+import TradingBackground from '../components/TradingBackground'
 import './JournalHome.css'
 
 // Export Modal Component

@@ -152,6 +152,22 @@ Steps:
 - **Hosting**: Firebase Hosting
 - **CI/CD**: GitHub Actions
 
+## Project Structure
+
+```
+├── public/                 Static assets (logos, favicon, web manifest)
+├── src/
+│   ├── pages/              Route-level pages (calculator, market, price action, journal, ...)
+│   ├── components/         Reusable UI (navigation, footer, cards, backgrounds, ...)
+│   ├── context/            React context providers (auth, day/night theme)
+│   ├── services/           Exchange APIs, Firestore and paper-trading logic
+│   ├── config/             Firebase and exchange configuration
+│   └── styles/             Design tokens (colors, spacing, day/night themes)
+├── firestore.rules         Firestore security rules
+├── firebase.json           Firebase Hosting configuration
+└── .github/workflows/      Deploy to Firebase on push to main, previews on PRs
+```
+
 ## Key Calculations
 
 ### Position Sizing

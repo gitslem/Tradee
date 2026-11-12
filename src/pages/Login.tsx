@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Shield, CheckCircle, Database, Download } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
-import TradingBackground from './TradingBackground'
+import TradingBackground from '../components/TradingBackground'
 import './Login.css'
 
 const Login = () => {

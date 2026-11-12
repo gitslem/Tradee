@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 import './PriceActionAnalysis.css'
-import CandleDataCard from './CandleDataCard'
-import TradingBackground from './TradingBackground'
+import CandleDataCard from '../components/CandleDataCard'
+import TradingBackground from '../components/TradingBackground'
 import type { OHLCVData } from '../services/ohlcvService'
 import {
   BarChart3, TrendingUp, TrendingDown, Activity, Zap, Target,

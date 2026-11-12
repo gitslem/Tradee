@@ -1,8 +1,8 @@
 import { useState, useMemo, useCallback } from 'react'
 import './PositionCalculator.css'
-import LivePriceCard from './LivePriceCard'
-import FloatingExchangeSelector from './FloatingExchangeSelector'
-import TradingBackground from './TradingBackground'
+import LivePriceCard from '../components/LivePriceCard'
+import FloatingExchangeSelector from '../components/FloatingExchangeSelector'
+import TradingBackground from '../components/TradingBackground'
 import { getExchangeFees, getMaxLeverage, getMaintenanceMargin, calculateFundingCost, EXCHANGES } from '../config/exchanges'
 import type { AccountType } from '../config/exchanges'
 import {

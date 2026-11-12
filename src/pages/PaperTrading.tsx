@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import './PaperTrading.css'
-import TradingBackground from './TradingBackground'
+import TradingBackground from '../components/TradingBackground'
 import { useAuth } from '../context/AuthContext'
 import { apiKeyService } from '../services/apiKeyService'
 import { bybitService } from '../services/bybitService'

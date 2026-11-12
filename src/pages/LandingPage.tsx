@@ -18,9 +18,9 @@ import {
   Play,
   Rocket
 } from 'lucide-react'
-import TradingBackground from './TradingBackground'
-import LiveTradingChart from './LiveTradingChart'
-import EmailSubscription from './EmailSubscription'
+import TradingBackground from '../components/TradingBackground'
+import LiveTradingChart from '../components/LiveTradingChart'
+import EmailSubscription from '../components/EmailSubscription'
 import './LandingPage.css'
 
 // Simulated live prices for the ticker
