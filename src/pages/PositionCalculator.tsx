@@ -67,6 +67,7 @@ interface SavedSettings {
   cryptoPair?: string
   selectedExchange?: string
   accountType?: AccountType
+  feeRegion?: Record<string, string>
   useLeverage?: boolean
   leverage?: string
 }
@@ -100,21 +101,32 @@ const PositionCalculator = () => {
   const [selectedExchange, setSelectedExchange] = useState<string>(
     saved.selectedExchange && EXCHANGES[saved.selectedExchange] ? saved.selectedExchange : 'binance'
   )
-  const [accountType, setAccountType] = useState<AccountType>(saved.accountType ?? 'futures')
+  // A saved account type may no longer exist on that exchange (e.g. margin removed)
+  const [accountType, setAccountType] = useState<AccountType>(() => {
+    const types = EXCHANGES[saved.selectedExchange ?? '']?.accountTypes
+    const wanted = saved.accountType ?? 'futures'
+    return !types || types[wanted] ? wanted : ACCOUNT_TYPE_ORDER.find(t => types[t]) ?? 'spot'
+  })
+  // Chosen fee region per exchange, e.g. { coinbase: 'eu-uk' }
+  const [feeRegion, setFeeRegion] = useState<Record<string, string>>(saved.feeRegion ?? {})
+  const feeRegions = EXCHANGES[selectedExchange].feeRegions
+  const selectedRegion = feeRegions?.some(r => r.id === feeRegion[selectedExchange])
+    ? feeRegion[selectedExchange]
+    : feeRegions?.[0].id
 
   useEffect(() => {
     try {
-      const settings: SavedSettings = { accountBalance, riskPercentage, cryptoPair, selectedExchange, accountType, useLeverage, leverage }
+      const settings: SavedSettings = { accountBalance, riskPercentage, cryptoPair, selectedExchange, accountType, feeRegion, useLeverage, leverage }
       localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings))
     } catch {
       // Storage unavailable (private mode) - settings just won't persist
     }
-  }, [accountBalance, riskPercentage, cryptoPair, selectedExchange, accountType, useLeverage, leverage])
+  }, [accountBalance, riskPercentage, cryptoPair, selectedExchange, accountType, feeRegion, useLeverage, leverage])
   const [showAdvanced, setShowAdvanced] = useState<boolean>(false)
   const [showLeverage, setShowLeverage] = useState<boolean>(false)
 
   // Get exchange-specific fees
-  const exchangeFees = getExchangeFees(selectedExchange, accountType)
+  const exchangeFees = getExchangeFees(selectedExchange, accountType, selectedRegion)
   const maxLeverageAllowed = getMaxLeverage(selectedExchange, accountType)
 
   // Spot trades have no leverage; elsewhere clamp to the exchange maximum
@@ -449,6 +461,21 @@ const PositionCalculator = () => {
                 </button>
               )}
             </div>
+
+            {/* Fee region, for exchanges that charge by region */}
+            {feeRegions && (
+              <div className="account-type-toggle fee-region-toggle" role="group" aria-label="Fee region">
+                {feeRegions.map(r => (
+                  <button
+                    key={r.id}
+                    className={`type-btn ${selectedRegion === r.id ? 'active' : ''}`}
+                    onClick={() => setFeeRegion(prev => ({ ...prev, [selectedExchange]: r.id }))}
+                  >
+                    {r.label} fees
+                  </button>
+                ))}
+              </div>
+            )}
 
             {/* Position Type */}
             <div className="position-type-selector">

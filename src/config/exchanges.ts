@@ -10,6 +10,14 @@ export interface LeverageTier {
   description: string
 }
 
+// Some exchanges charge different fees by region. The first region uses
+// the base fees; others override the account types they list.
+export interface FeeRegion {
+  id: string
+  label: string
+  fees: Partial<Record<'spot' | 'futures' | 'margin', ExchangeFees>>
+}
+
 export interface ExchangeConfig {
   id: string
   name: string
@@ -31,6 +39,7 @@ export interface ExchangeConfig {
     futures: ExchangeFees
     margin: ExchangeFees
   }
+  feeRegions?: FeeRegion[]
 
   // Leverage Information
   maxLeverage: {
@@ -87,7 +96,7 @@ export const EXCHANGES: Record<string, ExchangeConfig> = {
     maxLeverage: {
       spot: 1, // Spot itself has no leverage
       futures: 125,
-      margin: 3 // Cross margin; Cross Margin Pro was retired in 2026
+      margin: 10 // Isolated margin (cross margin is 3x)
     },
 
     leverageTiers: [
@@ -237,6 +246,11 @@ export const EXCHANGES: Record<string, ExchangeConfig> = {
         funding: 0.0
       }
     },
+
+    feeRegions: [
+      { id: 'us', label: 'US', fees: {} },
+      { id: 'eu-uk', label: 'EU / UK', fees: { spot: { maker: 0.25, taker: 0.5, funding: 0.0 } } }
+    ],
 
     maxLeverage: {
       spot: 1, // No spot margin on Coinbase
@@ -562,9 +576,10 @@ export const getExchangeConfig = (exchangeId: string): ExchangeConfig => {
   return EXCHANGES[exchangeId] || EXCHANGES.binance
 }
 
-export const getExchangeFees = (exchangeId: string, accountType: AccountType): ExchangeFees => {
+export const getExchangeFees = (exchangeId: string, accountType: AccountType, regionId?: string): ExchangeFees => {
   const exchange = getExchangeConfig(exchangeId)
-  return exchange.fees[accountType]
+  const region = exchange.feeRegions?.find(r => r.id === regionId)
+  return region?.fees[accountType] ?? exchange.fees[accountType]
 }
 
 export const getMaxLeverage = (exchangeId: string, accountType: AccountType): number => {

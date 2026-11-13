@@ -162,6 +162,19 @@
   margin-bottom: 1.5rem;
 }
 
+.calculator-page .fee-region-toggle {
+  margin-top: -0.75rem;
+  margin-bottom: 1.25rem;
+  padding: 0.25rem;
+  border-radius: 12px;
+}
+
+.calculator-page .fee-region-toggle .type-btn {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.8rem;
+  border-radius: 9px;
+}
+
 .type-btn {
   flex: 1;
   padding: 0.875rem 1rem;
