@@ -230,11 +230,11 @@
 }
 
 /* Input Groups */
-.input-group {
+.calculator-page .input-group {
   margin-bottom: 1.25rem;
 }
 
-.input-group label {
+.calculator-page .input-group label {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -244,19 +244,19 @@
   color: rgb(var(--ink) / 0.7);
 }
 
-.input-group label svg {
+.calculator-page .input-group label svg {
   color: var(--gold-ink);
   width: 16px;
   height: 16px;
 }
 
-.input-with-unit {
+.calculator-page .input-with-unit {
   position: relative;
   display: flex;
   align-items: center;
 }
 
-.input-with-unit .unit {
+.calculator-page .input-with-unit .unit {
   position: absolute;
   left: 1rem;
   color: rgb(var(--ink) / 0.6);
@@ -264,9 +264,9 @@
   z-index: 1;
 }
 
-.input-with-unit input {
+.calculator-page .input-with-unit input {
   width: 100%;
-  padding: 1rem 1rem 1rem 2rem;
+  padding: 1rem 1rem 1rem 2.5rem;
   background: rgb(var(--ink) / 0.05);
   border: 2px solid rgb(var(--ink) / 0.1);
   border-radius: 12px;
@@ -276,24 +276,24 @@
   transition: all 0.3s ease;
 }
 
-.input-with-unit input:focus {
+.calculator-page .input-with-unit input:focus {
   outline: none;
   border-color: #d4af37;
   background: rgba(212, 175, 55, 0.05);
   box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.1);
 }
 
-.input-with-unit.stop-loss input:focus {
+.calculator-page .input-with-unit.stop-loss input:focus {
   border-color: #ef4444;
   box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
 }
 
-.input-with-unit.take-profit input:focus {
+.calculator-page .input-with-unit.take-profit input:focus {
   border-color: #10b981;
   box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
 }
 
-.input-group select {
+.calculator-page .input-group select {
   width: 100%;
   padding: 1rem;
   background: rgb(var(--ink) / 0.05);
@@ -311,12 +311,12 @@
   background-size: 16px;
 }
 
-.input-group select:focus {
+.calculator-page .input-group select:focus {
   outline: none;
   border-color: #d4af37;
 }
 
-.input-group select option {
+.calculator-page .input-group select option {
   background: var(--surface-solid);
   color: var(--heading);
 }
@@ -1159,20 +1159,20 @@
     font-size: 0.9rem;
   }
 
-  .input-group {
+  .calculator-page .input-group {
     margin-bottom: 1rem;
   }
 
-  .input-group label {
+  .calculator-page .input-group label {
     font-size: 0.8rem;
   }
 
-  .input-with-unit input {
-    padding: 0.875rem 0.875rem 0.875rem 1.75rem;
+  .calculator-page .input-with-unit input {
+    padding: 0.875rem 0.875rem 0.875rem 2.25rem;
     font-size: 1rem;
   }
 
-  .input-group select {
+  .calculator-page .input-group select {
     padding: 0.875rem;
     font-size: 1rem;
   }

@@ -337,20 +337,20 @@
   gap: 1rem;
 }
 
-.input-group {
+.market-structure-page .input-group {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 
-.input-group label {
+.market-structure-page .input-group label {
   font-size: 0.75rem;
   font-weight: 600;
   color: rgb(var(--ink) / 0.5);
   text-transform: uppercase;
 }
 
-.input-group input {
+.market-structure-page .input-group input {
   padding: 0.75rem 1rem;
   background: rgb(var(--ink) / 0.05);
   border: 1px solid rgb(var(--ink) / 0.1);
@@ -359,7 +359,7 @@
   font-weight: 600;
 }
 
-.input-group input:focus {
+.market-structure-page .input-group input:focus {
   outline: none;
   border-color: #10b981;
   box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
@@ -1002,8 +1002,8 @@
     min-width: fit-content;
   }
 
-  .input-with-unit input,
-  .input-group select {
+  .market-structure-page .input-with-unit input,
+  .market-structure-page .input-group select {
     padding: 0.875rem;
     font-size: 1rem;
   }
