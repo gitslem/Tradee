@@ -1,243 +1,130 @@
-# Traddii - Crypto Trading Platform
+# Traddii
 
-A comprehensive web-based trading tool for cryptocurrency traders to calculate position sizes, manage risk, analyze market structure and price action, and track trading performance with a cloud-based trading journal.
+**Free, open-source tools for crypto traders: size positions, read market structure and price action, practise with virtual money, and keep a trading journal.**
+
+[![Deploy](https://github.com/gitslem/Tradee/actions/workflows/firebase-deploy.yml/badge.svg)](https://github.com/gitslem/Tradee/actions/workflows/firebase-deploy.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+
+**Live app:** https://traddii.web.app
+
+> ⚠️ Traddii is an educational tool, not financial advice. Trading crypto is risky; never risk money you can't afford to lose.
 
 ## Features
 
-### 1. Trading Journal (New!)
-- **Google Sign-In Authentication**: Secure login with your Google account
-- **Cloud-Based Storage**: All trades saved to Firebase Firestore
-- **Real-time Sync**: Trades automatically sync across devices
-- **Trade Management**:
-  - Add, edit, and delete trades
-  - Track entry/exit prices, quantity, and leverage
-  - Support for both base and quote currency quantities
-  - Open and closed trade tracking
-- **Performance Analytics**:
-  - Total P&L (Profit & Loss)
-  - Win rate percentage
-  - Profit factor calculation
-  - Best performing trading pairs
-  - Open trades monitoring
-- **Data Export**:
-  - Export to CSV format
-  - Export to JSON format
-  - Download trading history anytime
-- **Multi-Exchange Support**: Binance, Bybit, OKX, and more
+| Page | What it does |
+|---|---|
+| **Calculator** | Sizes a position so a stop-loss hit loses exactly the amount you chose to risk, including entry and exit fees. Covers 10 exchanges (Binance, Bybit, OKX, Kraken, ...) with spot, futures and margin fees and leverage limits. Shows the liquidation price, multiple take-profits, and a "Practice this trade" hand-off. |
+| **Market Structure** | Finds the trend from real swing highs and lows (higher highs and higher lows, and the reverse), and clusters support and resistance from swing points and round numbers. Shows the trend on 15m, 1H, 4H and 1D side by side, plus direction-aware Fibonacci levels. |
+| **AI Market Brief** | On the Market page. Shows positioning data (funding rate, open-interest change, long/short account ratio, Fear & Greed), then writes a short bull/bear brief using only that data. Runs on Traddii's free Gemini, or on the user's own model. |
+| **Price Action** | Reads the last closed candle: engulfing, harami, inside bar, doji types, hammer and shooting star (depending on the prior trend), marubozu and spinning top. Compares its volume with the 20-candle average, adds nearby levels and higher-timeframe context, and includes a pre-trade checklist. |
+| **Practice** | Paper trading with $10,000 of virtual money, using live Bybit prices and real Bybit fees. Supports market and limit orders, take-profit and stop-loss, leverage, and liquidation. Bybit **testnet** accounts can be connected too. |
+| **Journal** | Log trades and notes, synced to your account with Google sign-in. Shows win rate, profit factor and streaks, and exports to CSV, JSON, text or PDF. |
 
-### 2. Position Calculator
-- **Risk Management Calculations**:
-  - Stop-Loss % Distance = |Entry Price – Stop Price| ÷ Entry Price
-  - Risk Amount = Account Balance × Risk % per Trade
-  - Position Size = (Account Balance × Risk % per Trade) ÷ Stop Loss % Distance
-- **Support for Multiple Crypto Pairs**: BTC/USDT, ETH/USDT, BNB/USDT, SOL/USDT, and more
-- **Long & Short Positions**: Calculate for both buy and sell positions
-- **Risk/Reward Ratio**: Automatic R:R calculation with recommendations
-- **Position Validation**: Smart warnings for improper stop loss and take profit levels
-- **Real-time Calculations**: Instant updates as you adjust parameters
+Every tool page has a **Guide** button explaining how to use it. Day and night themes are included.
 
-### 3. Market Structure Analysis
-- **Trend Detection**:
-  - Higher Highs & Higher Lows (Uptrend)
-  - Lower Highs & Lower Lows (Downtrend)
-  - Range-bound market identification
-- **Fibonacci Retracement Levels**: Automatic calculation of key Fib levels (23.6%, 38.2%, 50%, 61.8%, 78.6%)
-- **Support & Resistance Levels**:
-  - Add multiple S/R levels
-  - Mark strength (weak, moderate, strong)
-  - Track number of touches
-- **Range Position Indicator**: Visual representation of current price within range
-- **Trading Suggestions**: Context-aware recommendations based on market structure
+### Bring your own AI model
 
-### 4. Price Action Analysis
-- **Candlestick Pattern Recognition**:
-  - Doji (indecision)
-  - Marubozu (strong momentum)
-  - Hammer/Hanging Man (reversal patterns)
-  - Shooting Star/Inverted Hammer
-  - Spinning Top (volatility/indecision)
-  - Engulfing patterns
-- **Volume Analysis**:
-  - Volume change percentage
-  - Volume confirmation for price moves
-  - Conviction analysis
-- **Visual Candle Representation**: See body and wick percentages
-- **Entry Signal Generation**: Combined price action and volume signals
-- **Pre-Trade Checklist**: Essential checks before entering a trade
-- **Multiple Timeframe Support**: 1M, 5M, 15M, 30M, 1H, 4H, 1D, 1W
+The AI Market Brief uses Traddii's free Gemini (Firebase AI Logic) by default. Users can switch to their own model from the gear icon:
 
-## Installation
+- **On their computer:** [Ollama](https://ollama.com) or [LM Studio](https://lmstudio.ai)
+- **Online, free tiers:** [OpenRouter](https://openrouter.ai) free models, [Groq](https://console.groq.com), or their own [Google AI Studio](https://aistudio.google.com/apikey) Gemini key
+- **Anything else** with an OpenAI-compatible API
 
-### Prerequisites
+Requests go straight from the browser to the chosen provider. Keys are stored only in that browser. If the user's model fails, Traddii falls back to Gemini.
 
-- Node.js 20+ installed
-- Firebase account (for authentication and database)
-- Google account (for user sign-in)
+## Tech stack
 
-### Quick Start
+React 19, TypeScript, Vite 7, Firebase (Hosting, Authentication, Firestore, AI Logic, App Check), and GitHub Actions for CI/CD. Market data comes from the public Binance and Bybit APIs and alternative.me (Fear & Greed). None of them need an API key.
+
+## Getting started
+
+Requirements: **Node.js 20+** and npm.
 
 ```bash
-# Clone the repository
 git clone https://github.com/gitslem/Tradee.git
 cd Tradee
-
-# Install dependencies
 npm install
-
-# Configure Firebase
-cp .env.example .env
-# Edit .env with your Firebase credentials
-
-# Run development server
-npm run dev
-
-# Build for production
-npm run build
+cp .env.example .env   # add your Firebase web config (see below)
+npm run dev            # http://localhost:5173
 ```
 
-### Firebase Setup
+The Calculator, Market, Price and Practice pages work without signing in. The Journal, sign-in and Traddii Gemini need a Firebase project.
 
-Steps:
-1. Create a Firebase project at https://console.firebase.google.com/
-2. Enable Google Authentication
-3. Create a Firestore database
-4. Copy Firebase config to `.env` file
-5. Deploy the security rules and site with `npm run firebase:deploy`
+| Command | Purpose |
+|---|---|
+| `npm run dev` | Start the dev server |
+| `npm run build` | Type-check and build to `dist/` |
+| `npm run lint` | Run ESLint |
+| `npm run preview` | Serve the production build locally |
 
-## Usage
+### Firebase setup
 
-1. **Trading Journal**:
-   - Click "Login" and sign in with your Google account
-   - Add trades with detailed information (pair, entry/exit, quantity, leverage)
-   - Track your performance with real-time statistics
-   - Export your trading history to CSV or JSON
-   - Access your trades from any device
+1. Create a project at the [Firebase console](https://console.firebase.google.com/) and add a **web app**. Copy its config values into `.env`.
+2. **Authentication:** enable the **Google** sign-in provider.
+3. **Firestore:** create a database, then deploy the security rules:
+   ```bash
+   npx firebase-tools deploy --only firestore:rules --project <your-project-id>
+   ```
+4. **AI Logic (optional, for the AI Market Brief):** go to AI Logic, then Get started, then choose **Gemini Developer API**. This works on the free Spark plan.
+5. **App Check (optional, recommended):** this stops others using your Gemini quota.
+   - In Google Cloud **Fraud Defense** (reCAPTCHA), create a score-based **Website** key.
+   - Register it under App Check for your web app.
+   - Set it as `VITE_RECAPTCHA_SITE_KEY`.
+   - For local development, register the debug token that the browser console prints.
 
-2. **Position Calculator Tab**:
-   - Enter your account balance
-   - Set your risk percentage (recommended: 1-2%)
-   - Input entry price, stop loss, and take profit
-   - View calculated position size and risk details
+### Environment variables
 
-3. **Market Structure Tab**:
-   - Input current price and recent highs/lows
-   - Add support and resistance levels
-   - Analyze trend direction and Fibonacci levels
-   - Get trading suggestions based on market structure
+See [`.env.example`](./.env.example). Firebase web config values are public by design; access is controlled by `firestore.rules` and App Check. Never commit `.env`.
 
-4. **Price Action Tab**:
-   - Enter candlestick OHLC data
-   - Input volume information
-   - Get pattern recognition and signals
-   - Review pre-trade checklist
-
-## Risk Warning
-
-⚠️ **Trading cryptocurrencies carries significant risk. This tool is for educational purposes only.**
-
-- Always use proper risk management
-- Never risk more than you can afford to lose
-- Do your own research before making any trades
-- Past performance does not guarantee future results
-- Consider consulting with a financial advisor
-
-## Technology Stack
-
-- **Frontend**: React 19 + TypeScript
-- **Build Tool**: Vite 7
-- **Styling**: Custom CSS with gradient themes
-- **State Management**: React Context API + Hooks
-- **Authentication**: Firebase Authentication (Google OAuth)
-- **Database**: Cloud Firestore (NoSQL)
-- **Hosting**: Firebase Hosting
-- **CI/CD**: GitHub Actions
-
-## Project Structure
-
-```
-├── public/                 Static assets (logos, favicon, web manifest)
-├── src/
-│   ├── pages/              Route-level pages (calculator, market, price action, journal, ...)
-│   ├── components/         Reusable UI (navigation, footer, cards, backgrounds, ...)
-│   ├── context/            React context providers (auth, day/night theme)
-│   ├── services/           Exchange APIs, Firestore and paper-trading logic
-│   ├── config/             Firebase and exchange configuration
-│   └── styles/             Design tokens (colors, spacing, day/night themes)
-├── firestore.rules         Firestore security rules
-├── firebase.json           Firebase Hosting configuration
-└── .github/workflows/      Deploy to Firebase on push to main, previews on PRs
-```
-
-## Key Calculations
-
-### Position Sizing
-```
-Stop-Loss % Distance = |Entry Price – Stop Price| ÷ Entry Price
-Risk Amount = Account Balance × Risk % per Trade
-Position Size = Risk Amount ÷ Stop Loss % Distance
-```
-
-### Risk/Reward Ratio
-```
-R:R = |Take Profit - Entry Price| ÷ |Entry Price - Stop Loss|
-```
-
-### Fibonacci Levels
-```
-Fib Level = Low + (High - Low) × Fibonacci %
-```
+| Variable | Required | Purpose |
+|---|---|---|
+| `VITE_FIREBASE_*` | For sign-in, Journal and AI | Firebase web app config |
+| `VITE_GEMINI_MODEL` | No | Gemini model for the AI brief (default `gemini-3.5-flash-lite`) |
+| `VITE_RECAPTCHA_SITE_KEY` | No | reCAPTCHA Enterprise key that turns on App Check |
 
 ## Deployment
 
-### Firebase Hosting
+Pushes to `main` build the app and deploy it to Firebase Hosting through GitHub Actions ([`.github/workflows`](./.github/workflows)). Pull requests from branches in this repository get a temporary preview URL.
 
-```bash
-# Build and deploy to Firebase
-npm run firebase:deploy
+The workflows need these repository secrets:
+- `FIREBASE_SERVICE_ACCOUNT`
+- the `VITE_*` values listed above
 
-# Preview deployment locally
-npm run firebase:preview
+Firestore rules are deployed by hand with the command above.
+
+## Project structure
+
+```
+src/
+├── pages/        Route-level pages (Calculator, Market, Price, Practice, Journal, ...)
+├── components/   UI components (cards, charts, page guides, AI brief, ...)
+├── services/     Market data, pattern and structure detection, paper trading, Firestore
+│   └── ai/       AI provider chain, market brief, positioning data
+├── context/      Auth and theme providers
+├── config/       Firebase and exchange fee/leverage settings
+└── styles/       Design tokens for the day and night themes
+firestore.rules   Firestore security rules
 ```
 
-### GitHub Actions
+## Key formulas
 
-Automatic deployment is configured via GitHub Actions:
-- **Production**: Pushes to `main` branch automatically deploy to Firebase
-- **Preview**: Pull requests create temporary preview deployments
-
-See [.github/workflows/](./.github/workflows/) for workflow configurations.
-
-## Best Practices
-
-1. **Trading Journal**:
-   - Log every trade immediately after execution
-   - Include detailed notes about strategy and market conditions
-   - Review performance weekly to identify patterns
-   - Use tags to categorize trades by strategy
-
-2. **Risk Management**:
-   - Keep risk per trade at 1-2% of account balance
-   - Always use stop losses
-   - Aim for minimum 1:2 risk/reward ratio
-
-3. **Market Structure**:
-   - Trade in the direction of the trend
-   - Wait for confirmations at key levels
-   - Use higher timeframe structure for context
-
-4. **Price Action**:
-   - Confirm patterns with volume
-   - Multiple timeframe analysis
-   - Wait for clear signals before entering
+```
+Position size (qty)  = risk amount ÷ (|entry − stop| + (entry + stop) × fee rate)
+Margin               = position value ÷ leverage
+Risk/reward          = |take profit − entry| ÷ |entry − stop|
+Fibonacci level      = swing low + (swing high − swing low) × ratio   (direction-aware)
+```
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome. Please read [CONTRIBUTING.md](./CONTRIBUTING.md) and the [Code of Conduct](./CODE_OF_CONDUCT.md).
+
+To report a security problem, see [SECURITY.md](./SECURITY.md). Please don't open a public issue for it.
 
 ## License
 
-MIT License. See [LICENSE](./LICENSE).
+[MIT](./LICENSE) © 2025-2026 gitslem
 
 ## Disclaimer
 
-This software is provided "as is" without warranty of any kind. The authors are not responsible for any trading losses incurred while using this tool. Always do your own research and trade responsibly.
+This software is provided "as is", without warranty of any kind. Nothing in Traddii, including the AI briefs, is financial advice. The authors are not responsible for trading losses. Always do your own research.

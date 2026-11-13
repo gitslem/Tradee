@@ -6,8 +6,16 @@ on:
       - main
       - master
 
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+
 jobs:
   build-and-preview:
+    # Secrets are not available to pull requests from forks, so previews only
+    # run for branches in this repository. Forks still get the CI build check.
+    if: github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
 
     steps:
@@ -25,6 +33,15 @@ jobs:
 
       - name: Run build
         run: npm run build
+        env:
+          VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
+          VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}
+          VITE_FIREBASE_PROJECT_ID: ${{ secrets.VITE_FIREBASE_PROJECT_ID }}
+          VITE_FIREBASE_STORAGE_BUCKET: ${{ secrets.VITE_FIREBASE_STORAGE_BUCKET }}
+          VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID }}
+          VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID }}
+          VITE_GEMINI_MODEL: ${{ secrets.VITE_GEMINI_MODEL }}
+          VITE_RECAPTCHA_SITE_KEY: ${{ secrets.VITE_RECAPTCHA_SITE_KEY }}
 
       - name: Verify build output
         run: |

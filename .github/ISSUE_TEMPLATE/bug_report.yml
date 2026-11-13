@@ -1,0 +1,69 @@
+name: Bug report
+description: Something isn't working as expected
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug! Please do **not** include API keys, account details or other private data.
+        Security problems go through [private reporting](https://github.com/gitslem/Tradee/security/advisories/new) instead.
+  - type: dropdown
+    id: page
+    attributes:
+      label: Where did it happen?
+      options:
+        - Home / landing page
+        - Calculator
+        - Market Structure
+        - Price Action
+        - Practice (paper trading)
+        - Practice (Bybit testnet)
+        - Trading Journal
+        - AI Market Brief / AI settings
+        - Sign-in
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you see, and what did you expect to see instead?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Go to ...
+        2. Enter ...
+        3. Click ...
+    validations:
+      required: true
+  - type: input
+    id: values
+    attributes:
+      label: Values used (if it's a calculation)
+      description: For example pair, entry, stop loss, take profit, leverage and exchange.
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and device
+      placeholder: Chrome 142 on macOS, Safari on iPhone 15, ...
+    validations:
+      required: true
+  - type: dropdown
+    id: theme
+    attributes:
+      label: Theme
+      options:
+        - Day
+        - Night
+        - Both
+        - Not relevant
+  - type: textarea
+    id: extra
+    attributes:
+      label: Screenshots or console errors
+      description: Drag images here, or paste errors from the browser console (F12).
