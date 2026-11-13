@@ -101,7 +101,7 @@ const LivePriceCard = ({ pair, exchange = 'binance', onUsePrice }: LivePriceCard
       <div className="price-header">
         <div className="price-title">
           <h3>{priceData.symbol}</h3>
-          <span className="exchange-badge">{priceData.exchange.toUpperCase()}</span>
+          <span className="exchange-badge">{priceData.exchange === 'gateio' ? 'GATE' : priceData.exchange.toUpperCase()}</span>
           <span className="live-indicator">
             <span className="pulse"></span>
             LIVE
@@ -115,6 +115,8 @@ const LivePriceCard = ({ pair, exchange = 'binance', onUsePrice }: LivePriceCard
           <RefreshCw size={18} />
         </button>
       </div>
+
+      {priceData.note && <p className="price-note">{priceData.note}</p>}
 
       <div className="price-main">
         <div className="current-price">

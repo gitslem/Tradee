@@ -320,3 +320,11 @@
     text-align: center;
   }
 }
+
+/* Shown when the price is not from the chosen exchange's USDT market */
+.live-price-card .price-note {
+  margin: -12px 0 16px;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  opacity: 0.75;
+}
