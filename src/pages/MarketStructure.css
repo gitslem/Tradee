@@ -494,7 +494,7 @@
 }
 
 .touches-input input {
-  width: 40px;
+  width: 52px;
   padding: 0.5rem;
   background: rgb(var(--ink) / 0.05);
   border: 1px solid rgb(var(--ink) / 0.1);
@@ -1056,4 +1056,19 @@
 /* Darken the bright Fibonacci level colours enough to read on light cards */
 [data-theme='day'] .market-structure-page .fib-label {
   color: color-mix(in srgb, var(--fib-color) 62%, #000);
+}
+
+/* Where the structure came from */
+.market-structure-page .trend-source {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  color: var(--text-faint);
+}
+
+.market-structure-page .fib-direction,
+.market-structure-page .fib-empty {
+  margin: -0.25rem 0 0.75rem;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
 }

@@ -995,3 +995,51 @@
     padding: 1.25rem;
   }
 }
+
+/* Neutral (indecision) states */
+.price-action-page .candle-type-badge.neutral,
+.price-action-page .signal-icon.neutral {
+  background: rgb(var(--ink) / 0.06);
+  color: var(--text-muted);
+}
+
+.price-action-page .signal-section.neutral {
+  border-color: var(--card-border);
+}
+
+.price-action-page .candle-source,
+.price-action-page .pattern-context {
+  font-size: 0.75rem;
+  color: var(--text-faint);
+}
+
+.price-action-page .pattern-context {
+  margin: -0.25rem 0 0.75rem;
+}
+
+.price-action-page .manual-subheading {
+  margin: 1.25rem 0 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.price-action-page .manual-inputs select {
+  width: 100%;
+  padding: 0.625rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid var(--card-border);
+  background: var(--field-bg);
+  color: var(--heading);
+}
+
+.price-action-page .input-error {
+  margin: 0 0 0.75rem;
+  font-size: 0.8125rem;
+  color: var(--danger-ink);
+}
+
+.price-action-page .checklist-item:focus-visible {
+  outline: 2px solid var(--gold-ink);
+  outline-offset: 2px;
+}

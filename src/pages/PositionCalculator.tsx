@@ -5,6 +5,7 @@ import FloatingExchangeSelector from '../components/FloatingExchangeSelector'
 import TradingBackground from '../components/TradingBackground'
 import { getExchangeFees, getMaxLeverage, getMaintenanceMargin, calculateFundingCost, EXCHANGES } from '../config/exchanges'
 import type { AccountType } from '../config/exchanges'
+import { formatPrice } from '../utils/format'
 import {
   Calculator, TrendingUp, TrendingDown, Shield, AlertTriangle,
   DollarSign, Percent, Target, Zap, ChevronDown, ChevronUp,
@@ -53,16 +54,6 @@ const RISK_PRESETS = [
 const LEVERAGE_PRESETS = [1, 3, 5, 10, 20, 50]
 
 const ACCOUNT_TYPE_ORDER: AccountType[] = ['futures', 'spot', 'margin']
-
-// Price formatting that stays readable for both BTC (60000) and DOGE (0.1234)
-const formatPrice = (value: number): string => {
-  if (!Number.isFinite(value)) return '—'
-  const abs = Math.abs(value)
-  if (abs >= 1000) return value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-  if (abs >= 1) return value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 })
-  if (abs === 0) return '0'
-  return value.toPrecision(4).replace(/0+$/, '').replace(/\.$/, '')
-}
 
 type Message = { type: 'error' | 'warning' | 'success'; message: string }
 

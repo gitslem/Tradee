@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { RefreshCw, TrendingUp, TrendingDown, Clock } from 'lucide-react'
 import { getOHLCVData, identifyCandlePattern, INTERVALS } from '../services/ohlcvService'
 import type { OHLCVData } from '../services/ohlcvService'
+import { formatPrice } from '../utils/format'
 import './CandleDataCard.css'
 
 interface CandleDataCardProps {
@@ -80,12 +81,6 @@ const CandleDataCard = ({ pair, timeframe, onUseCandleData, autoFill = true }: C
     if (candleData && onUseCandleData) {
       onUseCandleData(candleData)
     }
-  }
-
-  const formatPrice = (price: number) => {
-    if (price >= 1000) return price.toFixed(2)
-    if (price >= 1) return price.toFixed(4)
-    return price.toFixed(6)
   }
 
   const formatVolume = (volume: number) => {
@@ -184,7 +179,7 @@ const CandleDataCard = ({ pair, timeframe, onUseCandleData, autoFill = true }: C
             {isUp ? '+' : ''}{candleData.priceChangePercent.toFixed(2)}%
           </span>
           <span className="change-amount">
-            {isUp ? '+' : ''}${Math.abs(candleData.priceChange).toFixed(2)}
+            {isUp ? '+' : '-'}${formatPrice(Math.abs(candleData.priceChange))}
           </span>
         </div>
       </div>

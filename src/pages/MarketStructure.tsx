@@ -1,10 +1,11 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useRef } from 'react'
 import type { SyntheticEvent } from 'react'
 import './MarketStructure.css'
 import CandleDataCard from '../components/CandleDataCard'
 import TradingBackground from '../components/TradingBackground'
-import { calculateSupportResistance } from '../services/ohlcvService'
-import type { OHLCVData } from '../services/ohlcvService'
+import { getMarketStructure, classifyStructure } from '../services/ohlcvService'
+import type { OHLCVData, PriceLevel } from '../services/ohlcvService'
+import { formatPrice } from '../utils/format'
 import {
   Layers, TrendingUp, TrendingDown, Activity, Target, Plus, X,
   ChevronDown, ChevronUp, BarChart2, Shield, AlertTriangle,
@@ -15,6 +16,20 @@ interface SupportResistance {
   level: string
   strength: 'weak' | 'moderate' | 'strong'
   touches: string
+}
+
+const toRow = (l: PriceLevel): SupportResistance => ({
+  level: String(Number(l.price.toPrecision(6))),
+  strength: l.strength,
+  touches: String(l.touches)
+})
+
+const TREND_COLORS: Record<string, string> = {
+  uptrend: 'var(--success-ink)',
+  downtrend: 'var(--danger-ink)',
+  expansion: 'var(--warning-ink)',
+  range: 'var(--violet-ink)',
+  unknown: 'var(--text-faint)'
 }
 
 const FIBONACCI_LEVELS = [
@@ -39,10 +54,18 @@ const MarketStructure = () => {
   // Live data refreshes every 30s. Once the user edits values by hand, stop
   // overwriting them until they click "Apply Data" or switch pair.
   const [liveSync, setLiveSync] = useState(true)
+  // Bumped on every manual edit so a slow fetch can't overwrite it
+  const editVersion = useRef(0)
+  const requestId = useRef(0)
+  const [structureInfo, setStructureInfo] = useState<{ candles: number; interval: string; swings: number } | null>(null)
   const pauseLiveOnEdit = (ev: SyntheticEvent) => {
     const target = ev.target as HTMLElement
     if (!target.closest('.manual-inputs, .levels-section')) return
-    if (ev.type === 'change' || target.closest('button')) setLiveSync(false)
+    if (ev.type === 'change' || target.closest('button')) {
+      editVersion.current++
+      setLiveSync(false)
+      setStructureInfo(null)
+    }
   }
 
   const [supportLevels, setSupportLevels] = useState<SupportResistance[]>([
@@ -55,44 +78,55 @@ const MarketStructure = () => {
     { level: '3800', strength: 'strong', touches: '4' }
   ])
 
-  const handleUsePriceData = (ohlcv: OHLCVData) => {
+  const handleUsePriceData = async (ohlcv: OHLCVData) => {
     setLiveSync(true)
-    const levels = calculateSupportResistance(ohlcv)
     setCurrentPrice(ohlcv.current.close.toString())
-    setRecentHigh(ohlcv.current.high.toString())
-    setRecentLow(ohlcv.current.low.toString())
-    setPrevHigh(ohlcv.previous.high.toString())
-    setPrevLow(ohlcv.previous.low.toString())
 
-    setSupportLevels(levels.support.map((price, index) => ({
-      level: price.toFixed(2),
-      strength: index === 0 ? 'strong' : 'moderate',
-      touches: (index + 2).toString()
-    })))
+    const id = ++requestId.current
+    const edits = editVersion.current
+    const structure = await getMarketStructure(ohlcv.symbol, ohlcv.interval)
+    // Drop stale responses (pair changed, newer request, or user edited meanwhile)
+    if (!structure || id !== requestId.current || edits !== editVersion.current) return
 
-    setResistanceLevels(levels.resistance.map((price, index) => ({
-      level: price.toFixed(2),
-      strength: index === 0 ? 'strong' : 'moderate',
-      touches: (index + 2).toString()
-    })))
+    setCurrentPrice(structure.currentPrice.toString())
+    if (structure.lastHigh !== null) setRecentHigh(structure.lastHigh.toString())
+    if (structure.lastLow !== null) setRecentLow(structure.lastLow.toString())
+    if (structure.prevHigh !== null) setPrevHigh(structure.prevHigh.toString())
+    if (structure.prevLow !== null) setPrevLow(structure.prevLow.toString())
+    setSupportLevels(structure.support.map(toRow))
+    setResistanceLevels(structure.resistance.map(toRow))
+    setStructureInfo({
+      candles: structure.candlesAnalyzed,
+      interval: structure.interval,
+      swings: structure.swingHighs.length + structure.swingLows.length
+    })
   }
 
-  // Fibonacci retracement levels
-  // Fib Level Price = Low + (High - Low) × Fib Ratio
-  // Standard Fibonacci Levels: 0%, 23.6%, 38.2%, 50%, 61.8%, 78.6%, 100%
+  // Fibonacci retracement levels between the last swing high and low.
+  // In an uptrend the pullback is measured down from the high
+  //   (Price = High - Range × Ratio); otherwise up from the low
+  //   (Price = Low + Range × Ratio).
   // 38.2% - 61.8% is commonly treated as the key retracement zone
+  const structureTrend = classifyStructure(
+    parseFloat(recentHigh), parseFloat(prevHigh), parseFloat(recentLow), parseFloat(prevLow)
+  )
+  const fibFromHigh = structureTrend === 'uptrend'
   const fibonacciLevels = useMemo(() => {
     const high = parseFloat(recentHigh)
     const low = parseFloat(recentLow)
-    const diff = high - low
     const current = parseFloat(currentPrice)
+    if (!(high > low) || !(low > 0)) return []
+    const diff = high - low
 
-    return FIBONACCI_LEVELS.map(fib => ({
-      ...fib,
-      price: low + diff * fib.level,
-      isNearby: Math.abs((low + diff * fib.level) - current) / current < 0.01
-    }))
-  }, [recentHigh, recentLow, currentPrice])
+    return FIBONACCI_LEVELS.map(fib => {
+      const price = fibFromHigh ? high - diff * fib.level : low + diff * fib.level
+      return {
+        ...fib,
+        price,
+        isNearby: current > 0 && Math.abs(price - current) / current < 0.01
+      }
+    })
+  }, [recentHigh, recentLow, currentPrice, fibFromHigh])
 
   // Market structure analysis (Dow Theory)
   // Uptrend: Higher Highs (HH) and Higher Lows (HL)
@@ -105,30 +139,35 @@ const MarketStructure = () => {
     const pHigh = parseFloat(prevHigh)
     const pLow = parseFloat(prevLow)
 
-    let trend: 'uptrend' | 'downtrend' | 'expansion' | 'range' = 'range'
-    let trendDescription = ''
+    const values = [current, high, low, pHigh, pLow]
+    const trend = values.every(v => Number.isFinite(v) && v > 0)
+      ? classifyStructure(high, pHigh, low, pLow)
+      : 'unknown'
 
     // Dow Theory Market Structure Detection
-    if (high > pHigh && low > pLow) {
-      trend = 'uptrend'
-      trendDescription = 'Higher Highs and Higher Lows detected'
-    } else if (high < pHigh && low < pLow) {
-      trend = 'downtrend'
-      trendDescription = 'Lower Highs and Lower Lows detected'
-    } else if (high > pHigh && low < pLow) {
-      trend = 'expansion'
-      trendDescription = 'Range expanding - high volatility'
-    } else {
-      trend = 'range'
-      trendDescription = 'Consolidating between support and resistance'
-    }
+    const trendDescription = {
+      uptrend: 'Higher high and higher low between the last two swings',
+      downtrend: 'Lower high and lower low between the last two swings',
+      expansion: 'Higher high but lower low - range expanding, high volatility',
+      range: 'Lower high and higher low - consolidating',
+      unknown: 'Enter valid swing highs and lows to detect structure'
+    }[trend]
 
     // Range Position Calculation
-    const rangePosition = ((current - low) / (high - low)) * 100
+    const validRange = high > low && Number.isFinite(current)
+    const rangePosition = validRange ? ((current - low) / (high - low)) * 100 : NaN
     let positionLabel = ''
     let positionType: 'warning' | 'neutral' | 'info' = 'neutral'
 
-    if (rangePosition > 80) {
+    if (!validRange) {
+      positionLabel = 'Insufficient range'
+    } else if (rangePosition > 100) {
+      positionLabel = 'Above the swing high (breakout)'
+      positionType = 'warning'
+    } else if (rangePosition < 0) {
+      positionLabel = 'Below the swing low (breakdown)'
+      positionType = 'info'
+    } else if (rangePosition > 80) {
       positionLabel = 'Near resistance zone'
       positionType = 'warning'
     } else if (rangePosition < 20) {
@@ -151,14 +190,7 @@ const MarketStructure = () => {
     }
   }
 
-  const getTrendColor = () => {
-    switch (marketAnalysis.trend) {
-      case 'uptrend': return '#10b981'
-      case 'downtrend': return '#ef4444'
-      case 'expansion': return '#f59e0b'
-      default: return '#8b5cf6'
-    }
-  }
+  const getTrendColor = () => TREND_COLORS[marketAnalysis.trend]
 
   const addSupport = () => {
     setSupportLevels([...supportLevels, { level: '', strength: 'moderate', touches: '1' }])
@@ -205,7 +237,7 @@ const MarketStructure = () => {
         {/* Trend Overview Card */}
         <div className="trend-overview glass-card">
           <div className="trend-main">
-            <div className="trend-icon" style={{ background: `${getTrendColor()}20`, color: getTrendColor() }}>
+            <div className="trend-icon" style={{ background: `color-mix(in srgb, ${getTrendColor()} 14%, transparent)`, color: getTrendColor() }}>
               {getTrendIcon()}
             </div>
             <div className="trend-info">
@@ -213,12 +245,17 @@ const MarketStructure = () => {
                 {marketAnalysis.trend.toUpperCase()}
               </span>
               <span className="trend-desc">{marketAnalysis.trendDescription}</span>
+              <span className="trend-source">
+                {structureInfo
+                  ? `From ${structureInfo.swings} swing points in the last ${structureInfo.candles} closed ${structureInfo.interval} candles`
+                  : 'From your manual values'}
+              </span>
             </div>
           </div>
 
           <div className="price-display">
             <span className="price-label">Current Price</span>
-            <span className="price-value">${parseFloat(currentPrice).toLocaleString()}</span>
+            <span className="price-value">${formatPrice(parseFloat(currentPrice))}</span>
           </div>
 
           <div className="range-position">
@@ -232,13 +269,13 @@ const MarketStructure = () => {
               <div className="range-bar">
                 <div
                   className="range-indicator"
-                  style={{ left: `${Math.min(Math.max(marketAnalysis.rangePosition, 0), 100)}%` }}
+                  style={{ left: `${Number.isFinite(marketAnalysis.rangePosition) ? Math.min(Math.max(marketAnalysis.rangePosition, 0), 100) : 50}%` }}
                 />
               </div>
               <div className="range-labels">
-                <span>${parseFloat(recentLow).toFixed(0)}</span>
-                <span>{marketAnalysis.rangePosition.toFixed(0)}%</span>
-                <span>${parseFloat(recentHigh).toFixed(0)}</span>
+                <span>${formatPrice(parseFloat(recentLow))}</span>
+                <span>{Number.isFinite(marketAnalysis.rangePosition) ? `${marketAnalysis.rangePosition.toFixed(0)}%` : '—'}</span>
+                <span>${formatPrice(parseFloat(recentHigh))}</span>
               </div>
             </div>
           </div>
@@ -301,43 +338,43 @@ const MarketStructure = () => {
                       type="number"
                       value={currentPrice}
                       onChange={(e) => setCurrentPrice(e.target.value)}
-                      step="0.01"
+                      step="any"
                     />
                   </div>
                   <div className="input-group">
-                    <label>Recent High</label>
+                    <label>Last Swing High</label>
                     <input
                       type="number"
                       value={recentHigh}
                       onChange={(e) => setRecentHigh(e.target.value)}
-                      step="0.01"
+                      step="any"
                     />
                   </div>
                   <div className="input-group">
-                    <label>Recent Low</label>
+                    <label>Last Swing Low</label>
                     <input
                       type="number"
                       value={recentLow}
                       onChange={(e) => setRecentLow(e.target.value)}
-                      step="0.01"
+                      step="any"
                     />
                   </div>
                   <div className="input-group">
-                    <label>Previous High</label>
+                    <label>Previous Swing High</label>
                     <input
                       type="number"
                       value={prevHigh}
                       onChange={(e) => setPrevHigh(e.target.value)}
-                      step="0.01"
+                      step="any"
                     />
                   </div>
                   <div className="input-group">
-                    <label>Previous Low</label>
+                    <label>Previous Swing Low</label>
                     <input
                       type="number"
                       value={prevLow}
                       onChange={(e) => setPrevLow(e.target.value)}
-                      step="0.01"
+                      step="any"
                     />
                   </div>
                 </div>
@@ -351,7 +388,7 @@ const MarketStructure = () => {
                   <Shield size={18} />
                   Support Levels
                 </h3>
-                <button className="add-level-btn" onClick={addSupport}>
+                <button className="add-level-btn" onClick={addSupport} aria-label="Add support level">
                   <Plus size={16} />
                 </button>
               </div>
@@ -364,11 +401,14 @@ const MarketStructure = () => {
                         placeholder="Price"
                         value={level.level}
                         onChange={(e) => updateSupport(index, 'level', e.target.value)}
+                        aria-label="Support price"
+                        step="any"
                       />
                     </div>
                     <select
                       value={level.strength}
                       onChange={(e) => updateSupport(index, 'strength', e.target.value)}
+                      aria-label="Support strength"
                       className={`strength-select ${level.strength}`}
                     >
                       <option value="weak">Weak</option>
@@ -380,11 +420,12 @@ const MarketStructure = () => {
                         type="number"
                         value={level.touches}
                         onChange={(e) => updateSupport(index, 'touches', e.target.value)}
-                        min="1"
+                        aria-label="Support touches"
+                        min="0"
                       />
                       <span>touches</span>
                     </div>
-                    <button className="remove-btn" onClick={() => removeSupport(index)}>
+                    <button className="remove-btn" onClick={() => removeSupport(index)} aria-label="Remove support level">
                       <X size={14} />
                     </button>
                   </div>
@@ -399,7 +440,7 @@ const MarketStructure = () => {
                   <Target size={18} />
                   Resistance Levels
                 </h3>
-                <button className="add-level-btn" onClick={addResistance}>
+                <button className="add-level-btn" onClick={addResistance} aria-label="Add resistance level">
                   <Plus size={16} />
                 </button>
               </div>
@@ -412,11 +453,14 @@ const MarketStructure = () => {
                         placeholder="Price"
                         value={level.level}
                         onChange={(e) => updateResistance(index, 'level', e.target.value)}
+                        aria-label="Resistance price"
+                        step="any"
                       />
                     </div>
                     <select
                       value={level.strength}
                       onChange={(e) => updateResistance(index, 'strength', e.target.value)}
+                      aria-label="Resistance strength"
                       className={`strength-select ${level.strength}`}
                     >
                       <option value="weak">Weak</option>
@@ -428,11 +472,12 @@ const MarketStructure = () => {
                         type="number"
                         value={level.touches}
                         onChange={(e) => updateResistance(index, 'touches', e.target.value)}
-                        min="1"
+                        aria-label="Resistance touches"
+                        min="0"
                       />
                       <span>touches</span>
                     </div>
-                    <button className="remove-btn" onClick={() => removeResistance(index)}>
+                    <button className="remove-btn" onClick={() => removeResistance(index)} aria-label="Remove resistance level">
                       <X size={14} />
                     </button>
                   </div>
@@ -454,13 +499,13 @@ const MarketStructure = () => {
                 <div className="zone resistance-zone">
                   <span className="zone-label">Resistance Zone</span>
                   {resistanceLevels
-                    .filter(r => parseFloat(r.level) > parseFloat(currentPrice))
+                    .filter(r => parseFloat(r.level) >= parseFloat(currentPrice))
                     .sort((a, b) => parseFloat(a.level) - parseFloat(b.level))
                     .map((level, index) => (
                       <div key={index} className={`level-line resistance ${level.strength}`}>
-                        <span className="level-price">${parseFloat(level.level).toFixed(2)}</span>
+                        <span className="level-price">${formatPrice(parseFloat(level.level))}</span>
                         <div className="level-bar">
-                          <div className="bar-fill" style={{ width: `${parseInt(level.touches) * 20}%` }} />
+                          <div className="bar-fill" style={{ width: `${Math.min(Math.max((parseInt(level.touches) || 0) * 20, 4), 100)}%` }} />
                         </div>
                         <span className={`strength-badge ${level.strength}`}>{level.strength}</span>
                       </div>
@@ -471,7 +516,7 @@ const MarketStructure = () => {
                 <div className="current-price-line">
                   <ArrowUpRight size={16} />
                   <span className="current-label">Current</span>
-                  <span className="current-value">${parseFloat(currentPrice).toFixed(2)}</span>
+                  <span className="current-value">${formatPrice(parseFloat(currentPrice))}</span>
                   <ArrowDownRight size={16} />
                 </div>
 
@@ -483,9 +528,9 @@ const MarketStructure = () => {
                     .sort((a, b) => parseFloat(b.level) - parseFloat(a.level))
                     .map((level, index) => (
                       <div key={index} className={`level-line support ${level.strength}`}>
-                        <span className="level-price">${parseFloat(level.level).toFixed(2)}</span>
+                        <span className="level-price">${formatPrice(parseFloat(level.level))}</span>
                         <div className="level-bar">
-                          <div className="bar-fill" style={{ width: `${parseInt(level.touches) * 20}%` }} />
+                          <div className="bar-fill" style={{ width: `${Math.min(Math.max((parseInt(level.touches) || 0) * 20, 4), 100)}%` }} />
                         </div>
                         <span className={`strength-badge ${level.strength}`}>{level.strength}</span>
                       </div>
@@ -500,7 +545,15 @@ const MarketStructure = () => {
                 <Activity size={18} />
                 Fibonacci Retracement
               </h3>
+              <p className="fib-direction">
+                {fibFromHigh
+                  ? 'Uptrend: pullback levels measured down from the swing high'
+                  : 'Measured up from the swing low'}
+              </p>
               <div className="fib-visual">
+                {fibonacciLevels.length === 0 && (
+                  <p className="fib-empty">Swing high must be above swing low to draw retracement levels.</p>
+                )}
                 <div className="fib-chart">
                   {fibonacciLevels.map((fib, index) => (
                     <div
@@ -511,7 +564,7 @@ const MarketStructure = () => {
                       <div className="fib-line" />
                       <div className="fib-info">
                         <span className="fib-label">{fib.label}</span>
-                        <span className="fib-price">${fib.price.toFixed(2)}</span>
+                        <span className="fib-price">${formatPrice(fib.price)}</span>
                         {fib.isNearby && <span className="fib-nearby-badge">Near price</span>}
                       </div>
                     </div>
@@ -520,7 +573,7 @@ const MarketStructure = () => {
                 <div className="fib-legend">
                   <div className="legend-item">
                     <span className="legend-color" style={{ background: '#ef4444' }} />
-                    <span>0% (Low)</span>
+                    <span>0% ({fibFromHigh ? 'Swing high' : 'Swing low'})</span>
                   </div>
                   <div className="legend-item">
                     <span className="legend-color" style={{ background: '#eab308' }} />
@@ -528,7 +581,7 @@ const MarketStructure = () => {
                   </div>
                   <div className="legend-item">
                     <span className="legend-color" style={{ background: '#10b981' }} />
-                    <span>100% (High)</span>
+                    <span>100% ({fibFromHigh ? 'Swing low' : 'Swing high'})</span>
                   </div>
                 </div>
               </div>

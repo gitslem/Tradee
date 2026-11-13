@@ -284,14 +284,14 @@
 }
 
 /* Support/Resistance levels */
-.level-line {
+.trading-background .level-line {
   width: 250px;
   height: 40px;
   opacity: 0.15;
   pointer-events: none;
 }
 
-.level-indicator {
+.trading-background .level-indicator {
   font-size: 0.75rem;
   font-weight: 600;
   color: #6366f1;
@@ -319,13 +319,13 @@
   transform: translateX(-50%);
 }
 
-.level-1 {
+.trading-background .level-1 {
   top: 45%;
   right: 8%;
   animation: fadeInOut 8s ease-in-out infinite;
 }
 
-.level-2 {
+.trading-background .level-2 {
   bottom: 15%;
   left: 30%;
   animation: fadeInOut 10s ease-in-out infinite 2s;
