@@ -535,8 +535,8 @@ const TradeModal = ({ trade, onClose, onSave }: TradeModalProps) => {
       return
     }
 
-    if (isNaN(leverage) || leverage < 1 || leverage > 125) {
-      alert('Leverage must be between 1x and 125x')
+    if (isNaN(leverage) || leverage < 1 || leverage > 200) {
+      alert('Leverage must be between 1x and 200x')
       return
     }
 
@@ -714,7 +714,7 @@ const TradeModal = ({ trade, onClose, onSave }: TradeModalProps) => {
                   type="number"
                   step="1"
                   min="1"
-                  max="125"
+                  max="200"
                   value={formData.leverage}
                   onChange={(e) => setFormData({ ...formData, leverage: e.target.value })}
                   required

@@ -85,9 +85,9 @@ export const EXCHANGES: Record<string, ExchangeConfig> = {
     },
 
     maxLeverage: {
-      spot: 3,
+      spot: 1, // Spot itself has no leverage
       futures: 125,
-      margin: 10
+      margin: 3 // Cross margin; Cross Margin Pro was retired in 2026
     },
 
     leverageTiers: [
@@ -115,7 +115,7 @@ export const EXCHANGES: Record<string, ExchangeConfig> = {
     accountTypes: {
       spot: true,
       futures: true,
-      margin: false
+      margin: true // Spot margin in the Unified Trading Account
     },
 
     fees: {
@@ -138,8 +138,8 @@ export const EXCHANGES: Record<string, ExchangeConfig> = {
 
     maxLeverage: {
       spot: 1,
-      futures: 100,
-      margin: 1
+      futures: 150, // BTCUSDT
+      margin: 10
     },
 
     leverageTiers: [
@@ -147,7 +147,7 @@ export const EXCHANGES: Record<string, ExchangeConfig> = {
       { maxLeverage: 25, maintenanceMarginRate: 1.0, description: 'Conservative' },
       { maxLeverage: 50, maintenanceMarginRate: 2.0, description: 'Medium Risk' },
       { maxLeverage: 75, maintenanceMarginRate: 4.0, description: 'High Risk' },
-      { maxLeverage: 100, maintenanceMarginRate: 5.0, description: 'Extreme Risk' }
+      { maxLeverage: 150, maintenanceMarginRate: 5.0, description: 'Extreme Risk' }
     ],
 
     minTradeAmount: 10,
@@ -216,20 +216,20 @@ export const EXCHANGES: Record<string, ExchangeConfig> = {
 
     accountTypes: {
       spot: true,
-      futures: false,
+      futures: true, // US perpetual-style futures (Coinbase Financial Markets)
       margin: false
     },
 
     fees: {
       spot: {
-        maker: 0.4, // Higher fees for retail
-        taker: 0.6,
+        maker: 0.5, // US entry tier since Sep 2026
+        taker: 0.9,
         funding: 0.0
       },
       futures: {
-        maker: 0.0,
-        taker: 0.0,
-        funding: 0.0
+        maker: 0.02,
+        taker: 0.02,
+        funding: 0.01
       },
       margin: {
         maker: 0.0,
@@ -239,17 +239,18 @@ export const EXCHANGES: Record<string, ExchangeConfig> = {
     },
 
     maxLeverage: {
-      spot: 1, // No leverage on regular Coinbase
-      futures: 1,
+      spot: 1, // No spot margin on Coinbase
+      futures: 10,
       margin: 1
     },
 
     leverageTiers: [
-      { maxLeverage: 1, maintenanceMarginRate: 0.0, description: 'Spot Only' }
+      { maxLeverage: 5, maintenanceMarginRate: 1.0, description: 'Low Risk' },
+      { maxLeverage: 10, maintenanceMarginRate: 2.0, description: 'High Risk' }
     ],
 
     minTradeAmount: 10,
-    fundingInterval: 0,
+    fundingInterval: 8,
     website: 'https://www.coinbase.com',
     featuresUrl: 'https://www.coinbase.com/advanced-fees'
   },
@@ -288,14 +289,14 @@ export const EXCHANGES: Record<string, ExchangeConfig> = {
 
     maxLeverage: {
       spot: 10,
-      futures: 125,
+      futures: 100, // BTC-USDT-SWAP
       margin: 10
     },
 
     leverageTiers: [
       { maxLeverage: 20, maintenanceMarginRate: 0.5, description: 'Low Risk' },
       { maxLeverage: 75, maintenanceMarginRate: 1.0, description: 'Medium Risk' },
-      { maxLeverage: 125, maintenanceMarginRate: 2.5, description: 'High Risk' }
+      { maxLeverage: 100, maintenanceMarginRate: 2.5, description: 'High Risk' }
     ],
 
     minTradeAmount: 10,
@@ -320,8 +321,8 @@ export const EXCHANGES: Record<string, ExchangeConfig> = {
 
     fees: {
       spot: {
-        maker: 0.16,
-        taker: 0.26,
+        maker: 0.4, // Kraken Pro tier 1 since Jul 2026
+        taker: 0.8,
         funding: 0.0
       },
       futures: {
@@ -330,8 +331,8 @@ export const EXCHANGES: Record<string, ExchangeConfig> = {
         funding: 0.01
       },
       margin: {
-        maker: 0.16,
-        taker: 0.26,
+        maker: 0.4,
+        taker: 0.8,
         funding: 0.02
       }
     },
@@ -375,7 +376,7 @@ export const EXCHANGES: Record<string, ExchangeConfig> = {
         funding: 0.0
       },
       futures: {
-        maker: 0.015,
+        maker: 0.02,
         taker: 0.05,
         funding: 0.01
       },
@@ -488,14 +489,14 @@ export const EXCHANGES: Record<string, ExchangeConfig> = {
 
     maxLeverage: {
       spot: 10,
-      futures: 125,
+      futures: 150, // BTCUSDT
       margin: 10
     },
 
     leverageTiers: [
       { maxLeverage: 20, maintenanceMarginRate: 0.5, description: 'Low Risk' },
       { maxLeverage: 50, maintenanceMarginRate: 1.0, description: 'Medium Risk' },
-      { maxLeverage: 125, maintenanceMarginRate: 2.5, description: 'High Risk' }
+      { maxLeverage: 150, maintenanceMarginRate: 2.5, description: 'High Risk' }
     ],
 
     minTradeAmount: 10,
@@ -515,13 +516,13 @@ export const EXCHANGES: Record<string, ExchangeConfig> = {
     accountTypes: {
       spot: true,
       futures: true,
-      margin: true
+      margin: false // Not offered on the main pairs
     },
 
     fees: {
       spot: {
         maker: 0.0,
-        taker: 0.0,
+        taker: 0.05,
         funding: 0.0
       },
       futures: {
@@ -537,9 +538,9 @@ export const EXCHANGES: Record<string, ExchangeConfig> = {
     },
 
     maxLeverage: {
-      spot: 10,
+      spot: 1,
       futures: 200,
-      margin: 10
+      margin: 1
     },
 
     leverageTiers: [
