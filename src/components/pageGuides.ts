@@ -113,10 +113,12 @@ export const PAGE_GUIDES: Record<GuideKey, PageGuideContent> = {
         ]
       },
       {
-        heading: 'Bybit testnet (optional)',
+        heading: 'Bybit Demo Trading (optional)',
         items: [
-          'Use the gear icon to connect Bybit testnet API keys, then switch between Paper and Testnet at the top.',
-          'Keys are stored only in this browser. Use testnet keys only - never keys for a real account.'
+          'Use the gear icon to connect a Bybit practice account, then switch between Paper and Demo at the top.',
+          'Demo Trading is recommended: it uses real Bybit prices with demo funds. Create its API key on bybit.com after switching to Demo Trading.',
+          'The older Bybit testnet still works too, with its own separate prices.',
+          'Keys are stored only in this browser. Use demo or testnet keys only - never keys for a real-money account.'
         ]
       }
     ],

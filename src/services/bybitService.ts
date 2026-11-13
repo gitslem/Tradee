@@ -1,8 +1,9 @@
 /**
- * Bybit Testnet API Service
+ * Bybit Demo Trading / Testnet API Service
  *
- * This service handles all interactions with Bybit's testnet API for paper trading.
- * Testnet URL: https://api-testnet.bybit.com
+ * Authenticated calls go to Bybit Demo Trading (real mainnet prices, demo funds)
+ * or to the older testnet (separate prices), whichever the user connected.
+ * Demo URL: https://api-demo.bybit.com   Testnet URL: https://api-testnet.bybit.com
  *
  * Features:
  * - Account balance fetching
@@ -18,8 +19,34 @@ import { apiKeyService } from './apiKeyService'
 // Bybit API URLs
 // Mainnet for public market data (prices match TradingView charts)
 const MAINNET_BASE_URL = 'https://api.bybit.com'
-// Testnet for authenticated trading operations (demo trading)
+// Authenticated trading goes to Demo Trading or testnet
+const DEMO_BASE_URL = 'https://api-demo.bybit.com'
 const TESTNET_BASE_URL = 'https://api-testnet.bybit.com'
+
+export type BybitEnv = 'demo' | 'testnet'
+const ENV_KEY = 'traddii_bybit_env'
+
+// Which Bybit environment the user's keys belong to. Keys saved before Demo
+// Trading was supported are testnet keys; new connections default to demo.
+export const getBybitEnv = (userId: string): BybitEnv => {
+  try {
+    const saved = localStorage.getItem(`${ENV_KEY}_${userId}`)
+    if (saved === 'demo' || saved === 'testnet') return saved
+  } catch {
+    // Storage unavailable
+  }
+  return apiKeyService.hasCredentials(userId, 'bybit_testnet') ? 'testnet' : 'demo'
+}
+
+export const setBybitEnv = (userId: string, env: BybitEnv) => {
+  try {
+    localStorage.setItem(`${ENV_KEY}_${userId}`, env)
+  } catch {
+    // Storage unavailable - falls back to the default above
+  }
+}
+
+export const BYBIT_ENV_LABEL: Record<BybitEnv, string> = { demo: 'Demo', testnet: 'Testnet' }
 
 export interface BybitPosition {
   symbol: string
@@ -140,7 +167,7 @@ class BybitService {
     const credentials = isPrivate ? apiKeyService.getCredentials(userId, 'bybit_testnet') : null
 
     if (isPrivate && !credentials) {
-      throw new Error('API credentials not found. Please configure your Bybit testnet API keys.')
+      throw new Error('API credentials not found. Please connect your Bybit demo or testnet API keys.')
     }
 
     const timestamp = Date.now().toString()
@@ -148,7 +175,8 @@ class BybitService {
 
     // Use mainnet for public market data (prices match TradingView)
     // Use testnet for authenticated trading operations
-    const baseUrl = isPrivate ? TESTNET_BASE_URL : MAINNET_BASE_URL
+    const env = getBybitEnv(userId)
+    const baseUrl = !isPrivate ? MAINNET_BASE_URL : env === 'demo' ? DEMO_BASE_URL : TESTNET_BASE_URL
     let url = `${baseUrl}${endpoint}`
     let queryString = ''
     let body: string | undefined
@@ -195,7 +223,13 @@ class BybitService {
         body: method === 'POST' ? body : undefined
       })
 
-      const data = await response.json()
+      // Bybit answers a bad key with an empty 401, not JSON
+      if (response.status === 401 || response.status === 403) {
+        throw new Error(`${env === 'demo' ? 'Bybit Demo Trading' : 'Bybit testnet'} rejected the API key. Check it was created for ${env === 'demo' ? 'Demo Trading' : 'testnet'} and copied in full.`)
+      }
+      const text = await response.text()
+      if (!text) throw new Error(`Bybit returned an empty response (HTTP ${response.status})`)
+      const data = JSON.parse(text)
 
       if (data.retCode !== 0) {
         throw new Error(data.retMsg || `Bybit API error: ${data.retCode}`)
@@ -205,7 +239,7 @@ class BybitService {
     } catch (error) {
       if (error instanceof Error) {
         if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-          throw new Error('Network error: Unable to connect to Bybit testnet. Please check your internet connection.')
+          throw new Error(`Network error: Unable to connect to Bybit ${env === 'demo' ? 'Demo Trading' : 'testnet'}. Please check your internet connection.`)
         }
         throw error
       }

@@ -208,6 +208,44 @@
   text-decoration: underline;
 }
 
+.bybit-env-choice {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.bybit-env-choice button {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.875rem 1rem;
+  text-align: left;
+  background: var(--inset-bg);
+  border: 1px solid rgb(var(--ink) / 0.1);
+  border-radius: 12px;
+  color: var(--heading);
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.bybit-env-choice button span {
+  font-size: 0.8rem;
+  color: var(--text-faint);
+  line-height: 1.35;
+}
+
+.bybit-env-choice button.active {
+  border-color: #8b5cf6;
+  background: rgba(139, 92, 246, 0.1);
+}
+
+@media (max-width: 480px) {
+  .bybit-env-choice {
+    grid-template-columns: 1fr;
+  }
+}
+
 .api-input-group {
   margin-bottom: 1rem;
 }

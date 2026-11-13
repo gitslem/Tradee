@@ -6,7 +6,8 @@ import TradingBackground from '../components/TradingBackground'
 import { useAuth } from '../context/auth'
 import { useTheme } from '../context/theme'
 import { apiKeyService } from '../services/apiKeyService'
-import { bybitService } from '../services/bybitService'
+import { bybitService, getBybitEnv, setBybitEnv, BYBIT_ENV_LABEL } from '../services/bybitService'
+import type { BybitEnv } from '../services/bybitService'
 import { paperTradingService, BYBIT_FEES } from '../services/paperTradingService'
 import type { PaperTrade } from '../services/paperTradingService'
 import type { BybitTicker, BybitPosition, BybitOrder, BybitBalance } from '../services/bybitService'
@@ -72,6 +73,11 @@ const PaperTrading = () => {
   const [apiSecret, setApiSecret] = useState('')
   const [showSecret, setShowSecret] = useState(false)
   const [isConnected, setIsConnected] = useState(false)
+  // Bybit Demo Trading (real prices) or the older testnet
+  const [bybitEnv, setBybitEnvState] = useState<BybitEnv>(() => getBybitEnv(userId))
+  useEffect(() => { setBybitEnvState(getBybitEnv(userId)) }, [userId])
+  const envLabel = BYBIT_ENV_LABEL[bybitEnv]
+  const envName = bybitEnv === 'demo' ? 'Bybit Demo Trading' : 'Bybit testnet'
   const [connectionError, setConnectionError] = useState('')
   const [isConnecting, setIsConnecting] = useState(false)
 
@@ -403,6 +409,7 @@ const PaperTrading = () => {
       return
     }
 
+    setBybitEnv(userId, bybitEnv)
     const saved = apiKeyService.saveCredentials(userId, 'bybit_testnet', {
       apiKey,
       apiSecret
@@ -414,7 +421,7 @@ const PaperTrading = () => {
         setApiKey('')
         setApiSecret('')
         setShowApiConfig(false)
-        addNotification('Testnet connected', 'success')
+        addNotification(`${envName} connected`, 'success')
       } else {
         // Don't keep keys that don't work
         apiKeyService.deleteCredentials(userId, 'bybit_testnet')
@@ -674,16 +681,16 @@ const PaperTrading = () => {
               className={!usePaperMode ? 'active testnet' : ''}
               aria-pressed={!usePaperMode}
               onClick={() => switchMode(false)}
-              title={isConnected ? 'Trade on your Bybit testnet account' : 'Connect Bybit testnet API keys first'}
+              title={isConnected ? `Trade on your ${envName} account` : 'Connect Bybit Demo Trading or testnet API keys first'}
             >
               {isConnected ? <CheckCircle size={14} /> : <AlertCircle size={14} />}
-              Testnet
+              {isConnected ? envLabel : 'Demo'}
             </button>
           </div>
           <button
             className="settings-btn"
             onClick={() => setShowApiConfig(!showApiConfig)}
-            aria-label="Testnet API settings"
+            aria-label="Bybit API settings"
           >
             <Settings size={18} />
           </button>
@@ -696,23 +703,57 @@ const PaperTrading = () => {
           <div className="api-config-header">
             <h3>
               <Key size={18} />
-              Bybit Testnet API Configuration
+              {isConnected ? `${envName} API` : 'Connect a Bybit practice account'}
             </h3>
             <button onClick={() => setShowApiConfig(false)}>
               <X size={18} />
             </button>
           </div>
 
+          {!isConnected && (
+            <div className="bybit-env-choice" role="radiogroup" aria-label="Bybit practice account">
+              <button
+                role="radio"
+                aria-checked={bybitEnv === 'demo'}
+                className={bybitEnv === 'demo' ? 'active' : ''}
+                onClick={() => setBybitEnvState('demo')}
+              >
+                <strong>Demo Trading</strong>
+                <span>Recommended. Real Bybit prices with demo funds.</span>
+              </button>
+              <button
+                role="radio"
+                aria-checked={bybitEnv === 'testnet'}
+                className={bybitEnv === 'testnet' ? 'active' : ''}
+                onClick={() => setBybitEnvState('testnet')}
+              >
+                <strong>Testnet</strong>
+                <span>Separate test exchange with its own prices.</span>
+              </button>
+            </div>
+          )}
+
           <div className="api-config-info">
             <Info size={16} />
-            <p>
-              Get your testnet API keys from{' '}
-              <a href="https://testnet.bybit.com" target="_blank" rel="noopener noreferrer">
-                testnet.bybit.com
-                <ExternalLink size={12} />
-              </a>
-              {' '}(Create account, go to API Management)
-            </p>
+            {bybitEnv === 'demo' ? (
+              <p>
+                Log in at{' '}
+                <a href="https://www.bybit.com" target="_blank" rel="noopener noreferrer">
+                  bybit.com
+                  <ExternalLink size={12} />
+                </a>
+                , switch to <strong>Demo Trading</strong>, then open API Management from your profile and create a key there. Demo keys only work on demo funds.
+              </p>
+            ) : (
+              <p>
+                Get your testnet API keys from{' '}
+                <a href="https://testnet.bybit.com" target="_blank" rel="noopener noreferrer">
+                  testnet.bybit.com
+                  <ExternalLink size={12} />
+                </a>
+                {' '}(Create account, go to API Management)
+              </p>
+            )}
           </div>
 
           {isConnected ? (
@@ -721,7 +762,7 @@ const PaperTrading = () => {
                 <CheckCircle size={20} />
                 <span>API Connected</span>
               </div>
-              <p>Your Bybit testnet is connected. Place real orders with demo funds!</p>
+              <p>Your {envName} account is connected. Place real orders with demo funds.</p>
               <button className="disconnect-btn" onClick={disconnectApi}>
                 <Unlock size={16} />
                 Disconnect & Remove Keys
@@ -735,7 +776,7 @@ const PaperTrading = () => {
                   type="text"
                   value={apiKey}
                   onChange={(e) => setApiKey(e.target.value)}
-                  placeholder="Enter your testnet API key"
+                  placeholder={`Enter your ${envLabel.toLowerCase()} API key`}
                 />
               </div>
 
@@ -746,7 +787,7 @@ const PaperTrading = () => {
                     type={showSecret ? 'text' : 'password'}
                     value={apiSecret}
                     onChange={(e) => setApiSecret(e.target.value)}
-                    placeholder="Enter your testnet API secret"
+                    placeholder={`Enter your ${envLabel.toLowerCase()} API secret`}
                   />
                   <button
                     className="toggle-secret"
@@ -786,7 +827,7 @@ const PaperTrading = () => {
 
               <div className="api-security-note">
                 <Shield size={14} />
-                <span>Keys are stored only in this browser (obfuscated, not encrypted). Use testnet keys only.</span>
+                <span>Keys are stored only in this browser (obfuscated, not encrypted). Use demo or testnet keys only - never keys for a real-money account.</span>
               </div>
             </>
           )}

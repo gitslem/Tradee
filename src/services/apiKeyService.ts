@@ -1,5 +1,5 @@
 /**
- * Exchange API key storage (Bybit testnet only)
+ * Exchange API key storage (Bybit Demo Trading or testnet only)
  *
  * Credentials are kept in the browser's localStorage, obfuscated with an XOR
  * cipher and a per-user salt that is stored alongside them. This is NOT

@@ -17,7 +17,7 @@
 | **Market Structure** | Finds the trend from real swing highs and lows (higher highs and higher lows, and the reverse), and clusters support and resistance from swing points and round numbers. Shows the trend on 15m, 1H, 4H and 1D side by side, plus direction-aware Fibonacci levels. |
 | **AI Market Brief** | On the Market page. Shows positioning data (funding rate, open-interest change, long/short account ratio, Fear & Greed), then writes a short bull/bear brief using only that data. Runs on Traddii's free Gemini, or on the user's own model. |
 | **Price Action** | Reads the last closed candle: engulfing, harami, inside bar, doji types, hammer and shooting star (depending on the prior trend), marubozu and spinning top. Compares its volume with the 20-candle average, adds nearby levels and higher-timeframe context, and includes a pre-trade checklist. |
-| **Practice** | Paper trading with $10,000 of virtual money, using live Bybit prices and real Bybit fees. Supports market and limit orders, take-profit and stop-loss, leverage, and liquidation. Bybit **testnet** accounts can be connected too. |
+| **Practice** | Paper trading with $10,000 of virtual money, using live Bybit prices and real Bybit fees. Supports market and limit orders, take-profit and stop-loss, leverage, and liquidation. Bybit **Demo Trading** accounts (real prices, demo funds) or testnet accounts can be connected too. |
 | **Journal** | Log trades and notes, synced to your account with Google sign-in. Shows win rate, profit factor and streaks, and exports to CSV, JSON, text or PDF. |
 
 Every tool page has a **Guide** button explaining how to use it. Day and night themes are included.
