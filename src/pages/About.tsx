@@ -132,10 +132,6 @@ const About = () => {
           </p>
           <div className="contact-info">
             <div className="contact-item">
-              <strong>Address:</strong>
-              <p>(address removed)</p>
-            </div>
-            <div className="contact-item">
               <strong>Email:</strong>
               <p>traddii.web.app@gmail.com</p>
             </div>

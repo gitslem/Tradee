@@ -132,7 +132,7 @@ const LandingPage = () => {
       <TradingBackground variant="home" />
 
       {/* Live Price Ticker */}
-      <div className="price-ticker">
+      <div className="price-ticker dark-surface">
         <div className="ticker-track">
           {[...tickerPrices, ...tickerPrices].map((pair, index) => (
             <div key={index} className="ticker-item">
@@ -148,7 +148,7 @@ const LandingPage = () => {
       </div>
 
       {/* Hero Section */}
-      <section className="hero">
+      <section className="hero dark-surface">
         <div className="hero-grid-bg"></div>
         <div className="hero-glow"></div>
 
@@ -385,7 +385,7 @@ const LandingPage = () => {
       </section>
 
       {/* Live Chart Section */}
-      <section className="chart-section">
+      <section className="chart-section dark-surface">
         <div className="section-container">
           <div className="section-header light">
             <span className="section-tag">Real-Time Analysis</span>
@@ -417,74 +417,11 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section className="testimonials-section">
-        <div className="section-container">
-          <div className="section-header">
-            <span className="section-tag">Trader Stories</span>
-            <h2 className="section-title">Trusted by Traders Worldwide</h2>
-          </div>
-
-          <div className="testimonials-grid">
-            <div className="testimonial-card">
-              <div className="testimonial-content">
-                <p>
-                  "The position calculator changed how I approach every trade.
-                  I finally understand proper risk management and my account has
-                  been growing steadily."
-                </p>
-              </div>
-              <div className="testimonial-author">
-                <div className="author-avatar">MK</div>
-                <div className="author-info">
-                  <strong>Marcus Kim</strong>
-                  <span>Day Trader • Singapore</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="testimonial-card featured">
-              <div className="testimonial-content">
-                <p>
-                  "The analytics dashboard showed me I was overtrading during
-                  low-volatility hours. After adjusting my strategy, my win rate
-                  increased by 15%."
-                </p>
-              </div>
-              <div className="testimonial-author">
-                <div className="author-avatar">SJ</div>
-                <div className="author-info">
-                  <strong>Sarah Johnson</strong>
-                  <span>Swing Trader • United States</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="testimonial-card">
-              <div className="testimonial-content">
-                <p>
-                  "Simple yet powerful. The market structure analysis helps me
-                  understand trends, and the price action tool improved my
-                  entry timing significantly."
-                </p>
-              </div>
-              <div className="testimonial-author">
-                <div className="author-avatar">RP</div>
-                <div className="author-info">
-                  <strong>Raj Patel</strong>
-                  <span>Crypto Trader • India</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Email Subscription */}
       <EmailSubscription />
 
       {/* Final CTA */}
-      <section className="final-cta">
+      <section className="final-cta dark-surface">
         <div className="cta-container">
           <div className="cta-content">
             <h2 className="cta-title">Ready to Trade with Discipline?</h2>

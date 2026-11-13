@@ -60,6 +60,12 @@ const Footer = () => {
         <div className="footer-bottom">
           <p className="footer-copyright">&copy; 2025 Traddii. All rights reserved.</p>
           <p className="footer-tagline">Trade Smart. Trade Safe. Trade Profitably.</p>
+          <p className="footer-credit">
+            by{' '}
+            <a href="https://github.com/gitslem" target="_blank" rel="noopener noreferrer">
+              gitslem
+            </a>
+          </p>
         </div>
       </div>
     </footer>

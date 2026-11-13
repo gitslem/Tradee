@@ -161,6 +161,23 @@
   font-style: italic;
 }
 
+.footer-credit {
+  font-size: var(--font-size-xs);
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
+}
+
+.footer-credit a {
+  color: #e3c04f;
+  font-weight: var(--font-weight-semibold);
+  text-decoration: none;
+}
+
+.footer-credit a:hover,
+.footer-credit a:focus-visible {
+  text-decoration: underline;
+}
+
 /* Responsive Design */
 @media (max-width: 1024px) {
   .footer-grid {

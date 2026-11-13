@@ -156,7 +156,10 @@
 }
 
 /* Night Mode - set automatically from location/time, or manually via the nav toggle */
-[data-theme='night'] {
+/* .dark-surface: sections that stay dark in both themes (e.g. the landing
+   hero) use the night palette so their text stays readable in day mode */
+[data-theme='night'],
+.dark-surface {
   color-scheme: dark;
   --color-background: #0f172a;
   --color-background-hover: #1e293b;
