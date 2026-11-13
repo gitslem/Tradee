@@ -48,6 +48,14 @@ export const PAGE_GUIDES: Record<GuideKey, PageGuideContent> = {
         ]
       },
       {
+        heading: 'AI Market Brief',
+        items: [
+          'Funding, open interest, the share of accounts that are long, and the Fear & Greed Index show how traders are positioned. Amber means crowded or extreme.',
+          'Press "Generate brief" for a bull case, bear case and levels to watch, written only from the data on this page. It is cached for 10 minutes.',
+          'It uses Traddii\'s free Gemini by default. The gear icon lets you connect your own model instead - on your computer (Ollama, LM Studio) or a free online one (OpenRouter, Groq, your own Gemini key).'
+        ]
+      },
+      {
         heading: 'How to use it',
         items: [
           'Choose the pair, then the candle interval in the Live Data card. Everything updates every 30 seconds.',
