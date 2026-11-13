@@ -2,7 +2,7 @@
 
 **Free, open-source tools for crypto traders: size positions, read market structure and price action, practise with virtual money, and keep a trading journal.**
 
-[![Deploy](https://github.com/gitslem/Tradee/actions/workflows/firebase-deploy.yml/badge.svg)](https://github.com/gitslem/Tradee/actions/workflows/firebase-deploy.yml)
+[![Deploy](https://github.com/gitslem/traddii/actions/workflows/firebase-deploy.yml/badge.svg)](https://github.com/gitslem/traddii/actions/workflows/firebase-deploy.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 
 **Live app:** https://traddii.web.app
@@ -41,8 +41,8 @@ React 19, TypeScript, Vite 7, Firebase (Hosting, Authentication, Firestore, AI L
 Requirements: **Node.js 20+** and npm.
 
 ```bash
-git clone https://github.com/gitslem/Tradee.git
-cd Tradee
+git clone https://github.com/gitslem/traddii.git
+cd traddii
 npm install
 cp .env.example .env   # add your Firebase web config (see below)
 npm run dev            # http://localhost:5173

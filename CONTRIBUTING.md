@@ -6,8 +6,8 @@ By taking part you agree to follow the [Code of Conduct](./CODE_OF_CONDUCT.md).
 
 ## Ways to contribute
 
-- **Report a bug.** Open a [bug report](https://github.com/gitslem/Tradee/issues/new?template=bug_report.yml) with steps to reproduce it.
-- **Suggest a feature.** Open a [feature request](https://github.com/gitslem/Tradee/issues/new?template=feature_request.yml) and describe the problem it solves.
+- **Report a bug.** Open a [bug report](https://github.com/gitslem/traddii/issues/new?template=bug_report.yml) with steps to reproduce it.
+- **Suggest a feature.** Open a [feature request](https://github.com/gitslem/traddii/issues/new?template=feature_request.yml) and describe the problem it solves.
 - **Fix something.** Issues labelled `good first issue` or `help wanted` are a good place to start. Comment on an issue before starting larger work so we can agree on the approach.
 - **Report a security problem.** Do **not** open a public issue. Follow [SECURITY.md](./SECURITY.md).
 
@@ -16,8 +16,8 @@ By taking part you agree to follow the [Code of Conduct](./CODE_OF_CONDUCT.md).
 Requirements: Node.js 20+ and npm.
 
 ```bash
-git clone https://github.com/<your-username>/Tradee.git
-cd Tradee
+git clone https://github.com/<your-username>/traddii.git
+cd traddii
 npm install
 cp .env.example .env    # fill in your own Firebase web app config
 npm run dev             # http://localhost:5173

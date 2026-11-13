@@ -6,7 +6,7 @@ body:
     attributes:
       value: |
         Thanks for reporting a bug! Please do **not** include API keys, account details or other private data.
-        Security problems go through [private reporting](https://github.com/gitslem/Tradee/security/advisories/new) instead.
+        Security problems go through [private reporting](https://github.com/gitslem/traddii/security/advisories/new) instead.
   - type: dropdown
     id: page
     attributes:

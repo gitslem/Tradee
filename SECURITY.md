@@ -10,7 +10,7 @@ Please **do not** report security problems in public issues, discussions or pull
 
 Report them privately instead:
 
-1. **Preferred:** use GitHub's [private vulnerability reporting](https://github.com/gitslem/Tradee/security/advisories/new).
+1. **Preferred:** use GitHub's [private vulnerability reporting](https://github.com/gitslem/traddii/security/advisories/new).
 2. **Or** email **traddii.web.app@gmail.com** with the subject "Security".
 
 Please include:
