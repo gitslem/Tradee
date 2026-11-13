@@ -352,22 +352,22 @@
   gap: 0.25rem;
 }
 
-.stat-value {
+.stat-content .stat-value {
   font-size: 1.75rem;
   font-weight: 800;
   color: var(--color-text-primary);
   letter-spacing: -0.02em;
 }
 
-.stat-card.profit .stat-value {
+.stat-card.profit .stat-content .stat-value {
   color: var(--color-success);
 }
 
-.stat-card.loss .stat-value {
+.stat-card.loss .stat-content .stat-value {
   color: var(--color-danger);
 }
 
-.stat-label {
+.stat-content .stat-label {
   font-size: 0.875rem;
   color: var(--color-text-secondary);
   font-weight: 500;
@@ -593,12 +593,17 @@
 /* Journal Content Grid */
 .journal-content-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 2rem;
   animation: slideUp 0.6s ease-out 0.4s backwards;
 }
 
+.journal-content-grid.expanded {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 .journal-section {
+  min-width: 0;
   background: var(--color-surface);
   border: 2px solid var(--color-border);
   border-radius: var(--radius-2xl);
@@ -1719,4 +1724,10 @@
     width: 100%;
     justify-content: center;
   }
+}
+
+/* Embedded full views already sit inside a padded section */
+.full-component-view > .trading-journal,
+.full-component-view > .personal-notes {
+  padding: 0;
 }

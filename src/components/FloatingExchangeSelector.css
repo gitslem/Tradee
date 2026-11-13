@@ -314,7 +314,7 @@
   border-color: rgba(212, 175, 55, 0.35);
 }
 
-.stat-label {
+.quick-stat .stat-label {
   display: block;
   font-size: 0.75rem;
   color: var(--text-faint);
@@ -323,7 +323,7 @@
   letter-spacing: 0.5px;
 }
 
-.stat-value {
+.quick-stat .stat-value {
   display: block;
   font-size: 1.25rem;
   font-weight: 700;

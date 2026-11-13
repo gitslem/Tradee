@@ -119,7 +119,7 @@ class ApiKeyService {
         apiKey: this.encrypt(credentials.apiKey.trim(), encryptionKey),
         apiSecret: this.encrypt(credentials.apiSecret.trim(), encryptionKey),
         timestamp: Date.now(),
-        checksum: this.generateChecksum(credentials.apiKey + credentials.apiSecret)
+        checksum: this.generateChecksum(credentials.apiKey.trim() + credentials.apiSecret.trim())
       }
 
       const storageKey = `${this.STORAGE_KEY}_${userId}_${exchange}`

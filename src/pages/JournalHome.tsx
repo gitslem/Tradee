@@ -817,7 +817,7 @@ const JournalHome = () => {
         )}
       </div>
 
-      <div className="journal-content-grid">
+      <div className={`journal-content-grid ${tradesView === 'all' || notesView === 'all' ? 'expanded' : ''}`}>
         {/* Trades Section */}
         <div className="journal-section">
           <div className="section-header">

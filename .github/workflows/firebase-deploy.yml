@@ -47,6 +47,16 @@ jobs:
           echo "Build verification successful"
           ls -la dist/
 
+      - name: Deploy Firestore security rules
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/sa.json"
+          printf '%s' "$FIREBASE_SERVICE_ACCOUNT" > "$GOOGLE_APPLICATION_CREDENTIALS"
+          chmod 600 "$GOOGLE_APPLICATION_CREDENTIALS"
+          npx --yes firebase-tools@14 deploy --only firestore:rules --project traddii --non-interactive
+          rm -f "$GOOGLE_APPLICATION_CREDENTIALS"
+
       - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:

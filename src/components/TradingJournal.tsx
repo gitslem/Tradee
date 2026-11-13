@@ -622,7 +622,7 @@ const TradeModal = ({ trade, onClose, onSave }: TradeModalProps) => {
                   <option>XRP/USDT</option>
                   <option>ADA/USDT</option>
                   <option>DOGE/USDT</option>
-                  <option>MATIC/USDT</option>
+                  <option>POL/USDT</option>
                   <option>DOT/USDT</option>
                   <option>AVAX/USDT</option>
                 </select>

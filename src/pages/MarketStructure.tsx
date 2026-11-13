@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import type { SyntheticEvent } from 'react'
 import './MarketStructure.css'
 import CandleDataCard from '../components/CandleDataCard'
 import TradingBackground from '../components/TradingBackground'
@@ -35,6 +36,15 @@ const MarketStructure = () => {
   const [prevLow, setPrevLow] = useState<string>('3250')
   const [showManual, setShowManual] = useState<boolean>(false)
 
+  // Live data refreshes every 30s. Once the user edits values by hand, stop
+  // overwriting them until they click "Apply Data" or switch pair.
+  const [liveSync, setLiveSync] = useState(true)
+  const pauseLiveOnEdit = (ev: SyntheticEvent) => {
+    const target = ev.target as HTMLElement
+    if (!target.closest('.manual-inputs, .levels-section')) return
+    if (ev.type === 'change' || target.closest('button')) setLiveSync(false)
+  }
+
   const [supportLevels, setSupportLevels] = useState<SupportResistance[]>([
     { level: '3400', strength: 'strong', touches: '5' },
     { level: '3200', strength: 'moderate', touches: '3' }
@@ -46,6 +56,7 @@ const MarketStructure = () => {
   ])
 
   const handleUsePriceData = (ohlcv: OHLCVData) => {
+    setLiveSync(true)
     const levels = calculateSupportResistance(ohlcv)
     setCurrentPrice(ohlcv.current.close.toString())
     setRecentHigh(ohlcv.current.high.toString())
@@ -233,14 +244,14 @@ const MarketStructure = () => {
           </div>
         </div>
 
-        <div className="ms-main-grid">
+        <div className="ms-main-grid" onChangeCapture={pauseLiveOnEdit} onClickCapture={pauseLiveOnEdit}>
           {/* Left Panel */}
           <div className="ms-left-panel">
             {/* Pair Selector */}
             <div className="glass-card pair-section">
               <div className="pair-selector">
                 <label>Trading Pair</label>
-                <select value={cryptoPair} onChange={(e) => setCryptoPair(e.target.value)}>
+                <select value={cryptoPair} onChange={(e) => { setCryptoPair(e.target.value); setLiveSync(true) }}>
                   <option>BTC/USDT</option>
                   <option>ETH/USDT</option>
                   <option>BNB/USDT</option>
@@ -248,7 +259,7 @@ const MarketStructure = () => {
                   <option>XRP/USDT</option>
                   <option>ADA/USDT</option>
                   <option>DOGE/USDT</option>
-                  <option>MATIC/USDT</option>
+                  <option>POL/USDT</option>
                   <option>DOT/USDT</option>
                   <option>AVAX/USDT</option>
                 </select>
@@ -257,11 +268,23 @@ const MarketStructure = () => {
 
             {/* Live Price Data */}
             <div className="glass-card price-data-section">
-              <CandleDataCard pair={cryptoPair} onUseCandleData={handleUsePriceData} autoFill={true} />
+              <CandleDataCard pair={cryptoPair} onUseCandleData={handleUsePriceData} autoFill={liveSync} />
+              {!liveSync && (
+                <p className="live-paused-note" role="status">
+                  Live updates paused because you edited values. Click Apply Data to load live data again.
+                </p>
+              )}
             </div>
 
             {/* Manual Input Toggle */}
-            <div className="glass-card manual-toggle" onClick={() => setShowManual(!showManual)}>
+            <div
+              className="glass-card manual-toggle"
+              role="button"
+              tabIndex={0}
+              aria-expanded={showManual}
+              onKeyDown={(ev) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); setShowManual(!showManual) } }}
+              onClick={() => setShowManual(!showManual)}
+            >
               <div className="toggle-content">
                 <BarChart2 size={18} />
                 <span>Manual Price Levels</span>

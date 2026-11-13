@@ -26,7 +26,7 @@ export interface MarketData {
 // Narratives and trending sectors (can be updated based on current market conditions)
 const MARKET_NARRATIVES = [
   { keyword: ['AI', 'AGIX', 'FET', 'RNDR'], narrative: 'AI & Machine Learning' },
-  { keyword: ['L2', 'ARB', 'OP', 'MATIC'], narrative: 'Layer 2 Scaling' },
+  { keyword: ['L2', 'ARB', 'OP', 'POL'], narrative: 'Layer 2 Scaling' },
   { keyword: ['GAMING', 'IMX', 'GALA', 'SAND'], narrative: 'GameFi' },
   { keyword: ['RWA', 'ONDO', 'LINK'], narrative: 'Real World Assets' },
   { keyword: ['DEPIN', 'FIL', 'AR', 'HNT'], narrative: 'DePIN' },
@@ -38,7 +38,7 @@ const MARKET_NARRATIVES = [
 // Popular trading pairs to analyze
 const TRADING_PAIRS = [
   'BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'SOLUSDT', 'XRPUSDT',
-  'ADAUSDT', 'DOGEUSDT', 'MATICUSDT', 'DOTUSDT', 'AVAXUSDT',
+  'ADAUSDT', 'DOGEUSDT', 'POLUSDT', 'DOTUSDT', 'AVAXUSDT',
   'LTCUSDT', 'LINKUSDT', 'UNIUSDT', 'ATOMUSDT', 'FILUSDT',
   'NEARUSDT', 'APTUSDT', 'ARBUSDT', 'OPUSDT', 'SUIUSDT',
   'SEIUSDT', 'INJUSDT', 'TIAUSDT', 'WLDUSDT', 'RENDERUSDT',

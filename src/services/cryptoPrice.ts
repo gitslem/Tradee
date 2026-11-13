@@ -21,7 +21,7 @@ const symbolMap: Record<string, string> = {
   'XRP/USDT': 'XRPUSDT',
   'ADA/USDT': 'ADAUSDT',
   'DOGE/USDT': 'DOGEUSDT',
-  'MATIC/USDT': 'MATICUSDT',
+  'POL/USDT': 'POLUSDT',
   'DOT/USDT': 'DOTUSDT',
   'AVAX/USDT': 'AVAXUSDT'
 }

@@ -21,7 +21,8 @@ export interface PaperTrade {
   takeProfit?: number
   stopLoss?: number
   timestamp: number
-  status: 'open' | 'closed'
+  /** pending = resting limit order (margin and fee reserved, not yet filled) */
+  status: 'pending' | 'open' | 'closed' | 'cancelled'
   exitPrice?: number
   exitTimestamp?: number
   pnl?: number
@@ -92,8 +93,52 @@ class PaperTradingService {
     const account = this.accounts.get(userId)
     if (account) {
       account.lastUpdated = Date.now()
-      localStorage.setItem(STORAGE_KEY_PREFIX + userId, JSON.stringify(account))
+      try {
+        localStorage.setItem(STORAGE_KEY_PREFIX + userId, JSON.stringify(account))
+      } catch (error) {
+        console.error('Failed to save paper trading account:', error)
+      }
     }
+  }
+
+  private margin(trade: PaperTrade): number {
+    return (trade.entryPrice * trade.quantity) / trade.leverage
+  }
+
+  /**
+   * Validate an order before it is placed. Returns an error message or null.
+   */
+  validateOrder(params: {
+    side: 'long' | 'short'
+    entryPrice: number
+    quantity: number
+    leverage: number
+    takeProfit?: number
+    stopLoss?: number
+  }): string | null {
+    const { side, entryPrice, quantity, leverage, takeProfit, stopLoss } = params
+    if (!Number.isFinite(entryPrice) || entryPrice <= 0) return 'Invalid price'
+    if (!Number.isFinite(quantity) || quantity <= 0) return 'Please enter a valid quantity'
+    if (!Number.isFinite(leverage) || leverage < 1 || leverage > 100) return 'Leverage must be between 1x and 100x'
+
+    const isLong = side === 'long'
+    if (takeProfit !== undefined) {
+      if (!Number.isFinite(takeProfit) || takeProfit <= 0) return 'Invalid take profit'
+      if (isLong ? takeProfit <= entryPrice : takeProfit >= entryPrice) {
+        return `Take profit must be ${isLong ? 'above' : 'below'} the entry price for a ${side}`
+      }
+    }
+    if (stopLoss !== undefined) {
+      if (!Number.isFinite(stopLoss) || stopLoss <= 0) return 'Invalid stop loss'
+      if (isLong ? stopLoss >= entryPrice : stopLoss <= entryPrice) {
+        return `Stop loss must be ${isLong ? 'below' : 'above'} the entry price for a ${side}`
+      }
+      const liq = this.calculateLiquidationPrice({ side, entryPrice, leverage })
+      if (isLong ? stopLoss <= liq : stopLoss >= liq) {
+        return `Stop loss is past the liquidation price ($${liq.toFixed(2)}). Lower the leverage or tighten the stop.`
+      }
+    }
+    return null
   }
 
   /**
@@ -140,7 +185,7 @@ class PaperTradingService {
    * Calculate liquidation price for a position
    * Using Bybit's isolated margin formula
    */
-  calculateLiquidationPrice(trade: PaperTrade): number {
+  calculateLiquidationPrice(trade: Pick<PaperTrade, 'side' | 'entryPrice' | 'leverage'>): number {
     const MMR = 0.005 // Maintenance Margin Rate (0.5%)
 
     if (trade.side === 'long') {
@@ -166,14 +211,33 @@ class PaperTradingService {
       takeProfit?: number
       stopLoss?: number
       orderType: 'market' | 'limit'
-    }
+    },
+    marketPrice: number
   ): { success: boolean; trade?: PaperTrade; error?: string } {
     const account = this.getAccount(userId)
 
+    if (!Number.isFinite(marketPrice) || marketPrice <= 0) {
+      return { success: false, error: 'Unable to get current price' }
+    }
+
+    // A limit order that is already marketable fills immediately at the market
+    // price as a taker; otherwise it rests until price reaches it.
+    const isLimit = params.orderType === 'limit'
+    const marketable = !isLimit || (params.side === 'long'
+      ? marketPrice <= params.entryPrice
+      : marketPrice >= params.entryPrice)
+    const entryPrice = marketable ? marketPrice : params.entryPrice
+    const feeType: 'market' | 'limit' = marketable ? 'market' : 'limit'
+
+    const validationError = this.validateOrder({ ...params, entryPrice })
+    if (validationError) {
+      return { success: false, error: validationError }
+    }
+
     // Calculate notional value and required margin
-    const notionalValue = params.entryPrice * params.quantity
+    const notionalValue = entryPrice * params.quantity
     const requiredMargin = notionalValue / params.leverage
-    const entryFee = this.calculateEntryFee(notionalValue, params.orderType)
+    const entryFee = this.calculateEntryFee(notionalValue, feeType)
     const totalRequired = requiredMargin + entryFee
 
     // Check if user has enough balance
@@ -186,21 +250,21 @@ class PaperTradingService {
 
     // Create the trade
     const trade: PaperTrade = {
-      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
       symbol: params.symbol,
       side: params.side,
-      entryPrice: params.entryPrice,
+      entryPrice,
       quantity: params.quantity,
       leverage: params.leverage,
       takeProfit: params.takeProfit,
       stopLoss: params.stopLoss,
       timestamp: Date.now(),
-      status: 'open',
+      status: marketable ? 'open' : 'pending',
       fees: entryFee,
-      orderType: params.orderType
+      orderType: feeType
     }
 
-    // Deduct margin and fees from balance
+    // Deduct (or, for pending orders, reserve) margin and fees from balance
     account.balance -= totalRequired
     account.totalFees += entryFee
     account.trades.push(trade)
@@ -238,16 +302,17 @@ class PaperTradingService {
       : trade.entryPrice - exitPrice
     const grossPnl = priceDiff * trade.quantity
 
-    // Calculate exit fee
-    const exitNotional = exitPrice * trade.quantity
-    const exitFee = this.calculateExitFee(exitNotional, 'market') // Closing is always market
+    const margin = this.margin(trade)
+    const entryFee = trade.fees
+    const isLiquidation = closeReason === 'liquidation'
 
-    // Net P&L after exit fee
-    const netPnl = grossPnl - exitFee
+    // Closing is always a market (taker) order. On liquidation (isolated
+    // margin) the whole position margin is lost and nothing is returned.
+    const exitFee = isLiquidation ? 0 : this.calculateExitFee(exitPrice * trade.quantity, 'market')
+    const returned = isLiquidation ? 0 : margin + grossPnl - exitFee
 
-    // Return margin to balance
-    const entryNotional = trade.entryPrice * trade.quantity
-    const margin = entryNotional / trade.leverage
+    // Net P&L includes both entry and exit fees, so it matches the balance change
+    const netPnl = returned - margin - entryFee
 
     // Update trade
     trade.status = 'closed'
@@ -258,11 +323,11 @@ class PaperTradingService {
     trade.closeReason = closeReason
 
     // Update account
-    account.balance += margin + netPnl // Return margin + P&L
+    account.balance += returned
     account.totalPnl += netPnl
     account.totalFees += exitFee
 
-    if (netPnl >= 0) {
+    if (netPnl > 0) {
       account.winCount++
     } else {
       account.lossCount++
@@ -276,15 +341,33 @@ class PaperTradingService {
   /**
    * Check and execute TP/SL for all open trades
    */
-  checkAndExecuteTPSL(userId: string, currentPrices: Map<string, number>): PaperTrade[] {
+  checkAndExecuteTPSL(
+    userId: string,
+    currentPrices: Map<string, number>
+  ): { closed: PaperTrade[]; filled: PaperTrade[] } {
     const account = this.getAccount(userId)
     const closedTrades: PaperTrade[] = []
+    const filledOrders: PaperTrade[] = []
 
     for (const trade of account.trades) {
-      if (trade.status !== 'open') continue
-
       const currentPrice = currentPrices.get(trade.symbol)
       if (!currentPrice) continue
+
+      // Fill resting limit orders once price reaches them
+      if (trade.status === 'pending') {
+        const reached = trade.side === 'long'
+          ? currentPrice <= trade.entryPrice
+          : currentPrice >= trade.entryPrice
+        if (reached) {
+          trade.status = 'open'
+          trade.timestamp = Date.now()
+          filledOrders.push(trade)
+          this.saveAccount(userId)
+        }
+        continue
+      }
+
+      if (trade.status !== 'open') continue
 
       // Check liquidation first
       const liqPrice = this.calculateLiquidationPrice(trade)
@@ -322,7 +405,8 @@ class PaperTradingService {
           : currentPrice >= trade.stopLoss
 
         if (slHit) {
-          const result = this.closeTrade(userId, trade.id, trade.stopLoss, 'stopLoss')
+          // Stops fill at market, which may be worse than the stop price
+          const result = this.closeTrade(userId, trade.id, currentPrice, 'stopLoss')
           if (result.success && result.trade) {
             closedTrades.push(result.trade)
           }
@@ -330,7 +414,40 @@ class PaperTradingService {
       }
     }
 
-    return closedTrades
+    return { closed: closedTrades, filled: filledOrders }
+  }
+
+  /**
+   * Cancel a pending limit order and release its reserved margin and fee
+   */
+  cancelOrder(userId: string, tradeId: string): { success: boolean; error?: string } {
+    const account = this.getAccount(userId)
+    const trade = account.trades.find(t => t.id === tradeId)
+    if (!trade || trade.status !== 'pending') {
+      return { success: false, error: 'Order not found' }
+    }
+    account.balance += this.margin(trade) + trade.fees
+    account.totalFees -= trade.fees
+    trade.fees = 0
+    trade.status = 'cancelled'
+    trade.exitTimestamp = Date.now()
+    this.saveAccount(userId)
+    return { success: true }
+  }
+
+  /**
+   * Get resting limit orders for a user
+   */
+  getPendingOrders(userId: string): PaperTrade[] {
+    return this.getAccount(userId).trades.filter(t => t.status === 'pending')
+  }
+
+  /**
+   * Symbols that need live prices (open positions and pending orders)
+   */
+  getActiveSymbols(userId: string): string[] {
+    const active = this.getAccount(userId).trades.filter(t => t.status === 'open' || t.status === 'pending')
+    return [...new Set(active.map(t => t.symbol))]
   }
 
   /**

@@ -52,6 +52,20 @@ const RISK_PRESETS = [
 // Leverage presets
 const LEVERAGE_PRESETS = [1, 3, 5, 10, 20, 50]
 
+const ACCOUNT_TYPE_ORDER: AccountType[] = ['futures', 'spot', 'margin']
+
+// Price formatting that stays readable for both BTC (60000) and DOGE (0.1234)
+const formatPrice = (value: number): string => {
+  if (!Number.isFinite(value)) return '—'
+  const abs = Math.abs(value)
+  if (abs >= 1000) return value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  if (abs >= 1) return value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 })
+  if (abs === 0) return '0'
+  return value.toPrecision(4).replace(/0+$/, '').replace(/\.$/, '')
+}
+
+type Message = { type: 'error' | 'warning' | 'success'; message: string }
+
 const PositionCalculator = () => {
   const [accountBalance, setAccountBalance] = useState<string>('10000')
   const [riskPercentage, setRiskPercentage] = useState<string>('1')
@@ -73,116 +87,73 @@ const PositionCalculator = () => {
   const exchangeFees = getExchangeFees(selectedExchange, accountType)
   const maxLeverageAllowed = getMaxLeverage(selectedExchange, accountType)
 
+  // Spot trades have no leverage; elsewhere clamp to the exchange maximum
+  const leverageAvailable = accountType !== 'spot' && maxLeverageAllowed > 1
+  const requestedLeverage = parseFloat(leverage)
+  const effectiveLeverage = useLeverage && leverageAvailable
+    ? Math.min(Math.max(1, Number.isFinite(requestedLeverage) ? requestedLeverage : 1), maxLeverageAllowed)
+    : 1
+
   const calculatePosition = useCallback((): CalculationResults | null => {
     const balance = parseFloat(accountBalance)
     const risk = parseFloat(riskPercentage)
     const entry = parseFloat(entryPrice)
     const stop = parseFloat(stopPrice)
-    const takeProfit = parseFloat(takeProfitPrice)
-    const tp2 = parseFloat(tp2Price)
-    const tp3 = parseFloat(tp3Price)
-    const lev = useLeverage ? parseFloat(leverage) : 1
-    const feePercent = exchangeFees.taker / 100
+    const lev = effectiveLeverage
+    const feeRate = exchangeFees.taker / 100
+    const dir = positionType === 'long' ? 1 : -1
 
-    if (isNaN(balance) || isNaN(risk) || isNaN(entry) || isNaN(stop) || isNaN(lev)) {
-      return null
-    }
+    // Invalid inputs produce no result (the validation panel explains why)
+    if (!(balance > 0) || !(risk > 0) || !(entry > 0) || !(stop > 0)) return null
+    if ((entry - stop) * dir <= 0) return null // stop on the wrong side, or equal to entry
 
     // Position sizing
-    // Stop Loss Distance = |Entry - Stop| / Entry (as decimal)
-    // Risk Amount = Account Balance × Risk Percentage
-    // Base Position Size = Risk Amount / Stop Loss Distance (position size without leverage)
-    // Position Size = Base Position Size × Leverage (notional value of the position)
-    // Margin Required = Base Position Size (initial margin needed)
-    // Quantity = Position Size / Entry Price (amount of asset to buy/sell)
-    const stopLossDistance = Math.abs(entry - stop) / entry
+    // The position is sized so that hitting the stop loses exactly the risk
+    // amount, including the entry and exit (taker) fees:
+    //   loss = qty × |entry - stop| + qty × entry × fee + qty × stop × fee
+    // Leverage does NOT change the position size, only the margin you post.
+    const stopDistancePrice = Math.abs(entry - stop)
+    const stopLossDistance = stopDistancePrice / entry
     const riskAmount = balance * (risk / 100)
-    const basePositionSize = riskAmount / stopLossDistance
-    const positionSize = basePositionSize * lev
-    const marginRequired = basePositionSize // Initial Margin = Position Value / Leverage
-    const notionalValue = positionSize // Total position value
-    const quantity = positionSize / entry // Quantity of the asset
+    const quantity = riskAmount / (stopDistancePrice + (entry + stop) * feeRate)
+    const notionalValue = quantity * entry
+    const positionSize = notionalValue
+    const marginRequired = notionalValue / lev
     const positionValue = quantity // Legacy: same as quantity for compatibility
 
-    // Liquidation Price Calculation (Bybit Isolated Margin Formula)
-    // For Long: Liq Price = Entry × (1 - Initial Margin Rate + Maintenance Margin Rate)
-    // For Short: Liq Price = Entry × (1 + Initial Margin Rate - Maintenance Margin Rate)
-    // Where: Initial Margin Rate = 1 / Leverage
+    // Liquidation price (isolated margin, estimate)
+    //   Long:  Entry × (1 - 1/Leverage + MMR)
+    //   Short: Entry × (1 + 1/Leverage - MMR)
     let liquidationPrice = 0
-    if (useLeverage && lev > 1) {
-      const maintenanceMarginRate = getMaintenanceMargin(selectedExchange, lev) / 100 // Convert from percentage
-      const initialMarginRate = 1 / lev
-
-      if (positionType === 'long') {
-        // Bybit Long Liquidation Formula
-        liquidationPrice = entry * (1 - initialMarginRate + maintenanceMarginRate)
-      } else {
-        // Bybit Short Liquidation Formula
-        liquidationPrice = entry * (1 + initialMarginRate - maintenanceMarginRate)
-      }
-
-      // Ensure liquidation price is valid (positive and within reasonable bounds)
-      liquidationPrice = Math.max(0, liquidationPrice)
+    if (lev > 1) {
+      const mmr = getMaintenanceMargin(selectedExchange, lev) / 100
+      liquidationPrice = Math.max(0, entry * (1 - dir * (1 / lev - mmr)))
     }
 
     const distanceToLiquidation = liquidationPrice > 0
       ? (Math.abs(entry - liquidationPrice) / entry) * 100
       : 0
 
-    const breakevenDistance = entry * feePercent * 2
+    // Breakeven covers the entry and exit fee
     const breakevenPrice = positionType === 'long'
-      ? entry + breakevenDistance
-      : entry - breakevenDistance
+      ? entry * (1 + feeRate) / (1 - feeRate)
+      : entry * (1 - feeRate) / (1 + feeRate)
 
-    // Take Profit & P&L Calculations (Bybit Formula)
-    // P&L (Long) = Quantity × (Exit Price - Entry Price)
-    // P&L (Short) = Quantity × (Entry Price - Exit Price)
-    // Percent Gain = (Price Distance / Entry Price) × 100
-    // Risk:Reward = Take Profit Distance / Stop Loss Distance
+    // Take profits: net of fees, ignored when on the wrong side of entry
     const takeProfitResults: TakeProfitResult[] = []
-
-    if (!isNaN(takeProfit)) {
-      const tpDistance = Math.abs(takeProfit - entry)
-      const tpPercentDistance = (tpDistance / entry) * 100
-      const potentialProfit = quantity * tpDistance
-      const rrRatio = tpDistance / Math.abs(entry - stop)
-
+    const tpInputs: [string, string][] = [['TP1', takeProfitPrice], ['TP2', tp2Price], ['TP3', tp3Price]]
+    for (const [name, raw] of tpInputs) {
+      const tp = parseFloat(raw)
+      if (!(tp > 0) || (tp - entry) * dir <= 0) continue
+      const gross = quantity * (tp - entry) * dir
+      const fees = quantity * (entry + tp) * feeRate
+      const profit = gross - fees
       takeProfitResults.push({
-        name: 'TP1',
-        price: takeProfit,
-        percentGain: tpPercentDistance,
-        profit: potentialProfit,
-        rrRatio: rrRatio
-      })
-    }
-
-    if (!isNaN(tp2)) {
-      const tpDistance = Math.abs(tp2 - entry)
-      const tpPercentDistance = (tpDistance / entry) * 100
-      const potentialProfit = quantity * tpDistance
-      const rrRatio = tpDistance / Math.abs(entry - stop)
-
-      takeProfitResults.push({
-        name: 'TP2',
-        price: tp2,
-        percentGain: tpPercentDistance,
-        profit: potentialProfit,
-        rrRatio: rrRatio
-      })
-    }
-
-    if (!isNaN(tp3)) {
-      const tpDistance = Math.abs(tp3 - entry)
-      const tpPercentDistance = (tpDistance / entry) * 100
-      const potentialProfit = quantity * tpDistance
-      const rrRatio = tpDistance / Math.abs(entry - stop)
-
-      takeProfitResults.push({
-        name: 'TP3',
-        price: tp3,
-        percentGain: tpPercentDistance,
-        profit: potentialProfit,
-        rrRatio: rrRatio
+        name,
+        price: tp,
+        percentGain: ((tp - entry) * dir / entry) * 100,
+        profit,
+        rrRatio: profit / riskAmount
       })
     }
 
@@ -190,34 +161,25 @@ const PositionCalculator = () => {
     const riskRewardRatio = takeProfitResults.length > 0 ? takeProfitResults[0].rrRatio : 0
     const winRateNeeded = riskRewardRatio > 0 ? (1 / (1 + riskRewardRatio)) * 100 : 0
 
-    // Maintenance Margin Calculation (Bybit Formula)
     // Maintenance Margin = Position Value × Maintenance Margin Rate
     const maintenanceMarginRate = getMaintenanceMargin(selectedExchange, lev)
     const maintenanceMargin = (notionalValue * maintenanceMarginRate) / 100
 
-    // Trading Fees Calculation
-    // Entry Fee = Position Size × Taker Fee Rate
-    // Exit Fee = Position Size × Taker Fee Rate
-    // Total Fees = Entry Fee + Exit Fee
-    const entryFee = positionSize * (exchangeFees.taker / 100)
-    const exitFee = positionSize * (exchangeFees.taker / 100)
-    const totalFees = entryFee + exitFee
+    // Round-trip taker fees at the entry price
+    const totalFees = notionalValue * feeRate * 2
 
-    // Funding Cost Calculation (for perpetual futures)
     // Funding Cost = Position Size × Funding Rate × Number of Funding Periods
     const fundingCost = accountType === 'futures'
       ? calculateFundingCost(selectedExchange, accountType, notionalValue, 24)
       : 0
 
-    // ROI on Margin (Bybit Formula)
     // ROI = (P&L / Initial Margin) × 100%
     const roiOnMargin = marginRequired > 0 && potentialProfit > 0
       ? (potentialProfit / marginRequired) * 100
       : 0
 
-    // Actual Risk with Leverage
-    // This represents the maximum loss if stop loss is hit
-    const actualRiskWithLeverage = positionSize * stopLossDistance
+    // Loss if the stop is hit, fees included (equals the risk amount)
+    const actualRiskWithLeverage = quantity * stopDistancePrice + quantity * (entry + stop) * feeRate
 
     return {
       stopLossDistance: stopLossDistance * 100,
@@ -241,65 +203,112 @@ const PositionCalculator = () => {
       roiOnMargin,
       actualRiskWithLeverage
     }
-  }, [accountBalance, riskPercentage, entryPrice, stopPrice, takeProfitPrice, tp2Price, tp3Price, leverage, useLeverage, positionType, selectedExchange, accountType, exchangeFees])
+  }, [accountBalance, riskPercentage, entryPrice, stopPrice, takeProfitPrice, tp2Price, tp3Price, effectiveLeverage, positionType, selectedExchange, accountType, exchangeFees])
 
   const results = useMemo(() => calculatePosition(), [calculatePosition])
 
-  const validatePosition = useCallback((): { type: 'error' | 'warning' | 'success'; message: string }[] => {
-    const warnings: { type: 'error' | 'warning' | 'success'; message: string }[] = []
+  const validatePosition = useCallback((): Message[] => {
+    const warnings: Message[] = []
+    const balance = parseFloat(accountBalance)
     const entry = parseFloat(entryPrice)
     const stop = parseFloat(stopPrice)
-    const takeProfit = parseFloat(takeProfitPrice)
     const risk = parseFloat(riskPercentage)
-    const lev = useLeverage ? parseFloat(leverage) : 1
+    const isLong = positionType === 'long'
+    const side = isLong ? 'LONG' : 'SHORT'
 
-    if (positionType === 'long') {
-      if (stop >= entry) {
-        warnings.push({ type: 'error', message: 'Stop loss must be below entry for LONG' })
+    if (!(balance > 0)) warnings.push({ type: 'error', message: 'Enter an account balance above 0' })
+    if (!(risk > 0)) warnings.push({ type: 'error', message: 'Enter a risk percentage above 0' })
+    if (!(entry > 0)) warnings.push({ type: 'error', message: 'Enter an entry price above 0' })
+    if (!(stop > 0)) {
+      warnings.push({ type: 'error', message: 'Enter a stop loss price above 0' })
+    } else if (entry > 0) {
+      if (stop === entry) {
+        warnings.push({ type: 'error', message: 'Stop loss cannot equal the entry price' })
+      } else if (isLong ? stop > entry : stop < entry) {
+        warnings.push({ type: 'error', message: `Stop loss must be ${isLong ? 'below' : 'above'} entry for ${side}` })
       }
-      if (!isNaN(takeProfit) && takeProfit <= entry) {
-        warnings.push({ type: 'error', message: 'Take profit must be above entry for LONG' })
-      }
-    } else {
-      if (stop <= entry) {
-        warnings.push({ type: 'error', message: 'Stop loss must be above entry for SHORT' })
-      }
-      if (!isNaN(takeProfit) && takeProfit >= entry) {
-        warnings.push({ type: 'error', message: 'Take profit must be below entry for SHORT' })
+    }
+
+    if (entry > 0) {
+      const tps: [string, string][] = [['Take profit', takeProfitPrice], ['Take profit 2', tp2Price], ['Take profit 3', tp3Price]]
+      for (const [name, raw] of tps) {
+        const tp = parseFloat(raw)
+        if (tp > 0 && (isLong ? tp <= entry : tp >= entry)) {
+          warnings.push({ type: 'error', message: `${name} must be ${isLong ? 'above' : 'below'} entry for ${side} (ignored)` })
+        }
       }
     }
 
     if (risk > 2) {
-      warnings.push({ type: 'warning', message: `Risk ${risk}% is above recommended 2%` })
-    } else if (risk <= 1) {
-      warnings.push({ type: 'success', message: 'Conservative risk management' })
+      warnings.push({ type: 'warning', message: `Risk ${risk}% is above the recommended 2%` })
+    } else if (risk > 0 && risk <= 1) {
+      warnings.push({ type: 'success', message: 'Risk is within the 1% guideline' })
     }
 
     if (results && results.riskRewardRatio >= 2) {
-      warnings.push({ type: 'success', message: `Good R:R ratio (1:${results.riskRewardRatio.toFixed(1)})` })
+      warnings.push({ type: 'success', message: `Good R:R ratio after fees (1:${results.riskRewardRatio.toFixed(1)})` })
     } else if (results && results.riskRewardRatio < 1.5 && results.riskRewardRatio > 0) {
-      warnings.push({ type: 'warning', message: 'Consider better R:R ratio (< 1:1.5)' })
+      warnings.push({ type: 'warning', message: 'Consider a better R:R ratio (below 1:1.5 after fees)' })
     }
 
-    if (useLeverage && lev > 1) {
-      if (lev > maxLeverageAllowed) {
-        warnings.push({ type: 'error', message: `Max leverage is ${maxLeverageAllowed}x` })
-      }
-      if (lev >= 20) {
+    if (results && results.marginRequired > balance) {
+      const minLeverage = Math.ceil(results.notionalValue / balance)
+      warnings.push({
+        type: 'error',
+        message: leverageAvailable && minLeverage <= maxLeverageAllowed
+          ? `Position needs $${results.marginRequired.toFixed(2)} but the balance is $${balance.toFixed(2)}. Use at least ${minLeverage}x leverage, widen the stop or lower the risk.`
+          : `Position needs $${results.marginRequired.toFixed(2)} but the balance is $${balance.toFixed(2)}. Widen the stop or lower the risk.`
+      })
+    }
+
+    if (useLeverage && !leverageAvailable) {
+      warnings.push({ type: 'warning', message: 'Leverage is not available for spot. Calculated at 1x.' })
+    } else if (useLeverage && requestedLeverage > maxLeverageAllowed) {
+      warnings.push({ type: 'warning', message: `Leverage capped at the ${maxLeverageAllowed}x maximum` })
+    }
+
+    if (effectiveLeverage > 1) {
+      if (effectiveLeverage >= 20) {
         warnings.push({ type: 'error', message: 'Extreme leverage risk!' })
-      } else if (lev >= 10) {
+      } else if (effectiveLeverage >= 10) {
         warnings.push({ type: 'warning', message: 'High leverage risk' })
       }
 
-      if (results && results.distanceToLiquidation < 5 && results.distanceToLiquidation > 0) {
+      if (results && results.liquidationPrice > 0 && (isLong ? results.liquidationPrice >= stop : results.liquidationPrice <= stop)) {
+        warnings.push({
+          type: 'error',
+          message: `Liquidation ($${formatPrice(results.liquidationPrice)}) is hit before your stop loss. Lower the leverage.`
+        })
+      } else if (results && results.distanceToLiquidation < 5 && results.distanceToLiquidation > 0) {
         warnings.push({ type: 'error', message: 'Liquidation within 5%!' })
       }
     }
 
     return warnings
-  }, [entryPrice, stopPrice, takeProfitPrice, riskPercentage, leverage, useLeverage, positionType, maxLeverageAllowed, results])
+  }, [accountBalance, entryPrice, stopPrice, takeProfitPrice, tp2Price, tp3Price, riskPercentage, positionType, results, useLeverage, leverageAvailable, requestedLeverage, maxLeverageAllowed, effectiveLeverage])
 
   const warnings = useMemo(() => validatePosition(), [validatePosition])
+
+  const clampLeverageTo = (max: number) => {
+    const current = parseFloat(leverage)
+    if (!Number.isFinite(current) || current > max) setLeverage(String(Math.max(1, max)))
+  }
+
+  const handleSelectExchange = (exchangeId: string) => {
+    setSelectedExchange(exchangeId)
+    const types = EXCHANGES[exchangeId]?.accountTypes
+    let nextType = accountType
+    if (types && !types[accountType]) {
+      nextType = ACCOUNT_TYPE_ORDER.find(t => types[t]) ?? 'spot'
+      setAccountType(nextType)
+    }
+    clampLeverageTo(getMaxLeverage(exchangeId, nextType))
+  }
+
+  const handleAccountType = (type: AccountType) => {
+    setAccountType(type)
+    clampLeverageTo(getMaxLeverage(selectedExchange, type))
+  }
 
   const handleUseCurrentPrice = (price: number) => {
     setEntryPrice(price.toString())
@@ -331,7 +340,7 @@ const PositionCalculator = () => {
       {/* Exchange Selector */}
       <FloatingExchangeSelector
         selectedExchange={selectedExchange}
-        onSelectExchange={setSelectedExchange}
+        onSelectExchange={handleSelectExchange}
       />
 
       <div className="calculator-container">
@@ -349,10 +358,10 @@ const PositionCalculator = () => {
             <Activity size={16} />
             <span>{cryptoPair}</span>
           </div>
-          {useLeverage && parseFloat(leverage) > 1 && (
+          {effectiveLeverage > 1 && (
             <div className="stat-chip leverage-chip">
               <Zap size={16} />
-              <span>{leverage}x</span>
+              <span>{effectiveLeverage}x</span>
             </div>
           )}
         </div>
@@ -372,7 +381,7 @@ const PositionCalculator = () => {
               {EXCHANGES[selectedExchange].accountTypes.spot && (
                 <button
                   className={`type-btn ${accountType === 'spot' ? 'active' : ''}`}
-                  onClick={() => setAccountType('spot')}
+                  onClick={() => handleAccountType('spot')}
                 >
                   Spot
                 </button>
@@ -380,7 +389,7 @@ const PositionCalculator = () => {
               {EXCHANGES[selectedExchange].accountTypes.futures && (
                 <button
                   className={`type-btn ${accountType === 'futures' ? 'active' : ''}`}
-                  onClick={() => setAccountType('futures')}
+                  onClick={() => handleAccountType('futures')}
                 >
                   Futures
                 </button>
@@ -388,7 +397,7 @@ const PositionCalculator = () => {
               {EXCHANGES[selectedExchange].accountTypes.margin && (
                 <button
                   className={`type-btn ${accountType === 'margin' ? 'active' : ''}`}
-                  onClick={() => setAccountType('margin')}
+                  onClick={() => handleAccountType('margin')}
                 >
                   Margin
                 </button>
@@ -427,7 +436,7 @@ const PositionCalculator = () => {
                 <option>XRP/USDT</option>
                 <option>ADA/USDT</option>
                 <option>DOGE/USDT</option>
-                <option>MATIC/USDT</option>
+                <option>POL/USDT</option>
                 <option>DOT/USDT</option>
                 <option>AVAX/USDT</option>
               </select>
@@ -537,17 +546,26 @@ const PositionCalculator = () => {
               </div>
             </div>
 
-            {/* Leverage Section */}
-            <div className="section-toggle" onClick={() => setShowLeverage(!showLeverage)}>
+            {/* Leverage Section (not available for spot) */}
+            {leverageAvailable && (
+            <div
+              className="section-toggle"
+              role="button"
+              tabIndex={0}
+              aria-expanded={showLeverage}
+              onClick={() => setShowLeverage(!showLeverage)}
+              onKeyDown={(ev) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); setShowLeverage(!showLeverage) } }}
+            >
               <div className="toggle-header">
                 <Zap size={18} />
                 <span>Leverage Settings</span>
-                {useLeverage && <span className="active-badge">{leverage}x Active</span>}
+                {effectiveLeverage > 1 && <span className="active-badge">{effectiveLeverage}x Active</span>}
               </div>
               {showLeverage ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
             </div>
+            )}
 
-            {showLeverage && (
+            {leverageAvailable && showLeverage && (
               <div className="leverage-section animated-section">
                 <label className="toggle-switch">
                   <input
@@ -577,15 +595,16 @@ const PositionCalculator = () => {
                         type="range"
                         min="1"
                         max={maxLeverageAllowed}
-                        value={leverage}
+                        value={effectiveLeverage}
                         onChange={(e) => setLeverage(e.target.value)}
                         className="leverage-slider"
+                        aria-label="Leverage"
                       />
-                      <div className="leverage-display">{leverage}x</div>
+                      <div className="leverage-display">{effectiveLeverage}x</div>
                     </div>
                     <div className="leverage-warning">
                       <AlertTriangle size={16} />
-                      <span>Leverage multiplies both profits and losses</span>
+                      <span>Leverage lowers the margin you post, not your risk. The position size stays the same.</span>
                     </div>
                   </>
                 )}
@@ -593,7 +612,14 @@ const PositionCalculator = () => {
             )}
 
             {/* Advanced Section */}
-            <div className="section-toggle" onClick={() => setShowAdvanced(!showAdvanced)}>
+            <div
+              className="section-toggle"
+              role="button"
+              tabIndex={0}
+              aria-expanded={showAdvanced}
+              onClick={() => setShowAdvanced(!showAdvanced)}
+              onKeyDown={(ev) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); setShowAdvanced(!showAdvanced) } }}
+            >
               <div className="toggle-header">
                 <Target size={18} />
                 <span>Multiple Take Profits</span>
@@ -674,7 +700,7 @@ const PositionCalculator = () => {
                     <div className="metric-content">
                       <span className="metric-label">Potential Profit</span>
                       <span className="metric-value profit-text">${results.potentialProfit.toFixed(2)}</span>
-                      <span className="metric-sub">R:R 1:{results.riskRewardRatio.toFixed(2)}</span>
+                      <span className="metric-sub">R:R 1:{results.riskRewardRatio.toFixed(2)} after fees</span>
                     </div>
                   </div>
 
@@ -685,7 +711,7 @@ const PositionCalculator = () => {
                     <div className="metric-content">
                       <span className="metric-label">Stop Distance</span>
                       <span className="metric-value">{results.stopLossDistance.toFixed(2)}%</span>
-                      <span className="metric-sub">${Math.abs(parseFloat(entryPrice) - parseFloat(stopPrice)).toFixed(2)}</span>
+                      <span className="metric-sub">${formatPrice(Math.abs(parseFloat(entryPrice) - parseFloat(stopPrice)))}</span>
                     </div>
                   </div>
 
@@ -695,25 +721,25 @@ const PositionCalculator = () => {
                     </div>
                     <div className="metric-content">
                       <span className="metric-label">Breakeven</span>
-                      <span className="metric-value">${results.breakevenPrice.toFixed(2)}</span>
+                      <span className="metric-value">${formatPrice(results.breakevenPrice)}</span>
                       <span className="metric-sub">Inc. {exchangeFees.taker}% fees</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Leverage Info */}
-                {useLeverage && parseFloat(leverage) > 1 && (
+                {effectiveLeverage > 1 && (
                   <div className="leverage-results glass-card">
                     <h3>
                       <Zap size={20} />
-                      Leverage Analysis ({leverage}x)
+                      Leverage Analysis ({effectiveLeverage}x)
                     </h3>
 
                     <div className="liquidation-visual">
                       <div className="price-ladder">
                         <div className="price-point entry">
                           <span className="price-label">Entry</span>
-                          <span className="price-value">${parseFloat(entryPrice).toFixed(2)}</span>
+                          <span className="price-value">${formatPrice(parseFloat(entryPrice))}</span>
                         </div>
                         <div className="price-line">
                           <div
@@ -722,8 +748,8 @@ const PositionCalculator = () => {
                           />
                         </div>
                         <div className={`price-point liquidation ${results.distanceToLiquidation < 10 ? 'danger' : ''}`}>
-                          <span className="price-label">Liquidation</span>
-                          <span className="price-value">${results.liquidationPrice.toFixed(2)}</span>
+                          <span className="price-label">Liquidation (est.)</span>
+                          <span className="price-value">${formatPrice(results.liquidationPrice)}</span>
                         </div>
                       </div>
                       <div className="distance-info">
@@ -743,7 +769,7 @@ const PositionCalculator = () => {
                         <strong>${results.marginRequired.toFixed(2)}</strong>
                       </div>
                       <div className="leverage-metric">
-                        <span>Actual Risk</span>
+                        <span>Loss at Stop (inc. fees)</span>
                         <strong className="danger-text">${results.actualRiskWithLeverage.toFixed(2)}</strong>
                       </div>
                       <div className="leverage-metric">
@@ -772,10 +798,10 @@ const PositionCalculator = () => {
                         <div key={index} className="tp-item">
                           <div className="tp-header">
                             <span className="tp-name">{tp.name}</span>
-                            <span className="tp-price">${tp.price.toFixed(2)}</span>
+                            <span className="tp-price">${formatPrice(tp.price)}</span>
                           </div>
                           <div className="tp-details">
-                            <span className="tp-profit">+${tp.profit.toFixed(2)}</span>
+                            <span className="tp-profit">{tp.profit >= 0 ? '+' : '-'}${Math.abs(tp.profit).toFixed(2)}</span>
                             <span className="tp-percent">+{tp.percentGain.toFixed(2)}%</span>
                             <span className="tp-rr">R:R 1:{tp.rrRatio.toFixed(2)}</span>
                           </div>
@@ -791,7 +817,7 @@ const PositionCalculator = () => {
 
                 {/* Warnings & Validations */}
                 {warnings.length > 0 && (
-                  <div className="validations glass-card">
+                  <div className="validations glass-card" aria-live="polite">
                     <h3>Trade Analysis</h3>
                     <div className="validation-list">
                       {warnings.map((w, index) => (
@@ -819,9 +845,19 @@ const PositionCalculator = () => {
                 </div>
               </>
             ) : (
-              <div className="no-results glass-card">
+              <div className="no-results glass-card" aria-live="polite">
                 <Calculator size={48} />
                 <p>Enter trade parameters to calculate position size</p>
+                {warnings.filter(w => w.type === 'error').length > 0 && (
+                  <div className="validation-list">
+                    {warnings.filter(w => w.type === 'error').map((w, index) => (
+                      <div key={index} className="validation-item error">
+                        <XCircle size={18} />
+                        <span>{w.message}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>

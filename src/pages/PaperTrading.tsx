@@ -18,7 +18,7 @@ import {
 
 const POPULAR_PAIRS = [
   'BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'SOLUSDT', 'XRPUSDT',
-  'ADAUSDT', 'DOGEUSDT', 'MATICUSDT', 'DOTUSDT', 'AVAXUSDT'
+  'ADAUSDT', 'DOGEUSDT', 'POLUSDT', 'DOTUSDT', 'AVAXUSDT'
 ]
 
 // TradingView timeframe format
@@ -47,8 +47,15 @@ const PaperTrading = () => {
 
   // Trading State
   const [selectedPair, setSelectedPair] = useState('BTCUSDT')
+  // Drop the previous pair's ticker as soon as the pair changes, so orders
+  // can never be placed at another symbol's price
+  const [tickerPair, setTickerPair] = useState(selectedPair)
   const [selectedTimeframe, setSelectedTimeframe] = useState('15')
   const [ticker, setTicker] = useState<BybitTicker | null>(null)
+  if (tickerPair !== selectedPair) {
+    setTickerPair(selectedPair)
+    setTicker(null)
+  }
   const [allTickers, setAllTickers] = useState<Map<string, number>>(new Map())
   // Latest prices for the polling loop, without restarting it on every update
   const allTickersRef = useRef(allTickers)
@@ -107,7 +114,7 @@ const PaperTrading = () => {
   }, [userId])
 
   const addNotification = useCallback((message: string, type: 'success' | 'error' | 'warning') => {
-    const id = Date.now().toString()
+    const id = crypto.randomUUID()
     setNotifications(prev => [...prev, { id, message, type }])
     setTimeout(() => {
       setNotifications(prev => prev.filter(n => n.id !== id))
@@ -241,48 +248,63 @@ const PaperTrading = () => {
 
   // Fetch ticker data periodically and check TP/SL
   useEffect(() => {
+    let cancelled = false
+
     const fetchTickerAndCheckTPSL = async () => {
+      let prices = allTickersRef.current
       try {
         const tickerData = await bybitService.getTicker(selectedPair)
+        if (cancelled || tickerData.symbol !== selectedPair) return
         setTicker(tickerData)
 
         // Update all tickers map for TP/SL checking
-        const newTickers = new Map(allTickersRef.current)
-        newTickers.set(selectedPair, parseFloat(tickerData.lastPrice))
-        setAllTickers(newTickers)
-
-        // Check and execute TP/SL for paper trades
-        if (usePaperMode) {
-          const closedTrades = paperTradingService.checkAndExecuteTPSL(userId, newTickers)
-          if (closedTrades.length > 0) {
-            loadPaperTradingData()
-            closedTrades.forEach(trade => {
-              const reason = trade.closeReason === 'takeProfit' ? 'Take Profit' :
-                            trade.closeReason === 'stopLoss' ? 'Stop Loss' :
-                            trade.closeReason === 'liquidation' ? 'Liquidated' : 'Closed'
-              const pnlText = (trade.pnl || 0) >= 0 ? `+$${(trade.pnl || 0).toFixed(2)}` : `-$${Math.abs(trade.pnl || 0).toFixed(2)}`
-              addNotification(
-                `${trade.symbol} ${reason}: ${pnlText}`,
-                (trade.pnl || 0) >= 0 ? 'success' : 'error'
-              )
-            })
-          }
-        }
+        prices = new Map(allTickersRef.current)
+        prices.set(selectedPair, parseFloat(tickerData.lastPrice))
+        allTickersRef.current = prices
+        setAllTickers(prices)
       } catch (error) {
         console.error('Failed to fetch ticker:', error)
+      }
+      if (cancelled) return
+
+      // Check limit fills, TP/SL and liquidation for every paper position,
+      // using whatever prices we have (one failing symbol must not block others)
+      if (usePaperMode) {
+        const { closed: closedTrades, filled } = paperTradingService.checkAndExecuteTPSL(userId, prices)
+        if (closedTrades.length > 0 || filled.length > 0) {
+          loadPaperTradingData()
+          filled.forEach(trade => {
+            addNotification(
+              `${trade.symbol} ${trade.side.toUpperCase()} limit filled at $${trade.entryPrice}`,
+              'success'
+            )
+          })
+          closedTrades.forEach(trade => {
+            const reason = trade.closeReason === 'takeProfit' ? 'Take Profit' :
+                          trade.closeReason === 'stopLoss' ? 'Stop Loss' :
+                          trade.closeReason === 'liquidation' ? 'Liquidated' : 'Closed'
+            const pnlText = (trade.pnl || 0) >= 0 ? `+$${(trade.pnl || 0).toFixed(2)}` : `-$${Math.abs(trade.pnl || 0).toFixed(2)}`
+            addNotification(
+              `${trade.symbol} ${reason}: ${pnlText}`,
+              (trade.pnl || 0) >= 0 ? 'success' : 'error'
+            )
+          })
+        }
       }
     }
 
     fetchTickerAndCheckTPSL()
     const interval = setInterval(fetchTickerAndCheckTPSL, 2000)
-    return () => clearInterval(interval)
+    return () => {
+      cancelled = true
+      clearInterval(interval)
+    }
   }, [selectedPair, userId, usePaperMode, loadPaperTradingData, addNotification])
 
   // Fetch prices for all open positions' symbols
   useEffect(() => {
     const fetchAllPrices = async () => {
-      const openTrades = paperTradingService.getOpenTrades(userId)
-      const symbols = [...new Set(openTrades.map(t => t.symbol))]
+      const symbols = paperTradingService.getActiveSymbols(userId)
 
       for (const symbol of symbols) {
         if (symbol !== selectedPair) {
@@ -354,12 +376,11 @@ const PaperTrading = () => {
 
     if (usePaperMode) {
       // Paper trading mode - use paperTradingService
-      const entryPrice = orderType === 'Limit'
-        ? parseFloat(orderPrice)
-        : (ticker ? parseFloat(ticker.lastPrice) : 0)
+      const marketPrice = ticker && ticker.symbol === selectedPair ? parseFloat(ticker.lastPrice) : 0
+      const entryPrice = orderType === 'Limit' ? parseFloat(orderPrice) : marketPrice
 
-      if (entryPrice <= 0) {
-        setOrderError('Unable to get current price')
+      if (marketPrice <= 0) {
+        setOrderError('Waiting for the current price. Try again in a moment.')
         setIsPlacingOrder(false)
         return
       }
@@ -373,14 +394,15 @@ const PaperTrading = () => {
         takeProfit: orderTakeProfit ? parseFloat(orderTakeProfit) : undefined,
         stopLoss: orderStopLoss ? parseFloat(orderStopLoss) : undefined,
         orderType: orderType === 'Market' ? 'market' : 'limit'
-      })
+      }, marketPrice)
 
-      if (result.success) {
+      if (result.success && result.trade) {
         loadPaperTradingData()
-        const notional = entryPrice * parseFloat(orderQty)
-        const fee = notional * (orderType === 'Market' ? BYBIT_FEES.TAKER : BYBIT_FEES.MAKER)
+        const t = result.trade
         setOrderSuccess(
-          `${orderSide} order placed! Entry: $${entryPrice.toFixed(2)}, Fee: $${fee.toFixed(4)}`
+          t.status === 'pending'
+            ? `Limit ${orderSide} order placed at $${t.entryPrice}. It fills when price reaches it.`
+            : `${orderSide} order filled! Entry: $${t.entryPrice}, Fee: $${t.fees.toFixed(4)}`
         )
         setOrderQty('')
         setOrderPrice('')
@@ -418,15 +440,14 @@ const PaperTrading = () => {
     setIsPlacingOrder(false)
   }
 
-  const closePaperTrade = (tradeId: string) => {
-    if (!ticker) return
+  const closePaperTrade = (trade: PaperTrade) => {
+    const price = allTickers.get(trade.symbol)
+    if (!price) {
+      addNotification(`No live price for ${trade.symbol} yet. Try again in a moment.`, 'warning')
+      return
+    }
 
-    const result = paperTradingService.closeTrade(
-      userId,
-      tradeId,
-      parseFloat(ticker.lastPrice),
-      'manual'
-    )
+    const result = paperTradingService.closeTrade(userId, trade.id, price, 'manual')
 
     if (result.success && result.trade) {
       loadPaperTradingData()
@@ -447,6 +468,14 @@ const PaperTrading = () => {
     }
   }
 
+  const cancelPaperOrder = (tradeId: string) => {
+    const result = paperTradingService.cancelOrder(userId, tradeId)
+    if (result.success) {
+      loadPaperTradingData()
+      addNotification('Limit order cancelled', 'success')
+    }
+  }
+
   const resetPaperAccount = () => {
     paperTradingService.resetAccount(userId)
     loadPaperTradingData()
@@ -455,14 +484,14 @@ const PaperTrading = () => {
   }
 
   const calculateUnrealizedPnL = useCallback((trade: PaperTrade): number => {
-    const currentPrice = allTickers.get(trade.symbol) || (ticker ? parseFloat(ticker.lastPrice) : trade.entryPrice)
+    const currentPrice = allTickers.get(trade.symbol) ?? trade.entryPrice
     return paperTradingService.calculateUnrealizedPnL(trade, currentPrice)
-  }, [allTickers, ticker])
+  }, [allTickers])
 
   const calculateROE = useCallback((trade: PaperTrade): number => {
-    const currentPrice = allTickers.get(trade.symbol) || (ticker ? parseFloat(ticker.lastPrice) : trade.entryPrice)
+    const currentPrice = allTickers.get(trade.symbol) ?? trade.entryPrice
     return paperTradingService.calculateROE(trade, currentPrice)
-  }, [allTickers, ticker])
+  }, [allTickers])
 
   const getLiquidationPrice = useCallback((trade: PaperTrade): number => {
     return paperTradingService.calculateLiquidationPrice(trade)
@@ -470,9 +499,29 @@ const PaperTrading = () => {
 
   const totalUsdtBalance = balance.find(b => b.coin === 'USDT')
   const openPaperTrades = paperTrades.filter(t => t.status === 'open')
+  const pendingPaperOrders = paperTrades.filter(t => t.status === 'pending')
   const closedPaperTrades = paperTrades.filter(t => t.status === 'closed').sort((a, b) => (b.exitTimestamp || 0) - (a.exitTimestamp || 0))
 
   // Calculate total unrealized P&L for open positions
+  const orderSummary = (() => {
+    const qty = parseFloat(orderQty)
+    const last = ticker ? parseFloat(ticker.lastPrice) : NaN
+    const limit = parseFloat(orderPrice)
+    const lev = parseFloat(orderLeverage)
+    if (!(qty > 0) || !(last > 0) || !(lev > 0)) return null
+    // A limit order that is not marketable rests as a maker order
+    const resting = orderType === 'Limit' && limit > 0 &&
+      (orderSide === 'Buy' ? limit < last : limit > last)
+    const price = resting ? limit : last
+    const value = qty * price
+    return {
+      value,
+      margin: value / lev,
+      fee: value * (resting ? BYBIT_FEES.MAKER : BYBIT_FEES.TAKER),
+      feeLabel: resting ? 'Maker' : 'Taker'
+    }
+  })()
+
   const totalUnrealizedPnL = openPaperTrades.reduce((sum, trade) => sum + calculateUnrealizedPnL(trade), 0)
 
   return (
@@ -624,7 +673,7 @@ const PaperTrading = () => {
 
               <div className="api-security-note">
                 <Shield size={14} />
-                <span>Keys are encrypted and stored locally. Never shared.</span>
+                <span>Keys are stored only in this browser (obfuscated, not encrypted). Use testnet keys only.</span>
               </div>
             </>
           )}
@@ -933,19 +982,19 @@ const PaperTrading = () => {
                 </div>
 
                 {/* Order Summary */}
-                {orderQty && ticker && (
+                {orderSummary && (
                   <div className="order-summary">
                     <div className="summary-row">
                       <span>Order Value:</span>
-                      <span>${(parseFloat(orderQty) * parseFloat(ticker.lastPrice)).toFixed(2)}</span>
+                      <span>${orderSummary.value.toFixed(2)}</span>
                     </div>
                     <div className="summary-row">
-                      <span>Margin Required:</span>
-                      <span>${(parseFloat(orderQty) * parseFloat(ticker.lastPrice) / parseFloat(orderLeverage)).toFixed(2)}</span>
+                      <span>Est. Fee ({orderSummary.feeLabel}):</span>
+                      <span>${orderSummary.fee.toFixed(4)}</span>
                     </div>
                     <div className="summary-row">
-                      <span>Est. Fee ({orderType === 'Market' ? 'Taker' : 'Maker'}):</span>
-                      <span>${(parseFloat(orderQty) * parseFloat(ticker.lastPrice) * (orderType === 'Market' ? BYBIT_FEES.TAKER : BYBIT_FEES.MAKER)).toFixed(4)}</span>
+                      <span>Margin + Fee Required:</span>
+                      <span>${(orderSummary.margin + orderSummary.fee).toFixed(2)}</span>
                     </div>
                   </div>
                 )}
@@ -1008,7 +1057,7 @@ const PaperTrading = () => {
                 onClick={() => setActiveTab('orders')}
               >
                 <Clock size={14} />
-                Orders
+                Orders{usePaperMode && pendingPaperOrders.length > 0 ? ` (${pendingPaperOrders.length})` : ''}
               </button>
               <button
                 className={activeTab === 'history' ? 'active' : ''}
@@ -1089,7 +1138,7 @@ const PaperTrading = () => {
                             </div>
                             <button
                               className="close-position-btn"
-                              onClick={() => closePaperTrade(trade.id)}
+                              onClick={() => closePaperTrade(trade)}
                             >
                               <X size={14} />
                               Close Position
@@ -1147,7 +1196,39 @@ const PaperTrading = () => {
 
               {activeTab === 'orders' && (
                 <div className="orders-list">
-                  {openOrders.length > 0 ? (
+                  {usePaperMode ? (
+                    pendingPaperOrders.length > 0 ? (
+                      pendingPaperOrders.map(order => (
+                        <div key={order.id} className="order-item">
+                          <div className="order-header">
+                            <span className="symbol">{order.symbol}</span>
+                            <span className={`side ${order.side === 'long' ? 'buy' : 'sell'}`}>
+                              {order.side === 'long' ? 'Buy' : 'Sell'}
+                            </span>
+                            <span className="type">Limit · {order.leverage}x</span>
+                          </div>
+                          <div className="order-details">
+                            <span>Price: ${order.entryPrice}</span>
+                            <span>Qty: {order.quantity}</span>
+                            <span>Last: {allTickers.get(order.symbol) ? `$${allTickers.get(order.symbol)}` : '—'}</span>
+                          </div>
+                          <button
+                            className="close-position-btn"
+                            onClick={() => cancelPaperOrder(order.id)}
+                          >
+                            <X size={14} />
+                            Cancel
+                          </button>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="empty-state">
+                        <Clock size={32} />
+                        <p>No open orders</p>
+                        <p className="empty-note">Limit orders below (buy) or above (sell) the market rest here until filled</p>
+                      </div>
+                    )
+                  ) : openOrders.length > 0 ? (
                     openOrders.map((order, idx) => (
                       <div key={idx} className="order-item">
                         <div className="order-header">
@@ -1166,7 +1247,6 @@ const PaperTrading = () => {
                     <div className="empty-state">
                       <Clock size={32} />
                       <p>No open orders</p>
-                      {usePaperMode && <p className="empty-note">Paper mode uses market orders only</p>}
                     </div>
                   )}
                 </div>

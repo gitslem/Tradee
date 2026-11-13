@@ -7,6 +7,7 @@ import {
   type User as FirebaseUser
 } from 'firebase/auth'
 import { auth, googleProvider } from '../config/firebase'
+import { apiKeyService } from '../services/apiKeyService'
 import { AuthContext } from './auth'
 import type { AuthContextType, User } from './auth'
 
@@ -49,6 +50,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const logout = async () => {
     try {
+      // Exchange API keys must not outlive the session on shared browsers
+      if (user) apiKeyService.clearAllCredentials(user.uid)
       await firebaseSignOut(auth)
       setUser(null)
     } catch (error) {

@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import type { SyntheticEvent } from 'react'
 import './PriceActionAnalysis.css'
 import CandleDataCard from '../components/CandleDataCard'
 import TradingBackground from '../components/TradingBackground'
@@ -44,6 +45,15 @@ const PriceActionAnalysis = () => {
   const [prevVolume, setPrevVolume] = useState<string>('800000')
   const [timeframe, setTimeframe] = useState<string>('1h')
   const [showManual, setShowManual] = useState<boolean>(false)
+
+  // Live data refreshes every 30s. Once the user edits values by hand, stop
+  // overwriting them until they click "Apply Data" or switch pair.
+  const [liveSync, setLiveSync] = useState(true)
+  const pauseLiveOnEdit = (ev: SyntheticEvent) => {
+    const target = ev.target as HTMLElement
+    if (!target.closest('.manual-inputs')) return
+    if (ev.type === 'change' || target.closest('button')) setLiveSync(false)
+  }
   const [checklist, setChecklist] = useState<{ [key: string]: boolean }>({
     higherTF: false,
     keyLevels: false,
@@ -54,6 +64,7 @@ const PriceActionAnalysis = () => {
   })
 
   const handleUseCandleData = (ohlcv: OHLCVData) => {
+    setLiveSync(true)
     setCandle({
       open: ohlcv.current.open.toString(),
       high: ohlcv.current.high.toString(),
@@ -233,7 +244,7 @@ const PriceActionAnalysis = () => {
         <div className="pa-top-bar glass-card">
           <div className="pair-selector">
             <label>Trading Pair</label>
-            <select value={cryptoPair} onChange={(e) => setCryptoPair(e.target.value)}>
+            <select value={cryptoPair} onChange={(e) => { setCryptoPair(e.target.value); setLiveSync(true) }}>
               <option>BTC/USDT</option>
               <option>ETH/USDT</option>
               <option>BNB/USDT</option>
@@ -241,7 +252,7 @@ const PriceActionAnalysis = () => {
               <option>XRP/USDT</option>
               <option>ADA/USDT</option>
               <option>DOGE/USDT</option>
-              <option>MATIC/USDT</option>
+              <option>POL/USDT</option>
               <option>DOT/USDT</option>
               <option>AVAX/USDT</option>
             </select>
@@ -271,12 +282,17 @@ const PriceActionAnalysis = () => {
           </div>
         </div>
 
-        <div className="pa-main-grid">
+        <div className="pa-main-grid" onChangeCapture={pauseLiveOnEdit}>
           {/* Left Panel - Candle Data & Visualization */}
           <div className="pa-left-panel">
             {/* Live Candle Data Card */}
             <div className="glass-card candle-data-section">
-              <CandleDataCard pair={cryptoPair} timeframe={timeframe} onUseCandleData={handleUseCandleData} autoFill={true} />
+              <CandleDataCard pair={cryptoPair} timeframe={timeframe} onUseCandleData={handleUseCandleData} autoFill={liveSync} />
+              {!liveSync && (
+                <p className="live-paused-note" role="status">
+                  Live updates paused because you edited values. Click Apply Data to load live data again.
+                </p>
+              )}
             </div>
 
             {/* Interactive Candle Visualization */}
@@ -366,7 +382,14 @@ const PriceActionAnalysis = () => {
             </div>
 
             {/* Manual Input Toggle */}
-            <div className="glass-card manual-toggle" onClick={() => setShowManual(!showManual)}>
+            <div
+              className="glass-card manual-toggle"
+              role="button"
+              tabIndex={0}
+              aria-expanded={showManual}
+              onKeyDown={(ev) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); setShowManual(!showManual) } }}
+              onClick={() => setShowManual(!showManual)}
+            >
               <div className="toggle-content">
                 <Layers size={18} />
                 <span>Manual OHLCV Input</span>
