@@ -1,4 +1,5 @@
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import './PositionCalculator.css'
 import LivePriceCard from '../components/LivePriceCard'
 import FloatingExchangeSelector from '../components/FloatingExchangeSelector'
@@ -9,7 +10,7 @@ import { formatPrice } from '../utils/format'
 import {
   Calculator, TrendingUp, TrendingDown, Shield, AlertTriangle,
   DollarSign, Percent, Target, Zap, ChevronDown, ChevronUp,
-  BarChart3, Activity, Wallet, Scale, Info, CheckCircle2, XCircle
+  BarChart3, Activity, Wallet, Scale, Info, CheckCircle2, XCircle, Send
 } from 'lucide-react'
 
 interface TakeProfitResult {
@@ -57,20 +58,57 @@ const ACCOUNT_TYPE_ORDER: AccountType[] = ['futures', 'spot', 'margin']
 
 type Message = { type: 'error' | 'warning' | 'success'; message: string }
 
+// Account settings are remembered between visits (trade prices are not)
+const SETTINGS_KEY = 'calculator-settings'
+interface SavedSettings {
+  accountBalance?: string
+  riskPercentage?: string
+  cryptoPair?: string
+  selectedExchange?: string
+  accountType?: AccountType
+  useLeverage?: boolean
+  leverage?: string
+}
+const loadSettings = (): SavedSettings => {
+  try {
+    const raw = localStorage.getItem(SETTINGS_KEY)
+    return raw ? JSON.parse(raw) as SavedSettings : {}
+  } catch {
+    return {}
+  }
+}
+
+// Quantity text for an order form: enough precision, no float noise
+const formatQty = (qty: number): string =>
+  qty >= 1 ? String(Number(qty.toFixed(4))) : String(Number(qty.toPrecision(4)))
+
 const PositionCalculator = () => {
-  const [accountBalance, setAccountBalance] = useState<string>('10000')
-  const [riskPercentage, setRiskPercentage] = useState<string>('1')
+  const navigate = useNavigate()
+  const [saved] = useState(loadSettings)
+  const [accountBalance, setAccountBalance] = useState<string>(saved.accountBalance ?? '10000')
+  const [riskPercentage, setRiskPercentage] = useState<string>(saved.riskPercentage ?? '1')
   const [entryPrice, setEntryPrice] = useState<string>('3500')
   const [stopPrice, setStopPrice] = useState<string>('3400')
   const [takeProfitPrice, setTakeProfitPrice] = useState<string>('3800')
   const [tp2Price, setTp2Price] = useState<string>('')
   const [tp3Price, setTp3Price] = useState<string>('')
-  const [cryptoPair, setCryptoPair] = useState<string>('ETH/USDT')
+  const [cryptoPair, setCryptoPair] = useState<string>(saved.cryptoPair ?? 'ETH/USDT')
   const [positionType, setPositionType] = useState<'long' | 'short'>('long')
-  const [leverage, setLeverage] = useState<string>('1')
-  const [useLeverage, setUseLeverage] = useState<boolean>(false)
-  const [selectedExchange, setSelectedExchange] = useState<string>('binance')
-  const [accountType, setAccountType] = useState<AccountType>('futures')
+  const [leverage, setLeverage] = useState<string>(saved.leverage ?? '1')
+  const [useLeverage, setUseLeverage] = useState<boolean>(saved.useLeverage ?? false)
+  const [selectedExchange, setSelectedExchange] = useState<string>(
+    saved.selectedExchange && EXCHANGES[saved.selectedExchange] ? saved.selectedExchange : 'binance'
+  )
+  const [accountType, setAccountType] = useState<AccountType>(saved.accountType ?? 'futures')
+
+  useEffect(() => {
+    try {
+      const settings: SavedSettings = { accountBalance, riskPercentage, cryptoPair, selectedExchange, accountType, useLeverage, leverage }
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings))
+    } catch {
+      // Storage unavailable (private mode) - settings just won't persist
+    }
+  }, [accountBalance, riskPercentage, cryptoPair, selectedExchange, accountType, useLeverage, leverage])
   const [showAdvanced, setShowAdvanced] = useState<boolean>(false)
   const [showLeverage, setShowLeverage] = useState<boolean>(false)
 
@@ -299,6 +337,21 @@ const PositionCalculator = () => {
   const handleAccountType = (type: AccountType) => {
     setAccountType(type)
     clampLeverageTo(getMaxLeverage(selectedExchange, type))
+  }
+
+  // Open the Practice page with this setup pre-filled as an order
+  const sendToPractice = () => {
+    if (!results) return
+    const params = new URLSearchParams({
+      pair: cryptoPair.replace('/', ''),
+      side: positionType === 'long' ? 'Buy' : 'Sell',
+      qty: formatQty(results.quantity),
+      sl: stopPrice,
+      lev: String(Math.round(effectiveLeverage))
+    })
+    const tp = results.takeProfitResults[0]
+    if (tp) params.set('tp', String(tp.price))
+    navigate(`/paper-trading?${params.toString()}`)
   }
 
   const handleUseCurrentPrice = (price: number) => {
@@ -834,6 +887,16 @@ const PositionCalculator = () => {
                     <span>{exchangeFees.taker}% × 2</span>
                   </div>
                 </div>
+
+                <button
+                  className="send-to-practice-btn"
+                  onClick={sendToPractice}
+                  disabled={warnings.some(w => w.type === 'error')}
+                  title={warnings.some(w => w.type === 'error') ? 'Fix the errors above first' : 'Open this setup as a paper trade'}
+                >
+                  <Send size={18} />
+                  Practice this trade
+                </button>
               </>
             ) : (
               <div className="no-results glass-card" aria-live="polite">

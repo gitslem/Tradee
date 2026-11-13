@@ -463,14 +463,10 @@ class BybitService {
     })
   }
 
-  // Test connection with API keys
+  // Test connection with API keys (throws with the exchange's error message)
   async testConnection(userId: string): Promise<boolean> {
-    try {
-      await this.getWalletBalance(userId)
-      return true
-    } catch {
-      return false
-    }
+    await this.getWalletBalance(userId)
+    return true
   }
 
   // Get available trading pairs

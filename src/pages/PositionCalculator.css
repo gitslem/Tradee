@@ -1401,3 +1401,37 @@
 [data-theme='day'] .calculator-page .stat-chip > svg {
   filter: brightness(0.7);
 }
+
+/* Send the calculated setup to the Practice page */
+.calculator-page .send-to-practice-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border: 0;
+  border-radius: 14px;
+  background: var(--gold-gradient);
+  color: #1a1306;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: var(--card-shadow);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+.calculator-page .send-to-practice-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: var(--card-shadow-hover);
+}
+
+.calculator-page .send-to-practice-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.calculator-page .send-to-practice-btn:focus-visible {
+  outline: 2px solid var(--gold-ink);
+  outline-offset: 3px;
+}

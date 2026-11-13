@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import './PaperTrading.css'
 import TradingBackground from '../components/TradingBackground'
 import { useAuth } from '../context/auth'
@@ -15,6 +16,34 @@ import {
   ArrowUpRight, ArrowDownRight, Layers, Activity, Lock, Unlock,
   LineChart, Info, ExternalLink, RotateCcw, AlertTriangle
 } from 'lucide-react'
+
+// Order pre-filled from the Position Calculator (?pair=&side=&qty=&sl=&tp=&lev=)
+interface OrderPrefill {
+  pair?: string
+  side?: 'Buy' | 'Sell'
+  qty?: string
+  sl?: string
+  tp?: string
+  lev?: string
+}
+const readPrefill = (params: URLSearchParams): OrderPrefill | null => {
+  if (!params.has('pair') && !params.has('qty')) return null
+  const num = (key: string) => {
+    const v = params.get(key)
+    return v && parseFloat(v) > 0 ? v : undefined
+  }
+  const pair = params.get('pair')?.toUpperCase()
+  const side = params.get('side')
+  const lev = num('lev')
+  return {
+    pair: pair && POPULAR_PAIRS.includes(pair) ? pair : undefined,
+    side: side === 'Buy' || side === 'Sell' ? side : undefined,
+    qty: num('qty'),
+    sl: num('sl'),
+    tp: num('tp'),
+    lev: lev ? String(Math.min(Math.max(Math.round(parseFloat(lev)), 1), 100)) : undefined
+  }
+}
 
 const POPULAR_PAIRS = [
   'BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'SOLUSDT', 'XRPUSDT',
@@ -46,7 +75,9 @@ const PaperTrading = () => {
   const [isConnecting, setIsConnecting] = useState(false)
 
   // Trading State
-  const [selectedPair, setSelectedPair] = useState('BTCUSDT')
+  const [searchParams, setSearchParams] = useSearchParams()
+  const [prefill] = useState(() => readPrefill(searchParams))
+  const [selectedPair, setSelectedPair] = useState(prefill?.pair ?? 'BTCUSDT')
   // Drop the previous pair's ticker as soon as the pair changes, so orders
   // can never be placed at another symbol's price
   const [tickerPair, setTickerPair] = useState(selectedPair)
@@ -65,16 +96,18 @@ const PaperTrading = () => {
   const [orderHistory, setOrderHistory] = useState<BybitOrder[]>([])
 
   // Order Form State
-  const [orderSide, setOrderSide] = useState<'Buy' | 'Sell'>('Buy')
+  const [orderSide, setOrderSide] = useState<'Buy' | 'Sell'>(prefill?.side ?? 'Buy')
   const [orderType, setOrderType] = useState<'Market' | 'Limit'>('Market')
-  const [orderQty, setOrderQty] = useState('')
+  const [orderQty, setOrderQty] = useState(prefill?.qty ?? '')
   const [orderPrice, setOrderPrice] = useState('')
-  const [orderLeverage, setOrderLeverage] = useState('10')
-  const [orderTakeProfit, setOrderTakeProfit] = useState('')
-  const [orderStopLoss, setOrderStopLoss] = useState('')
+  const [orderLeverage, setOrderLeverage] = useState(prefill?.lev ?? '10')
+  const [orderTakeProfit, setOrderTakeProfit] = useState(prefill?.tp ?? '')
+  const [orderStopLoss, setOrderStopLoss] = useState(prefill?.sl ?? '')
   const [isPlacingOrder, setIsPlacingOrder] = useState(false)
   const [orderError, setOrderError] = useState('')
-  const [orderSuccess, setOrderSuccess] = useState('')
+  const [orderSuccess, setOrderSuccess] = useState(
+    prefill ? 'Order filled in from the Position Calculator. Review it, then place it.' : ''
+  )
 
   // Paper Trading State
   const [paperTrades, setPaperTrades] = useState<PaperTrade[]>([])
@@ -87,6 +120,9 @@ const PaperTrading = () => {
     winRate: 0
   })
   const [usePaperMode, setUsePaperMode] = useState(true)
+  // Bybit lot size rules per symbol (testnet orders must match the qty step)
+  const [instruments, setInstruments] = useState<Map<string, { minOrderQty: number; qtyStep: number }>>(new Map())
+  const credentialsCheckedFor = useRef<string | null>(null)
   const [showResetConfirm, setShowResetConfirm] = useState(false)
 
   // TradingView Chart
@@ -144,7 +180,7 @@ const PaperTrading = () => {
     }
   }, [isConnected, userId])
 
-  const testConnection = useCallback(async () => {
+  const testConnection = useCallback(async (): Promise<boolean> => {
     setIsConnecting(true)
     setConnectionError('')
 
@@ -157,9 +193,11 @@ const PaperTrading = () => {
         await fetchAccountData(true)
         setUsePaperMode(false)
       }
+      return connected
     } catch (error) {
-      setConnectionError(error instanceof Error ? error.message : 'Connection failed')
+      setConnectionError(error instanceof Error ? `Connection failed: ${error.message}` : 'Connection failed')
       setIsConnected(false)
+      return false
     } finally {
       setIsConnecting(false)
     }
@@ -169,6 +207,11 @@ const PaperTrading = () => {
     allTickersRef.current = allTickers
   }, [allTickers])
 
+  // Drop the pre-fill parameters from the URL so a refresh doesn't re-apply them
+  useEffect(() => {
+    if (prefill) setSearchParams({}, { replace: true })
+  }, [prefill, setSearchParams])
+
   // Load paper trading data on mount
   useEffect(() => {
     loadPaperTradingData()
@@ -176,11 +219,35 @@ const PaperTrading = () => {
 
   // Check for existing API credentials on mount
   useEffect(() => {
-    const hasCredentials = apiKeyService.hasCredentials(userId, 'bybit_testnet')
-    if (hasCredentials) {
+    if (credentialsCheckedFor.current === userId) return
+    credentialsCheckedFor.current = userId
+    if (apiKeyService.hasCredentials(userId, 'bybit_testnet')) {
       testConnection()
     }
   }, [userId, testConnection])
+
+  // Keep testnet balance, positions and orders fresh while in testnet mode
+  useEffect(() => {
+    if (!isConnected || usePaperMode) return
+    const interval = setInterval(() => { fetchAccountData() }, 10000)
+    return () => clearInterval(interval)
+  }, [isConnected, usePaperMode, fetchAccountData])
+
+  // Load Bybit lot size rules once testnet trading is in use
+  useEffect(() => {
+    if (!isConnected || instruments.size > 0) return
+    let cancelled = false
+    bybitService.getSymbols()
+      .then(list => {
+        if (cancelled) return
+        setInstruments(new Map(list.map(s => [s.symbol, {
+          minOrderQty: parseFloat(s.minOrderQty),
+          qtyStep: parseFloat(s.qtyStep)
+        }])))
+      })
+      .catch(error => console.error('Failed to load instrument info:', error))
+    return () => { cancelled = true }
+  }, [isConnected, instruments.size])
 
 
   // Initialize TradingView Advanced Chart Widget
@@ -341,10 +408,16 @@ const PaperTrading = () => {
     })
 
     if (saved) {
-      await testConnection()
-      setApiKey('')
-      setApiSecret('')
-      setShowApiConfig(false)
+      const ok = await testConnection()
+      if (ok) {
+        setApiKey('')
+        setApiSecret('')
+        setShowApiConfig(false)
+        addNotification('Testnet connected', 'success')
+      } else {
+        // Don't keep keys that don't work
+        apiKeyService.deleteCredentials(userId, 'bybit_testnet')
+      }
     } else {
       setConnectionError('Invalid API key format')
     }
@@ -413,6 +486,18 @@ const PaperTrading = () => {
       }
     } else {
       // Real testnet order
+      const rules = instruments.get(selectedPair)
+      let qty = orderQty
+      if (rules && rules.qtyStep > 0) {
+        const decimals = (rules.qtyStep.toString().split('.')[1] || '').length
+        const rounded = Math.floor(parseFloat(orderQty) / rules.qtyStep + 1e-9) * rules.qtyStep
+        if (rounded < rules.minOrderQty) {
+          setOrderError(`Minimum order size for ${selectedPair} is ${rules.minOrderQty}`)
+          setIsPlacingOrder(false)
+          return
+        }
+        qty = rounded.toFixed(decimals)
+      }
       try {
         await bybitService.setLeverage(userId, selectedPair, orderLeverage)
 
@@ -420,13 +505,13 @@ const PaperTrading = () => {
           symbol: selectedPair,
           side: orderSide,
           orderType,
-          qty: orderQty,
+          qty,
           price: orderType === 'Limit' ? orderPrice : undefined,
           takeProfit: orderTakeProfit || undefined,
           stopLoss: orderStopLoss || undefined
         })
 
-        setOrderSuccess(`Order placed! ID: ${result.orderId.slice(0, 8)}...`)
+        setOrderSuccess(`Order placed! Qty ${qty}, ID: ${result.orderId.slice(0, 8)}...`)
         await fetchAccountData()
         setOrderQty('')
         setOrderPrice('')
@@ -476,6 +561,27 @@ const PaperTrading = () => {
     }
   }
 
+  const cancelTestnetOrder = async (order: BybitOrder) => {
+    try {
+      await bybitService.cancelOrder(userId, order.symbol, order.orderId)
+      addNotification('Order cancelled', 'success')
+      await fetchAccountData()
+    } catch (error) {
+      addNotification(error instanceof Error ? error.message : 'Failed to cancel order', 'error')
+    }
+  }
+
+  const switchMode = (paper: boolean) => {
+    if (!paper && !isConnected) {
+      setShowApiConfig(true)
+      return
+    }
+    setUsePaperMode(paper)
+    setOrderError('')
+    setOrderSuccess('')
+    if (!paper) fetchAccountData()
+  }
+
   const resetPaperAccount = () => {
     paperTradingService.resetAccount(userId)
     loadPaperTradingData()
@@ -522,6 +628,9 @@ const PaperTrading = () => {
     }
   })()
 
+  const lockedMargin = openPaperTrades.reduce((sum, t) => sum + (t.entryPrice * t.quantity) / t.leverage, 0) +
+    pendingPaperOrders.reduce((sum, t) => sum + (t.entryPrice * t.quantity) / t.leverage + t.fees, 0)
+
   const totalUnrealizedPnL = openPaperTrades.reduce((sum, trade) => sum + calculateUnrealizedPnL(trade), 0)
 
   return (
@@ -550,27 +659,29 @@ const PaperTrading = () => {
           <p>Practice strategies with live Bybit data • Bybit fee structure applied</p>
         </div>
         <div className="pt-header-right">
-          <div className={`connection-status ${isConnected ? 'connected' : usePaperMode ? 'paper' : 'disconnected'}`}>
-            {isConnected ? (
-              <>
-                <CheckCircle size={16} />
-                <span>Testnet Connected</span>
-              </>
-            ) : usePaperMode ? (
-              <>
-                <Activity size={16} />
-                <span>Paper Mode</span>
-              </>
-            ) : (
-              <>
-                <AlertCircle size={16} />
-                <span>Disconnected</span>
-              </>
-            )}
+          <div className="mode-switch" role="group" aria-label="Trading mode">
+            <button
+              className={usePaperMode ? 'active paper' : ''}
+              aria-pressed={usePaperMode}
+              onClick={() => switchMode(true)}
+            >
+              <Activity size={14} />
+              Paper
+            </button>
+            <button
+              className={!usePaperMode ? 'active testnet' : ''}
+              aria-pressed={!usePaperMode}
+              onClick={() => switchMode(false)}
+              title={isConnected ? 'Trade on your Bybit testnet account' : 'Connect Bybit testnet API keys first'}
+            >
+              {isConnected ? <CheckCircle size={14} /> : <AlertCircle size={14} />}
+              Testnet
+            </button>
           </div>
           <button
             className="settings-btn"
             onClick={() => setShowApiConfig(!showApiConfig)}
+            aria-label="Testnet API settings"
           >
             <Settings size={18} />
           </button>
@@ -789,6 +900,14 @@ const PaperTrading = () => {
                   <span className="label">Available Balance</span>
                 </div>
                 <div className="balance-stats">
+                  <div className="balance-row equity-row">
+                    <span>Equity:</span>
+                    <span>${(paperBalance + lockedMargin + totalUnrealizedPnL).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  </div>
+                  <div className="balance-row">
+                    <span>In Margin / Orders:</span>
+                    <span>${lockedMargin.toFixed(2)}</span>
+                  </div>
                   <div className="balance-row">
                     <span>Unrealized P&L:</span>
                     <span className={totalUnrealizedPnL >= 0 ? 'positive' : 'negative'}>
@@ -1229,8 +1348,8 @@ const PaperTrading = () => {
                       </div>
                     )
                   ) : openOrders.length > 0 ? (
-                    openOrders.map((order, idx) => (
-                      <div key={idx} className="order-item">
+                    openOrders.map(order => (
+                      <div key={order.orderId} className="order-item">
                         <div className="order-header">
                           <span className="symbol">{order.symbol}</span>
                           <span className={`side ${order.side.toLowerCase()}`}>{order.side}</span>
@@ -1241,6 +1360,13 @@ const PaperTrading = () => {
                           <span>Qty: {order.qty}</span>
                           <span className="status">{order.orderStatus}</span>
                         </div>
+                        <button
+                          className="close-position-btn"
+                          onClick={() => cancelTestnetOrder(order)}
+                        >
+                          <X size={14} />
+                          Cancel
+                        </button>
                       </div>
                     ))
                   ) : (

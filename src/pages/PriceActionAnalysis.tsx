@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react'
 import type { SyntheticEvent } from 'react'
 import './PriceActionAnalysis.css'
 import CandleDataCard from '../components/CandleDataCard'
+import PriceContextPanel from '../components/PriceContextPanel'
 import TradingBackground from '../components/TradingBackground'
 import { detectPatterns, getTrendContext, isValidCandle, candleDirection } from '../services/ohlcvService'
 import type { OHLCVData, TrendContext } from '../services/ohlcvService'
@@ -557,6 +558,9 @@ const PriceActionAnalysis = () => {
                 </div>
               </div>
             </div>
+
+            {/* Key levels and higher-timeframe confirmation */}
+            <PriceContextPanel key={`${cryptoPair}-${timeframe}`} pair={cryptoPair} timeframe={timeframe} bias={bias} />
 
             {/* Pre-Trade Checklist */}
             <div className="glass-card checklist-section">

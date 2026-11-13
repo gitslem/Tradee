@@ -2,6 +2,7 @@ import { useState, useMemo, useRef } from 'react'
 import type { SyntheticEvent } from 'react'
 import './MarketStructure.css'
 import CandleDataCard from '../components/CandleDataCard'
+import MultiTimeframeTrend from '../components/MultiTimeframeTrend'
 import TradingBackground from '../components/TradingBackground'
 import { getMarketStructure, classifyStructure } from '../services/ohlcvService'
 import type { OHLCVData, PriceLevel } from '../services/ohlcvService'
@@ -280,6 +281,8 @@ const MarketStructure = () => {
             </div>
           </div>
         </div>
+
+        <MultiTimeframeTrend key={cryptoPair} pair={cryptoPair} />
 
         <div className="ms-main-grid" onChangeCapture={pauseLiveOnEdit} onClickCapture={pauseLiveOnEdit}>
           {/* Left Panel */}
