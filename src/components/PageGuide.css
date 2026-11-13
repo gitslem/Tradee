@@ -1,0 +1,203 @@
+/* Guide button */
+.page-guide-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 0.875rem;
+  border-radius: 999px;
+  border: 1px solid var(--card-border);
+  background: var(--card-bg);
+  color: var(--heading);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: var(--card-shadow);
+  transition: transform 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  z-index: 5;
+}
+
+.page-guide-btn svg {
+  color: var(--gold-ink);
+}
+
+.page-guide-btn:hover {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--gold-ink) 50%, transparent);
+}
+
+.page-guide-btn:focus-visible {
+  outline: 2px solid var(--gold-ink);
+  outline-offset: 2px;
+}
+
+.page-guide-btn.corner {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+}
+
+@media (max-width: 600px) {
+  .page-guide-btn span {
+    display: none;
+  }
+
+  .page-guide-btn {
+    padding: 0.5rem;
+  }
+}
+
+/* Dialog */
+.page-guide-dialog {
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  overflow-y: auto;
+  width: min(560px, calc(100vw - 32px));
+  max-height: min(80vh, 720px);
+  padding: 0;
+  border: 1px solid var(--card-border);
+  border-radius: 18px;
+  background: var(--surface-solid);
+  color: var(--text-muted);
+  box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.5);
+  text-align: left;
+}
+
+.page-guide-dialog::backdrop {
+  background: rgba(2, 6, 23, 0.55);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+
+.page-guide-dialog[open] {
+  animation: page-guide-in 0.18s ease-out;
+}
+
+@keyframes page-guide-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-guide-dialog[open] { animation: none; }
+}
+
+.page-guide-body {
+  padding: 1.5rem;
+}
+
+.page-guide-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.page-guide-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  flex-shrink: 0;
+  color: var(--gold-ink);
+  background: color-mix(in srgb, var(--gold-ink) 14%, transparent);
+}
+
+.page-guide-header h2 {
+  flex: 1;
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--heading);
+  -webkit-text-fill-color: currentColor;
+  background: none;
+}
+
+.page-guide-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  border: 1px solid var(--card-border);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.page-guide-close:hover {
+  color: var(--heading);
+  background: rgb(var(--ink) / 0.06);
+}
+
+.page-guide-close:focus-visible {
+  outline: 2px solid var(--gold-ink);
+  outline-offset: 2px;
+}
+
+.page-guide-intro {
+  margin: 0 0 1.25rem;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: var(--heading);
+}
+
+.page-guide-section + .page-guide-section {
+  margin-top: 1rem;
+}
+
+.page-guide-section h3 {
+  margin: 0 0 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--gold-ink);
+  -webkit-text-fill-color: currentColor;
+  background: none;
+}
+
+.page-guide-section ul {
+  margin: 0;
+  padding-left: 1.125rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.page-guide-section li {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.page-guide-tip {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  margin-top: 1.25rem;
+  padding: 0.75rem 0.875rem;
+  border-radius: 12px;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--heading);
+  background: color-mix(in srgb, var(--gold-ink) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--gold-ink) 25%, transparent);
+}
+
+.page-guide-tip svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--gold-ink);
+}
+
+.page-guide-disclaimer {
+  margin: 1rem 0 0;
+  font-size: 0.75rem;
+  color: var(--text-faint);
+}

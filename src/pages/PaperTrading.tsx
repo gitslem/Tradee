@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
+import PageGuide from '../components/PageGuide'
 import './PaperTrading.css'
 import TradingBackground from '../components/TradingBackground'
 import { useAuth } from '../context/auth'
@@ -659,6 +660,7 @@ const PaperTrading = () => {
           <p>Practice strategies with live Bybit data • Bybit fee structure applied</p>
         </div>
         <div className="pt-header-right">
+          <PageGuide page="practice" placement="inline" />
           <div className="mode-switch" role="group" aria-label="Trading mode">
             <button
               className={usePaperMode ? 'active paper' : ''}

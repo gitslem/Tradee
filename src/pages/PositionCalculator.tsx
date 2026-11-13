@@ -4,6 +4,7 @@ import './PositionCalculator.css'
 import LivePriceCard from '../components/LivePriceCard'
 import FloatingExchangeSelector from '../components/FloatingExchangeSelector'
 import TradingBackground from '../components/TradingBackground'
+import PageGuide from '../components/PageGuide'
 import { getExchangeFees, getMaxLeverage, getMaintenanceMargin, calculateFundingCost, EXCHANGES } from '../config/exchanges'
 import type { AccountType } from '../config/exchanges'
 import { formatPrice } from '../utils/format'
@@ -374,6 +375,7 @@ const PositionCalculator = () => {
 
       {/* Hero Section */}
       <div className="calculator-hero">
+        <PageGuide page="calculator" />
         <div className="hero-icon">
           <Calculator size={40} />
         </div>

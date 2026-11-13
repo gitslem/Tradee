@@ -4,6 +4,7 @@ import './MarketStructure.css'
 import CandleDataCard from '../components/CandleDataCard'
 import MultiTimeframeTrend from '../components/MultiTimeframeTrend'
 import TradingBackground from '../components/TradingBackground'
+import PageGuide from '../components/PageGuide'
 import { getMarketStructure, classifyStructure } from '../services/ohlcvService'
 import type { OHLCVData, PriceLevel } from '../services/ohlcvService'
 import { formatPrice } from '../utils/format'
@@ -227,6 +228,7 @@ const MarketStructure = () => {
 
       {/* Hero Section */}
       <div className="ms-hero">
+        <PageGuide page="market" />
         <div className="hero-icon">
           <Layers size={40} />
         </div>

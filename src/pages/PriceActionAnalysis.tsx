@@ -4,6 +4,7 @@ import './PriceActionAnalysis.css'
 import CandleDataCard from '../components/CandleDataCard'
 import PriceContextPanel from '../components/PriceContextPanel'
 import TradingBackground from '../components/TradingBackground'
+import PageGuide from '../components/PageGuide'
 import { detectPatterns, getTrendContext, isValidCandle, candleDirection } from '../services/ohlcvService'
 import type { OHLCVData, TrendContext } from '../services/ohlcvService'
 import { formatPrice } from '../utils/format'
@@ -203,6 +204,7 @@ const PriceActionAnalysis = () => {
 
       {/* Hero Section */}
       <div className="pa-hero">
+        <PageGuide page="price" />
         <div className="hero-icon">
           <BarChart3 size={40} />
         </div>

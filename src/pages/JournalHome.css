@@ -1731,3 +1731,11 @@
 .full-component-view > .personal-notes {
   padding: 0;
 }
+
+/* Guide button sits beside the export button */
+.journal-hero .hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}

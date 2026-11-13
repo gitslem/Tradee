@@ -14,6 +14,7 @@ import type { Trade, JournalNote } from '../services/firestoreService'
 import TradingJournal from '../components/TradingJournal'
 import PersonalNotes from '../components/PersonalNotes'
 import CryptoRecommendations from '../components/CryptoRecommendations'
+import PageGuide from '../components/PageGuide'
 import TradingBackground from '../components/TradingBackground'
 import './JournalHome.css'
 
@@ -641,6 +642,7 @@ const JournalHome = () => {
           <p>Your trading journal dashboard - track performance, analyze patterns, grow consistently</p>
         </div>
         <div className="hero-actions">
+          <PageGuide page="journal" placement="inline" />
           <button
             onClick={() => setShowExportModal(true)}
             className="export-btn"
